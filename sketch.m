@@ -7,14 +7,21 @@ end function;
 
 
 function CharacterFactorsThrough(A, B, pi, chi)
-
+    Zn := Codomain(chi);
+    for g in Generators(Kernel(pi)) do
+        if chi(g) ne Zn!0 then
+            return false;
+        end if;
+    end for;
+    return true;
 end function;
 
 A := UnitGroup(Integers(36));
 B := UnitGroup(Integers(12));
-// pi := reduction map
-// for chi in CharactersOfOrder(A, 4) do
-//    if CharacterFactorsThrough(A, B, pi, chi) then
-//      print(chi);
-//    end if;
-// end for;
+AB, t := Hom(A,B);
+pi := t(AB.1);
+for chi in CharactersOfOrder(A, 2) do
+   if CharacterFactorsThrough(A, B, pi, chi) then
+     print(chi);
+   end if;
+end for;
