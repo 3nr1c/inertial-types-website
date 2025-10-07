@@ -1,0 +1,39 @@
+// This function is a Demo for Enric to know what we need
+Z:=Integers();
+
+function BaseValues(F)
+p:=Prime(F);
+e:=AbsoluteRamificationDegree(F);
+f:=AbsoluteInertiaDegree(F);
+N:=Z!(6*Valuation(F!2)+3*Valuation(F!3)+2);
+F2:=ChangePrecision(F,N);
+UnitGroup(Integers(F2));
+return p,e,f,N;
+end function;
+
+function ExtValues(K)
+Cond:=Valuation(Discriminant(K));
+return Cond;
+end function;
+
+function QuadraticExtensions(F)
+Fx<x>:=PolynomialRing(F);
+Sel,f:=pSelmerGroup(2,F);
+QuadExt:=[];
+QuadGen:=[];
+for z in Sel do
+z1:=ChangePrecision(Inverse(f)(z),Precision(F));
+QuadGen:=Append(QuadGen,z1);
+QuadExt:=Append(QuadExt,SplittingField(x^2-z1));
+end for;
+return QuadExt,QuadGen,Sel,f;
+end function;
+
+function ConGroup(K,f)
+K:=ChangePrecision(K,f);
+OK:=Integers(K);
+UK,mK:=UnitGroup(OK);
+Uf:=sub<UK|[Inverse(mK)(OK!Norm(mK(g))) : g in UK]>;
+ConG,ConGtoUK:=quo<UK|Uf>;
+return ConG,ConGtoUK,UK,mK;
+end function;
