@@ -33,7 +33,7 @@ function ConGroup(K,f)
 K:=ChangePrecision(K,f);
 OK:=Integers(K);
 UK,mK:=UnitGroup(OK);
-Uf:=sub<UK|[Inverse(mK)(OK!Norm(mK(g))) : g in UK]>;
+Uf:=sub<UK|[Inverse(mK)(OK!Norm(mK(g))) : g in Generators(UK)]>;
 ConG,ConGtoUK:=quo<UK|Uf>;
 return ConG,ConGtoUK,UK,mK;
 end function;
