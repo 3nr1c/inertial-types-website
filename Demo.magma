@@ -1,4 +1,4 @@
-// This function is a Demo for Enric to know what we need
+// This is a Demo for Enric to know what we need
 Z:=Integers();
 
 function BaseValues(F)
@@ -36,4 +36,78 @@ UK,mK:=UnitGroup(OK);
 Uf:=sub<UK|[Inverse(mK)(OK!Norm(mK(g))) : g in Generators(UK)]>;
 ConG,ConGtoUK:=quo<UK|Uf>;
 return ConG,ConGtoUK,UK,mK;
+end function;
+
+
+function ConGMap(K,f)
+
+K1:=ChangePrecision(K,f);
+OK1:=Integers(K1);
+UK1,mK1:=UnitGroup(OK1);
+Uf1:=sub<UK1|[Inverse(mK1)(OK1!Norm(mK1(g))) : g in Generators(UK1)]>;
+G1,U1toG1:=quo<UK1|Uf1>;
+Lift:=Inverse(U1toG1)*mK1*Coercion(OK1,K1)*Coercion(K1,K);
+
+
+
+K2:=ChangePrecision(K,f-1);
+OK2:=Integers(K2);
+UK2,mK2:=UnitGroup(OK2);
+Uf2:=sub<UK2|[Inverse(mK2)(OK2!Norm(mK2(g))) : g in Generators(UK2)]>;
+G2,U2toG2:=quo<UK2|Uf2>;
+
+L:=[];
+
+for g in Generators(G1) do
+L:=Append(L,<g, U2toG2(Inverse(mK2)(K2!(Lift(g)))) >);
+end for;
+
+phi:=hom<G1->G2|L>;
+return G1,G2,phi,Lift;
+end function;
+
+
+
+function ConComplex(K,f)
+
+CGroups:=[];
+CMaps:=[* *];
+
+
+K1:=ChangePrecision(K,f);
+OK1:=Integers(K1);
+UK1,mK1:=UnitGroup(OK1);
+Uf1:=sub<UK1|[Inverse(mK1)(OK1!Norm(mK1(g))) : g in Generators(UK1)]>;
+G1,U1toG1:=quo<UK1|Uf1>;
+Lift:=Inverse(U1toG1)*mK1*Coercion(OK1,K1)*Coercion(K1,K);
+
+CGroups:=Append(CGroups,G1);
+
+for i in [1..f-3] do
+K2:=ChangePrecision(K,f-i);
+OK2:=Integers(K2);
+UK2,mK2:=UnitGroup(OK2);
+Uf2:=sub<UK2|[Inverse(mK2)(OK2!Norm(mK2(g))) : g in Generators(UK2)]>;
+G2,U2toG2:=quo<UK2|Uf2>;
+
+CGroups:=Append(CGroups,G2);
+
+L:=[];
+for g in Generators(G1) do
+L:=Append(L,<g, U2toG2(Inverse(mK2)(K2!(K1!mK1(Inverse(U1toG1)(g))))) >);
+end for;
+
+phi:=hom<G1->G2|L>;
+CMaps:=Append(CMaps,phi);
+
+K1:=K2;
+OK1:=OK2;
+UK1:=UK2;
+mK1:=mK2;
+Uf1:=Uf2;
+G1:=G2;
+U1toG1:=U2toG2;
+end for;
+
+return CGroups,CMaps,Lift;
 end function;
