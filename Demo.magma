@@ -114,7 +114,7 @@ end function;
 
 //The idea of the function ConComplex is to be able to do, for example, the following
 
-Q2:=pAdic(2,100);
+Q2:=pAdicField(2,100);
 K:=FieldOfFractions(AllExtensions(Q2,2)[3]);
 Groups,Maps,Lift:=ConComplex(K,7);
 Lift(Groups[1].1);
