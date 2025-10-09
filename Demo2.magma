@@ -1,3 +1,8 @@
+//I found a problem with the origianl ConComplex function this is an improvement. 
+//I don't now how to use the branches so for now I will just upload both versions
+// one in Demo and one i Demo2 just in case.
+
+
 function ConComplex(K,f)
 CGroups:=[];
 CMaps:=[* *];
