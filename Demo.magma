@@ -119,7 +119,7 @@ K:=FieldOfFractions(AllExtensions(Q2,2)[3]);
 Groups,Maps,Lift:=ConComplex(K,7);
 Lift(Groups[1].1);
 Maps[4](Maps[3](Maps[2](Maps[1](Groups[1].2))));
-
+Maps[2](Groups[2].1);
 
 
 
