@@ -83,7 +83,7 @@ Lift:=Inverse(U1toG1)*mK1*Coercion(OK1,K1)*Coercion(K1,K);
 
 CGroups:=Append(CGroups,G1);
 
-for i in [1..f-3] do
+for i in [1..f-3] do  //The f-3 there need to be replace by a sharp value depending on the field but for now is enough
 K2:=ChangePrecision(K,f-i);
 OK2:=Integers(K2);
 UK2,mK2:=UnitGroup(OK2);
@@ -111,3 +111,15 @@ end for;
 
 return CGroups,CMaps,Lift;
 end function;
+
+//The idea of the function ConComplex is to be able to do, for example, the following
+
+Q2:=pAdic(2,100);
+K:=FieldOfFractions(AllExtensions(Q2,2)[3]);
+Groups,Maps,Lift:=ConComplex(K,7);
+Lift(Groups[1].1);
+Maps[4](Maps[3](Maps[2](Maps[1](Groups[1].2))));
+
+
+
+
