@@ -1,0 +1,61 @@
+function ConComplex(K,f)
+CGroups:=[];
+CMaps:=[* *];
+
+K1:=ChangePrecision(K,f);
+OK1:=Integers(K1);
+UK1,mK1:=UnitGroup(OK1);
+Uf1:=sub<UK1|[Inverse(mK1)(OK1!Norm(mK1(g))) : g in Generators(UK1)]>;
+G1,U1toG1:=quo<UK1|Uf1>;
+Lift:=Inverse(U1toG1)*mK1*Coercion(OK1,K1)*Coercion(K1,K);
+
+CGroups:=Append(CGroups,G1);
+
+for i in [1..f-3] do
+K2:=ChangePrecision(K,f-i);
+OK2:=Integers(K2);
+UK2,mK2:=UnitGroup(OK2);
+
+L:=[];
+for g in Generators(UK1) do
+L:=Append(L,<g, Inverse(mK2)(K2!(K1!mK1((g))))>);
+end for;
+
+phi:=hom<UK1-> UK2|L>;
+
+Uf2:=phi(Uf1);
+G2,U2toG2:=quo<UK2|Uf2>;
+phi:=Inverse(U1toG1)*phi*U2toG2;
+CGroups:=Append(CGroups,G2);
+CMaps:=Append(CMaps,phi);
+K1:=K2;
+OK1:=OK2;
+UK1:=UK2;
+mK1:=mK2;
+Uf1:=Uf2;
+G1:=G2;
+U1toG1:=U2toG2;
+end for;
+
+return CGroups,CMaps,Lift;
+end function;
+
+
+function Varepsilon(F,K,f,c)
+
+K1:=ChangePrecision(K,f);
+F1:=ChangePrecision(F,c);
+OF1:=Integers(F1);
+OK1:=Integers(K1);
+UF1,mF1:=UnitGroup(OF1);
+UK1,mK1:=UnitGroup(OK1);
+L:=[];
+
+for g in Generators(UF1) do
+if not(NormEquation(OK1,mF1,mF1(g))) then
+L:=Append(L,<mF1(g),-1>);
+end if;
+end for;
+
+return L;
+end function;
