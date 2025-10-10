@@ -5,7 +5,13 @@ function CharactersOfOrder(G, n)
     /* Todo: modulo inverses */
     Zn := AdditiveGroup(Integers(n));
     GZn, t := Hom(G, Zn);
-    return {t(f) : f in GZn | Order(f) eq n};
+    GZn_half := [];
+    for t in GZn do
+        if not (-t in GZn_half) then
+            Append(~GZn_half, t);
+        end if;
+    end for;
+    return {t(f) : f in GZn_half | Order(f) eq n};
 end function;
 
 
@@ -24,6 +30,11 @@ end function;
 F := UnramifiedExtension(pAdicField(2,100),2);
 K := FieldOfFractions(AllExtensions(F,2)[1]);
 f := 6; // This will change according to the situation
+c := 4;
+
+Cond,pi,Gal,y := ExtValues(F,K);
+L := Varepsilon(F,K,f,c);
+
 Groups, Maps, Lift := ConComplex(K,f);
 // Lift(Groups[1].1);
 // Maps[4](Maps[3](Maps[2](Maps[1](Groups[1].2))));
@@ -31,8 +42,14 @@ Groups, Maps, Lift := ConComplex(K,f);
 
 G := Groups[1];
 gens := Generators(G);
-G;gens;
-AllChars := CharactersOfOrder(G, 4);
+f;G;gens;
+y_unlift := Inverse(Lift)(y);
+AllChars := {chi : chi in CharactersOfOrder(G, 4) | chi(y_unlift) * 2 eq Codomain(chi)!0};
+for l in L do
+    l_unlift := Inverse(Lift)(l);
+    AllChars := {chi : chi in AllChars | chi(l_unlift) eq Codomain(chi)!2};
+end for;
+#AllChars;
 
 for chi in AllChars do
     chi_cond := f;

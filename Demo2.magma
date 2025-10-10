@@ -2,6 +2,27 @@
 //I don't now how to use the branches so for now I will just upload both versions
 // one in Demo and one i Demo2 just in case.
 
+Z := Integers();
+
+function BaseValues(F)
+    p := Prime(F);
+    e := AbsoluteRamificationDegree(F);
+    f := AbsoluteInertiaDegree(F);
+    N := Z!(6*Valuation(F!2)+3*Valuation(F!3)+2);
+    F2 := ChangePrecision(F,N);
+    UnitGroup(Integers(F2));
+    return p,e,f,N;
+end function;
+
+
+function ExtValues(F,K)
+    pi:=UniformizingElement(K);
+    Cond:=Valuation(Discriminant(K,F));
+    Gal:=Automorphisms(K,F);
+    y:=pi/Gal[2](pi);
+    return Cond,pi,Gal,y;
+end function;
+
 function ConComplex(K,f)
     CGroups := [];
     CMaps := [* *];
