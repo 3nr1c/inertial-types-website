@@ -11,9 +11,13 @@ function BaseValues(F)
     return p,e,f,N;
 end function;
 
-function ExtValues(K)
-    Cond := Valuation(Discriminant(K));
-    return Cond;
+
+function ExtValues(F,K)
+    pi:=UniformizingElement(K);
+    Cond:=Valuation(Discriminant(K,F));
+    Gal:=Automorphisms(K,F);
+    y:=pi/Gal[2](pi);
+    return Cond,pi,Gal,y;
 end function;
 
 function QuadraticExtensions(F)
