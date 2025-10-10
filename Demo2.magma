@@ -2,7 +2,6 @@
 //I don't now how to use the branches so for now I will just upload both versions
 // one in Demo and one i Demo2 just in case.
 
-
 function ConComplex(K,f)
     CGroups := [];
     CMaps := [* *];
@@ -30,9 +29,12 @@ function ConComplex(K,f)
 
         Uf2 := phi(Uf1);
         G2,U2toG2 := quo<UK2|Uf2>;
-        phi := Inverse(U1toG1)*phi*U2toG2;
+        Qphi := Inverse(U1toG1)*phi*U2toG2;
         CGroups := Append(CGroups,G2);
-        CMaps := Append(CMaps,phi);
+        
+        // The maps go from the first group to the ith group
+        Append(~CMaps, IsEmpty(CMaps) select Qphi else CMaps[#CMaps] * Qphi);
+
         K1 := K2;
         OK1 := OK2;
         UK1 := UK2;
@@ -57,7 +59,7 @@ function Varepsilon(F,K,f,c)
 
     for g in Generators(UF1) do
         if not(NormEquation(OK1,mF1,mF1(g))) then
-         L := Append(L,<mF1(g),-1>);
+            Append(~L,mF1(g));
         end if;
     end for;
 
