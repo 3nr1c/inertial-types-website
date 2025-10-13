@@ -35,7 +35,8 @@ c := 4;
 Cond,pi,Gal,y := ExtValues(F,K);
 L := Varepsilon(F,K,f,c);
 
-Groups, Maps, Lift := ConComplex(K,f);
+UGroups, UMaps, ULift , Uf:= UComplex(K,f);
+Groups, Maps, Lift:= ConComplex(UGroups,UMaps,ULift,Uf);
 // Lift(Groups[1].1);
 // Maps[4](Maps[3](Maps[2](Maps[1](Groups[1].2))));
 // Maps[2](Groups[2].1);
