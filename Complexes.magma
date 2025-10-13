@@ -8,6 +8,14 @@ N:=Z!(6*Valuation(F!2)+3*Valuation(F!3)+2);
 return p,e,f,pi,N;
 end function;
 
+function ExtValues(F,K)
+pi:=UniformizingElement(K);
+Cond:=Valuation(Discriminant(K,F));
+Gal:=Automorphisms(K,F);
+y:=pi/Gal[2](pi);
+return Cond,pi,Gal,y;
+end function;
+
 //Dont worry if you dont have time to read these, I will Explain everything to you on monday I think it is faster that way.
 // Note that thise file is devoted to compute the complex of Unit groups before taking the quotient by Uf.
 // Once this is done it is enough to compute the Uf for the highest group and quotient by the images.
@@ -28,8 +36,6 @@ function UComplex(K,f)
     Lift:=mK1*Coercion(OK1,K1)*Coercion(K1,K);
     Groups:=Append(Groups,UK1);
     
-
-
     for i in [1..f-1] do
         L:=[];
         for x in Fq do
@@ -45,17 +51,38 @@ function UComplex(K,f)
 end function;
 
 
-function ConComplex (Groups,Maps,Uf);
+function ConComplex (Groups,Maps,Lift,Uf);
     f:=#Groups;
     CComplex:=[];
     CMaps:=[* *];
     G,pr:=quo<Groups[1]|Uf>;
+    CLift:=Inverse(pr)*Lift;
     CComplex:=Append(CComplex,G);
 
     for i in [1..f-1] do
     G,phi:=quo<Groups[i+1]|Maps[i](Uf)>;
+    CComplex:=Append(CComplex,G);
     CMaps:=Append(CMaps,Inverse(pr)*Maps[i]*phi);
     end for;
 
-    return CComplex,CMaps;
+    return CComplex,CMaps,CLift;
+end function;
+
+
+function Varepsilon(F,K,f,c)
+    K1 := ChangePrecision(K,f);
+    F1 := ChangePrecision(F,c);
+    OF1 := Integers(F1);
+    OK1 := Integers(K1);
+    UF1,mF1 := UnitGroup(OF1);
+    UK1,mK1 := UnitGroup(OK1);
+    L := [];
+
+    for g in Generators(UF1) do
+        if not(NormEquation(OK1,mF1,mF1(g))) then
+            Append(~L,mF1(g));
+        end if;
+    end for;
+
+    return L;
 end function;
