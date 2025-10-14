@@ -26,21 +26,92 @@ function PrincipalSeriesOfOrder(F, f, n)
     return ULift(Gens), Output;
 end function;
 
+function InternalSupercuspidalOfOrder(F, K, f, c, n)
+    assert n in {3, 4, 6};
+
+    // UGroups, UMaps, ULift := UComplex(K, f);
+    // Uf := ComputeUf(F, K, f);
+    // CGroups, CMaps, CLift := ConComplex(UGroups, UMaps, ULift, Uf);
+    CGroups, CMaps, CLift := ConComplex(F, K, f);
+    CProject := Inverse(CLift);
+    
+    assert #CGroups eq f;
+    assert #CMaps eq f-1;
+
+    G := CGroups[1];
+    Gens := Generators(G);
+    Chars := CharactersOfOrder(G, n);
+
+    // 
+    p, ram_deg, in_deg, pi, N := BaseValues(F);
+    Cond, pi, Gal, y := ExtValues(F, K);
+    bar_y := CProject(y);
+
+    // Sieving
+    if Cond gt 0 then 
+        // K|F ramified
+        print("K|F ramified");
+        if p eq 2 then
+            assert n eq 4;
+            if (in_deg mod 2) eq 0 then
+                // (in_deg mod 2) eq 0 checks if x^2+x+1 splits in F
+                // Triply imprimitive with n = 4, characters must be quadratic on y
+                print("Characters will induce a triply imprimitive type.");
+                Chars := {chi : chi in CharactersOfOrder(G, 4) | IsIdentity(2 * chi(bar_y))};
+            else
+                // Simply imprimitive with n = 4, characters must *not* be quadratic on y
+                print("Characters will induce a simply imprimitive type.");
+                Chars := {chi : chi in CharactersOfOrder(G, 4) | not IsIdentity(2 * chi(bar_y))};
+            end if;
+        elif p eq 3 then
+            assert n eq 6;
+            print("Characters will induce a simply imprimitive type.");
+            Chars := CharactersOfOrder(G, 6);
+        else
+            error Error("There is no supercuspidal ramified type for p > 3");
+        end if;
+    else
+        // SupercuspidalUnramified
+        // n is 3, 4 or 6
+        print("K|F Unramified");
+        Chars := CharactersOfOrder(G, n);
+    end if;
+
+    NonNormGenerators := Varepsilon(F, K, f, c);
+    assert IsEmpty(NonNormGenerators) or not (n eq 3);
+    minus_one := n eq 4 select 2 else 3;
+    for g in NonNormGenerators do
+        bar_g := CProject(g);
+        Chars := {chi : chi in Chars | chi(bar_g) eq Codomain(chi)!minus_one};
+    end for;
+
+    Output := [* *];
+
+    for chi in Chars do
+        chi_cond := f;
+        while chi_cond gt 1 and  \
+            CharacterFactorsThrough(G, CGroups[f - chi_cond + 2], CMaps[f - chi_cond + 1], chi) do
+            chi_cond := chi_cond - 1;
+        end while;
+        Append(~Output, [* chi, chi_cond, chi(Gens) *]);
+    end for;
+
+    return CLift(Gens), Output;
+end function;
+
 function SupercuspidalUnramifiedOfOrder(F, K, f, c, n)
-    // Varepsilon condition
-    return 0;
+    return InternalSupercuspidalOfOrder(F, K, f, c, n);
 end function;
 
-function SimplyImprimitiveOfOrder(F, K, f, c, n)
-    // Varepsilon condition
-    // Uniformizer conditions
-    return 0;
+function SupercuspidalRamifiedOfOrder(F, K, f, c)
+    p := Prime(F);
+    if p eq 2 then
+        n := 4;
+    elif p eq 3 then
+        n := 6;
+    else
+        error Error("There is no supercuspidal ramified type for p > 3");
+    end if;
 
-end function;
-
-function TriplyImprimitiveOfOrder(F, K, f, c, n)
-    // Varepsilon condition
-    // Uniformizer conditions: quadratic char on u/sigma(u)
-    return 0;
-
+    return InternalSupercuspidalOfOrder(F, K, f, c, n);
 end function;

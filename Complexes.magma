@@ -1,19 +1,19 @@
 function BaseValues(F)
-Z:=Integers();
-p:=Prime(F);
-e:=AbsoluteRamificationDegree(F);
-f:=AbsoluteInertiaDegree(F);
-pi:=UniformizingElement(F);
-N:=Z!(6*Valuation(F!2)+3*Valuation(F!3)+2);
-return p,e,f,pi,N;
+    Z:=Integers();
+    p:=Prime(F);
+    e:=AbsoluteRamificationDegree(F);
+    f:=AbsoluteInertiaDegree(F);
+    pi:=UniformizingElement(F);
+    N:=Z!(6*Valuation(F!2)+3*Valuation(F!3)+2);
+    return p,e,f,pi,N;
 end function;
 
 function ExtValues(F,K)
-pi:=UniformizingElement(K);
-Cond:=Valuation(Discriminant(K,F));
-Gal:=Automorphisms(K,F);
-y:=pi/Gal[2](pi);
-return Cond,pi,Gal,y;
+    pi:=UniformizingElement(K);
+    Cond:=Valuation(Discriminant(K,F));
+    Gal:=Automorphisms(K,F);
+    y:=pi/Gal[2](pi);
+    return Cond,pi,Gal,y;
 end function;
 
 //Dont worry if you dont have time to read these, I will Explain everything to you on monday I think it is faster that way.
@@ -57,26 +57,30 @@ function ComputeUf(F, K, f)
     Fq := Integers(ChangePrecision(K,1));
     OK1 := Integers(K1);
     UK1, mK1 := UnitGroup(OK1);
-    Uf := sub<UK1|[Inverse(mK1)(OK1!Norm(mK1(g), F)) : g in Generators(UK1)]>;
+    Uf := sub<UK1|[Inverse(mK1)(OK1!Norm(K!mK1(g), F)) : g in Generators(UK1)]>;
 
     return Uf;
 end function;
 
-function ConComplex(Groups,Maps,Lift,Uf);
-    f:=#Groups;
-    CComplex:=[];
-    CMaps:=[* *];
-    G,pr:=quo<Groups[1]|Uf>;
-    CLift:=Inverse(pr)*Lift;
-    CComplex:=Append(CComplex,G);
+function ConComplex(F, K, f)
+    UGroups, UMaps, ULift := UComplex(K, f);
+    UK1 := UGroups[1];
+    UProj := Inverse(ULift);
+    Uf := sub<UK1|[UProj(K!Norm(ULift(g), F)) : g in Generators(UK1)]>;
+
+    CGroups := [];
+    CMaps := [* *];
+    G,pr := quo<UGroups[1]|Uf>;
+    CLift := Inverse(pr)*ULift;
+    CGroups := Append(CGroups,G);
 
     for i in [1..f-1] do
-        G,phi:=quo<Groups[i+1]|Maps[i](Uf)>;
-        CComplex:=Append(CComplex,G);
-        CMaps:=Append(CMaps,Inverse(pr)*Maps[i]*phi);
+        G,phi := quo<UGroups[i+1]|UMaps[i](Uf)>;
+        CGroups := Append(CGroups,G);
+        CMaps := Append(CMaps,Inverse(pr)*UMaps[i]*phi);
     end for;
 
-    return CComplex,CMaps,CLift;
+    return CGroups, CMaps, CLift;
 end function;
 
 
@@ -87,13 +91,13 @@ function Varepsilon(F,K,f,c)
     OK1 := Integers(K1);
     UF1,mF1 := UnitGroup(OF1);
     UK1,mK1 := UnitGroup(OK1);
-    L := [];
+    NonNormGenerators := [];
 
     for g in Generators(UF1) do
-        if not(NormEquation(OK1,mF1,mF1(g))) then
-            Append(~L,mF1(g));
+        if not(NormEquation(OK1, mF1, mF1(g))) then
+            Append(~NonNormGenerators, K!mF1(g));
         end if;
     end for;
 
-    return L;
+    return NonNormGenerators;
 end function;
