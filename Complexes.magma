@@ -23,35 +23,46 @@ end function;
 
 
 // This function compute Ugroups for higher values of f
-function UComplex(K,f)
+function UComplex(K, f)
     p,e,fK,pi,N:=BaseValues(K);
     Groups:=[];
-    Maps:=[* *];
+    UMaps:=[* *];
 
-    K1:=ChangePrecision(K,f);
-    Fq:=Integers(ChangePrecision(K,1));
-    OK1:=Integers(K1);
-    UK1,mK1:=UnitGroup(OK1);
-    Uf1:=sub<UK1|[Inverse(mK1)(OK1!Norm(mK1(g))) : g in Generators(UK1)]>;
-    Lift:=mK1*Coercion(OK1,K1)*Coercion(K1,K);
-    Groups:=Append(Groups,UK1);
+    K1 := ChangePrecision(K,f);
+    Fq := Integers(ChangePrecision(K,1));
+    OK1 := Integers(K1);
+    UK1,mK1 := UnitGroup(OK1);
+    ULift := mK1*Coercion(OK1,K1)*Coercion(K1,K);
+    Groups := Append(Groups,UK1);
+
+    UProj := Inverse(ULift);
     
     for i in [1..f-1] do
-        L:=[];
+        L := [];
         for x in Fq do
             z:=ChangePrecision(K!x,Precision(K));
-            if IsEmpty(Maps) then L:=Append(L,Inverse(Lift)(1+z*pi^(f-i))); else L:=Append(L,Maps[i-1](Inverse(Lift)(1+z*pi^(f-i)))); end if;
+            if IsEmpty(UMaps) then L:=Append(L,UProj(1+z*pi^(f-i))); else L:=Append(L,UMaps[i-1](UProj(1+z*pi^(f-i)))); end if;
         end for;
 
         G,phi:=quo<Groups[i]|L>;
         Groups:=Append(Groups,G);
-        if IsEmpty(Maps) then Maps:=Append(Maps,phi); else Maps:=Append(Maps,Maps[i-1]*phi); end if;
+        if IsEmpty(UMaps) then UMaps:=Append(UMaps,phi); else UMaps:=Append(UMaps,UMaps[i-1]*phi); end if;
     end for;
-    return Groups,Maps,Lift,Uf1;
+
+    return Groups,UMaps,ULift;
 end function;
 
+function ComputeUf(F, K, f)
+    K1 := ChangePrecision(K,f);
+    Fq := Integers(ChangePrecision(K,1));
+    OK1 := Integers(K1);
+    UK1, mK1 := UnitGroup(OK1);
+    Uf := sub<UK1|[Inverse(mK1)(OK1!Norm(mK1(g), F)) : g in Generators(UK1)]>;
 
-function ConComplex (Groups,Maps,Lift,Uf);
+    return Uf;
+end function;
+
+function ConComplex(Groups,Maps,Lift,Uf);
     f:=#Groups;
     CComplex:=[];
     CMaps:=[* *];
@@ -60,9 +71,9 @@ function ConComplex (Groups,Maps,Lift,Uf);
     CComplex:=Append(CComplex,G);
 
     for i in [1..f-1] do
-    G,phi:=quo<Groups[i+1]|Maps[i](Uf)>;
-    CComplex:=Append(CComplex,G);
-    CMaps:=Append(CMaps,Inverse(pr)*Maps[i]*phi);
+        G,phi:=quo<Groups[i+1]|Maps[i](Uf)>;
+        CComplex:=Append(CComplex,G);
+        CMaps:=Append(CMaps,Inverse(pr)*Maps[i]*phi);
     end for;
 
     return CComplex,CMaps,CLift;
