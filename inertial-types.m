@@ -39,6 +39,7 @@ function InternalSupercuspidalOfOrder(F, K, f, c, n)
     assert #CMaps eq f-1;
 
     G := CGroups[1];
+    #G;
     Gens := Generators(G);
     Chars := CharactersOfOrder(G, n);
 
@@ -115,3 +116,46 @@ function SupercuspidalRamified(F, K, f, c)
 
     return InternalSupercuspidalOfOrder(F, K, f, c, n);
 end function;
+
+function InertialTypes(F) 
+    c:=0;
+    QuadExt:=[];
+    for Z in AllExtensions(F,2) do
+        K:=FieldOfFractions(Z);
+        QuadExt:=Append(QuadExt,K);
+        m:=Valuation(Discriminant(K,F));
+        c:=Max(m,c);
+    end for;
+
+    p,ram_deg,in_deg,pi,N:=BaseValues(F);
+    f:=Floor(N/2);
+    for n in [2,3,4,6] do
+        gens, chars := PrincipalSeriesOfOrder(F,f,n);
+        printf("Principal series of order: ");print(n);
+        #chars;
+        [char[2] : char in chars];
+        print("----");
+    end for;
+
+    for K in QuadExt do
+        Cond,pi,Gal,y:=ExtValues(F,K);
+        f:=N-Cond;
+        print(f);print(c);
+        if Cond gt 0 then
+            gens, chars := SupercuspidalRamified(F,K,f,c);
+            #chars;
+            [char[2] : char in chars];
+            print("----");
+        else 
+            for n in [3,4,6] do
+                gens, chars := InternalSupercuspidalOfOrder(F,K,f,c,n);
+                print(n);
+                #chars;
+                [char[2] : char in chars];
+                print("----");
+            end for;
+        end if;
+    end for;
+    return 0;
+end function;
+

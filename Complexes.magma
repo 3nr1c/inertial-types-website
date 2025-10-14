@@ -63,6 +63,7 @@ function ComputeUf(F, K, f)
 end function;
 
 function ConComplex(F, K, f)
+    // This seems to be the slowest function (might want to do some timings)
     UGroups, UMaps, ULift := UComplex(K, f);
     UK1 := UGroups[1];
     UProj := Inverse(ULift);
