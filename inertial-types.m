@@ -103,7 +103,7 @@ function SupercuspidalUnramifiedOfOrder(F, K, f, c, n)
     return InternalSupercuspidalOfOrder(F, K, f, c, n);
 end function;
 
-function SupercuspidalRamifiedOfOrder(F, K, f, c)
+function SupercuspidalRamified(F, K, f, c)
     p := Prime(F);
     if p eq 2 then
         n := 4;
