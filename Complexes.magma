@@ -63,6 +63,7 @@ function ComputeUf(F, K, f)
 end function;
 
 function ConComplex(F, K, f)
+    f;
     // This seems to be the slowest function (might want to do some timings)
     UGroups, UMaps, ULift := UComplex(K, f);
     UK1 := UGroups[1];
@@ -84,21 +85,54 @@ function ConComplex(F, K, f)
     return CGroups, CMaps, CLift;
 end function;
 
-
 function Varepsilon(F,K,f,c)
+    F1:=ChangePrecision(F,c);
+    K1:=ChangePrecision(K,f);
+    OF1:=Integers(F1);
+    OK1:=Integers(K1);
+    UF1,mF1:=UnitGroup(OF1);
+    UK1,mK1:=UnitGroup(OK1);
+
+    Uf1 := sub<UF1|[Inverse(mF1)(OF1!(Norm(K!mK1(g),F))) : g in Generators(UK1)]>;
+    Qf, pf := quo<UF1|Uf1>;
+
+    return [K!mF1(g) : g in Generators(UF1) | not IsIdentity(pf(g))];
+end function;
+
+function VarepsilonMal(F,K,f,c)
     K1 := ChangePrecision(K,f);
     F1 := ChangePrecision(F,c);
     OF1 := Integers(F1);
     OK1 := Integers(K1);
+    OK := Integers(K);
+    OF := Integers(F);
+    UF, mF := UnitGroup(OF);
     UF1,mF1 := UnitGroup(OF1);
     UK1,mK1 := UnitGroup(OK1);
     NonNormGenerators := [];
 
-    for g in Generators(UF1) do
-        if not(NormEquation(OK1, mF1, mF1(g))) then
-            Append(~NonNormGenerators, K!mF1(g));
-        end if;
-    end for;
+    Uf := sub<UF1|[Inverse(mF1)(OF1!Norm(K!mK1(g), F)) : g in Generators(UK1)]>;
+    quo<UF1|Uf>;
+    // Generators(UF1);
+    // for g in Generators(UF1) do
+    //     if not(NormEquation(OK1, mF1, mF1(g))) then
+    //         Append(~NonNormGenerators, K!mF1(g));
+    //     end if;
+    // end for;
+
+
+    // for g in Generators(UF1) do
+    //     if not(NormEquation(OK, mF, ChangePrecision(F!mF1(g), Precision(F)))) then
+    //         print(Precision(mF1(g)));
+    //         Append(~NonNormGenerators, ChangePrecision(K!mF1(g),Precision(K)));
+    //     end if;
+    // end for;
+    NonNormGenerators;
 
     return NonNormGenerators;
 end function;
+
+Q2 := pAdicField(2, 100);
+Q4 := UnramifiedExtension(Q2, 2);
+K := FieldOfFractions(AllExtensions(Q4, 2)[8]);
+

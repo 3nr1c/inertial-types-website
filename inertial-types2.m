@@ -7,6 +7,7 @@ function ComputeChars(order, instantiation, filters)
     Chars := CharactersOfOrder(groups[1], order);
     for filter in filters do
         Chars := [chi : chi in Chars | filter(chi, lift)];
+        // Chars;
     end for;
     return AddConductor(Chars, groups, maps);
 end function;
@@ -75,6 +76,7 @@ function InertialTypes(F)
         m := Valuation(Discriminant(K,F));
         c := Max(m,c);
     end for;
+    c := c+1;
 
     p, ram_deg, in_deg, pi, N := BaseValues(F);
     f := Floor(N/2);
@@ -107,3 +109,6 @@ function InertialTypes(F)
     end for;
     return 0;
 end function;
+
+Q2 := pAdicField(2, 100);
+Q4 := UnramifiedExtension(Q2, 2);
