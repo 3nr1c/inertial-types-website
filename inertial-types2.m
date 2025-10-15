@@ -16,7 +16,7 @@ function PrincipalSeriesOfOrder(F, f, n)
     return ComputeChars(n, func< | UComplex(F, f)>, [func< x, ... | true >]);
 end function;
 
-function SupercuspidalUnramifiedOfOrder(F, K, f,  n)
+function SupercuspidalUnramifiedOfOrder(F, K, f, n)
     assert n in {3, 4, 6};
     if Valuation(Discriminant(K,F)) gt 0 then
         error Error("The extension K|F is not unramified");
@@ -79,6 +79,7 @@ function InertialTypes(F)
 
     p, ram_deg, in_deg, pi, N := BaseValues(F);
     f := Floor(N/2);
+    groups, maps, lift := UComplex(F, f);
     for n in [2,3,4,6] do
         chars := PrincipalSeriesOfOrder(F,f,n);
         printf("Principal series of order: ");print(n);
