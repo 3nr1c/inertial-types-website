@@ -13,18 +13,18 @@ function ComputeChars(order, instantiation, filters)
 end function;
 
 function PrincipalSeriesOfOrder(F, f, n)
-    return ComputeChars(n, func< | UComplex(F, f)>, [func< x, ... | true>]);
+    return ComputeChars(n, func< | UComplex(F, f)>, [func< x, ... | true >]);
 end function;
 
-function SupercuspidalUnramifiedOfOrder(F, K, f, c, n)
+function SupercuspidalUnramifiedOfOrder(F, K, f,  n)
+    assert n in {3, 4, 6};
     if Valuation(Discriminant(K,F)) gt 0 then
         error Error("The extension K|F is not unramified");
     end if;
 
-    NonNormGenerators := Varepsilon(F, K, f, c);
     minus_one := n eq 4 select 2 else 3;
     return ComputeChars(n, func< | ConComplex(F, K, f)>, 
-        [func< chi, lift | ListValueFilter(NonNormGenerators, minus_one, chi, lift)>]);
+        [func< chi, lift | true >]);
 end function;
 
 function SupercuspidalRamified2(F, K, f, c)
@@ -76,7 +76,6 @@ function InertialTypes(F)
         m := Valuation(Discriminant(K,F));
         c := Max(m,c);
     end for;
-    c := c+1;
 
     p, ram_deg, in_deg, pi, N := BaseValues(F);
     f := Floor(N/2);
@@ -88,24 +87,28 @@ function InertialTypes(F)
         print("----");
     end for;
 
+    i := 1;
     for K in QuadExt do
         Cond, pi, Gal, y := ExtValues(F,K);
-        f:=N-Cond;
-        print(f);print(c);
+        f := Max(N-Cond, 2*Cond);
+        c := Cond;
+        // print(f);print(c);
         if Cond gt 0 then
+            i;
             chars := SupercuspidalRamified(F,K,f,c);
             #chars;
             [char[2] : char in chars];
             print("----");
         else 
             for n in [3,4,6] do
-                chars := SupercuspidalUnramifiedOfOrder(F,K,f,c,n);
+                chars := SupercuspidalUnramifiedOfOrder(F,K,f,n);
                 print(n);
                 #chars;
                 [char[2] : char in chars];
                 print("----");
             end for;
         end if;
+        i +:= 1;
     end for;
     return 0;
 end function;

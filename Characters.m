@@ -22,7 +22,6 @@ end function;
 
 function ListValueFilter(list, val, chi, lift)
     for g in list do
-        Inverse(lift)(g);
         if not (chi(Inverse(lift)(g)) eq Codomain(chi)!val) then return false; end if;
     end for;
     return true;
