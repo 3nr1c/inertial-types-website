@@ -1,0 +1,27 @@
+//This fucntion produces the 2-Selmer Group of L as a Gal(L/F) module
+function SelmerGaloisModule (F,L)
+    assert IsNormal(L,F);
+    F2:=GF(2);
+    Gal,GaltoAut:=AutomorphismGroup(L,F);
+    Sel,LtoSel:=pSelmerGroup(2,L);
+    n:=#Generators(Sel);
+    V:=VectorSpace(F2,n);
+    Operators:=[];
+    Operators:=Append(Operators,ScalarMatrix(F2,n,1));
+
+    for t in Generators(Gal) do
+        M:=[];
+        g:=GaltoAut(t);
+        for z in Generators(Sel) do
+            y:=Inverse(LtoSel)(z);
+            M:=Append(M,ElementToSequence(LtoSel(g(y))));
+        end for;
+        Operators:=Append(Operators,Matrix(F2,M));
+    end for;
+    GSel:=GModule(Gal,Operators);
+    return GSel,Gal;
+end function;
+
+Q2:=pAdicField(2,100);
+Q4:=UnramifiedExtension(Q2,2);
+K:=FieldOfFractions(AllExtensions(Q4,3)[2]);
