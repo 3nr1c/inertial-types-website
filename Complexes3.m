@@ -16,6 +16,16 @@ function ExtValues(F,K)
     return Cond,pi,Gal,y;
 end function;
 
+//Given two groups A,B and a map m define as a composite of different maps it returns the map that goes directly from A to B without 
+// passing thorough all the composites. 
+function FastMap(m)
+A:=Domain(m);
+B:=Codomain(m);
+Fmap:=hom<A->B|[m(A.j) : j in [1..#Generators(A)]]>;
+return Fmap;
+end function;
+
+
 // This function compute Ugroups for higher values of f
 function UComplex(K, f)
     p,e,fK,pi,N := BaseValues(K);
@@ -28,7 +38,6 @@ function UComplex(K, f)
     UK1,mK1 := UnitGroup(OK1);
     ULift := mK1*Coercion(OK1,K1)*Coercion(K1,K);
     Groups := Append(Groups,UK1);
-
     UProj := Inverse(ULift);
     
     for i in [1..f-1] do
@@ -40,15 +49,16 @@ function UComplex(K, f)
 
         G,phi:=quo<Groups[i]|L>;
         Groups:=Append(Groups,G);
-        if IsEmpty(UMaps) then UMaps:=Append(UMaps,phi); else UMaps:=Append(UMaps,UMaps[i-1]*phi); end if;
-    end for;
+        if IsEmpty(UMaps) then UMaps:=Append(UMaps,FastMap(phi)); else UMaps:=Append(UMaps,FastMap(UMaps[i-1]*phi)); end if;
+        end for;
 
     return Groups,UMaps,ULift;
 end function;
 
 function ConComplex(F, K, f)
     // This seems to be the slowest function (might want to do some timings)
-    UGroups, UMaps, ULift := UComplex(K, f);
+    UGroups, UMaps,ULift := UComplex(K, f);
+    #UGroups;
     UK1 := UGroups[1];
     UProj := Inverse(ULift);
     Uf := sub<UK1|[UProj(K!Norm(ULift(g), F)) : g in Generators(UK1)]>;
@@ -62,7 +72,7 @@ function ConComplex(F, K, f)
     for i in [1..f-1] do
         G,phi := quo<UGroups[i+1]|UMaps[i](Uf)>;
         CGroups := Append(CGroups,G);
-        CMaps := Append(CMaps,Inverse(pr)*UMaps[i]*phi);
+        CMaps := Append(CMaps,FastMap(Inverse(pr)*UMaps[i]*phi));
     end for;
 
     return CGroups, CMaps, CLift;
@@ -92,4 +102,8 @@ function GetVarepsilonGenerators(F, K : MyComplex := [* *])
     VarepsGenerators := {K!llift(g) : g in Generators(G)};
 
     return f, c, VarepsGenerators;
+
+function FastMap(A,B,m)
+    Fmap:=hom<A->B|[m(A.j) : j in [1..#Generators(A)]]>;
+    return Fmap;
 end function;
