@@ -49,7 +49,6 @@ end function;
 function ConComplex(F, K, f)
     // This seems to be the slowest function (might want to do some timings)
     UGroups, UMaps, ULift := UComplex(K, f);
-    #UGroups;
     UK1 := UGroups[1];
     UProj := Inverse(ULift);
     Uf := sub<UK1|[UProj(K!Norm(ULift(g), F)) : g in Generators(UK1)]>;
@@ -67,4 +66,30 @@ function ConComplex(F, K, f)
     end for;
 
     return CGroups, CMaps, CLift;
+end function;
+
+function GetVarepsilonGenerators(F, K : MyComplex := [* *])
+    p, ram_deg, in_deg, pi, N := BaseValues(F);
+    Cond, pi, Gal, y := ExtValues(F,K);
+    f := Max(N-Cond, 2*Cond);
+    c := Cond;
+
+    if #MyComplex eq 3 then
+        UGroups := MyComplex[1];
+        UMaps := MyComplex[2];
+        ULift := MyComplex[3];
+    else
+        UGroups, UMaps, ULift := UComplex(F, f);
+    end if;
+    ff := #UGroups;
+    ff;c;
+    G := UGroups[ff - c + 1];
+    if ff - c + 1 eq 1 then
+        llift := ULift;
+    else
+        llift := Inverse(UMaps[ff - c]) * ULift;
+    end if;
+    VarepsGenerators := {K!llift(g) : g in Generators(G)};
+
+    return f, c, VarepsGenerators;
 end function;
