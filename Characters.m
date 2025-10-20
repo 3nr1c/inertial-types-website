@@ -29,45 +29,42 @@ function AffinePoints(k, G)
     return points;
 end function;
 
-function CharacterExponents(k, G : HalfG := {})
+function CharacterExponents(k, Zn : HalfZn := {})
 // This function returns the tuples (x1,...,xj)
 // necessary to obtain all characters of exact order n,
 // modulo -1
     if k le 0 then
-        points := [];
+        tuples := [];
     elif k eq 1 then
-        points := [[G!1]];
+        tuples := [[Zn!1]];
     else
-        if #HalfG eq 0 then
-            HalfG := {G!1};
-            for g in G do
-                if not (-g in HalfG) then
-                    Include(~HalfG, g);
+        if #HalfZn eq 0 then
+            HalfZn := {Zn!1};
+            for g in Zn do
+                if not (-g in HalfZn) then
+                    Include(~HalfZn, g);
                 end if;
             end for;
-            Exclude(~HalfG, G!1);
+            Exclude(~HalfZn, Zn!1);
         end if;
 
         TupleToList := func<t | [e : e in t]>;
-        points := {[G!1] cat TupleToList(p) : p in CartesianPower(G, k - 1)};
-        Exponentskminus1 := CharacterExponents(k - 1, G : HalfG:=HalfG);
-        for g in HalfG do
-            points := points join {[g] cat p : p in Exponentskminus1};
+        tuples := {[Zn!1] cat TupleToList(p) : p in CartesianPower(Zn, k - 1)};
+        Exponentskminus1 := CharacterExponents(k - 1, Zn : HalfZn:=HalfZn);
+        for g in HalfZn do
+            tuples := tuples join {[g] cat p : p in Exponentskminus1};
         end for;
-        // points := points_affine_patch cat points_proj_infty;
     end if;
-    return points;
+    return tuples;
 end function;
 
 function FastCharactersOfOrder(G, n)
-// This does not work (yet)
     if not (n in {2, 3, 4}) then
         return CharactersOfOrder(G, n);
     end if;
 
     ZZ := Integers();
     Zn := AdditiveGroup(Integers(n));
-
     Q, GtoQ := quo<G | [ZZ!(Gcd(Order(g),n)) * g : g in Generators(G)]>;
     GensOfOrder_n := [g : g in Generators(Q) | Order(g) eq n];
     GensOfLowerOrder := [g : g in Generators(Q) | Order(g) lt n];
@@ -77,7 +74,13 @@ function FastCharactersOfOrder(G, n)
 
     for e1 in CharacterExponents(#GensOfOrder_n, Zn) do
         if #GensOfLowerOrder gt 0 then
+            // The following needs to be changed if we want to 
+            // compute fast characters for composite n distinct from 4:
             LowerOrderImages := {Zn!0, Zn!2};
+            // In general, one should order the GensOfLowerOrder, then
+            // build a cartesian product (not a power) with the possible
+            // exponents for each generator. This is necessary in order to
+            // avoid repetition.
 
             for e2 in CartesianPower(LowerOrderImages, #GensOfLowerOrder) do
                 Append(~QChars, Homomorphism(Q, Zn, Gens, e1 cat [t : t in e2]));
