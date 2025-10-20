@@ -30,31 +30,29 @@ function AffinePoints(k, G)
 end function;
 
 function CharacterExponents(k, G : HalfG := {})
-// This function returns tuples (x1,...,xj),
-// where (x1,...,xj) is a projective point in G
+// This function returns the tuples (x1,...,xj)
+// necessary to obtain all characters of exact order n,
+// modulo -1
     if k le 0 then
         points := [];
     elif k eq 1 then
         points := [[G!1]];
     else
-        // Affines := AffinePoints(k - 1, G);
-        // points := {
-            // Insert(P, i, G!1) : i in [1 .. k], P in Affines
-        // };
         if #HalfG eq 0 then
+            HalfG := {G!1};
             for g in G do
                 if not (-g in HalfG) then
                     Include(~HalfG, g);
                 end if;
             end for;
+            Exclude(~HalfG, G!1);
         end if;
 
         TupleToList := func<t | [e : e in t]>;
         points := {[G!1] cat TupleToList(p) : p in CartesianPower(G, k - 1)};
+        Exponentskminus1 := CharacterExponents(k - 1, G : HalfG:=HalfG);
         for g in HalfG do
-            points := points join {
-                [g] cat p : p in CharacterExponents(k - 1, G : HalfG:=HalfG)
-            };
+            points := points join {[g] cat p : p in Exponentskminus1};
         end for;
         // points := points_affine_patch cat points_proj_infty;
     end if;
