@@ -109,6 +109,7 @@ end function;
 function SupercuspidalRamified2withoutArgs(F, K)
     assert Prime(F) eq 2;
 
+    p, ram_deg, in_deg, pi, N := BaseValues(F);
     f, c, VarepsGenerators := GetVarepsilonGenerators(F, K);
     Cond, pi, Gal, y := ExtValues(F,K);
 
