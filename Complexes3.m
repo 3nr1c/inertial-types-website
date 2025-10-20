@@ -33,17 +33,17 @@ function UComplex(K, f)
     UMaps := [* *];
 
     K1 := ChangePrecision(K,f);
-    Fq := Integers(ChangePrecision(K,1));
     OK1 := Integers(K1);
+    FqBasis := Basis(ResidueClassField(OK1));
     UK1,mK1 := UnitGroup(OK1);
     ULift := mK1*Coercion(OK1,K1)*Coercion(K1,K);
     Groups := Append(Groups,UK1);
     UProj := Inverse(ULift);
-    
+
     for i in [1..f-1] do
         L := [];
-        for x in Fq do
-            z:=ChangePrecision(K!x,Precision(K));
+        for x in FqBasis do
+            z:=ChangePrecision(K!K1!OK1!x,Precision(K));
             if IsEmpty(UMaps) then L:=Append(L,UProj(1+z*pi^(f-i))); else L:=Append(L,UMaps[i-1](UProj(1+z*pi^(f-i)))); end if;
         end for;
 
@@ -57,11 +57,12 @@ end function;
 
 function ConComplex(F, K, f)
     // This seems to be the slowest function (might want to do some timings)
+    assert f gt AbsoluteRamificationDegree(K);
     UGroups, UMaps,ULift := UComplex(K, f);
     #UGroups;
     UK1 := UGroups[1];
     UProj := Inverse(ULift);
-    Uf := sub<UK1|[UProj(K!Norm(ULift(g), F)) : g in Generators(UK1)]>;
+    Uf := sub<UK1|[UProj(K!Norm(ChangePrecision(ULift(g),Precision(K)), F)) : g in Generators(UK1)]>;
 
     CGroups := [];
     CMaps := [* *];
@@ -76,9 +77,4 @@ function ConComplex(F, K, f)
     end for;
 
     return CGroups, CMaps ,CLift;
-end function;
-
-function FastMap(A,B,m)
-Fmap:=hom<A->B|[m(A.j) : j in [1..#Generators(A)]]>;
-return Fmap;
 end function;
