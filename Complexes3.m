@@ -19,10 +19,10 @@ end function;
 //Given two groups A,B and a map m define as a composite of different maps it returns the map that goes directly from A to B without 
 // passing thorough all the composites. 
 function FastMap(m)
-A:=Domain(m);
-B:=Codomain(m);
-Fmap:=hom<A->B|[m(A.j) : j in [1..#Generators(A)]]>;
-return Fmap;
+    A:=Domain(m);
+    B:=Codomain(m);
+    Fmap:=hom<A->B|[m(A.j) : j in [1..#Generators(A)]]>;
+    return Fmap;
 end function;
 
 
@@ -103,9 +103,9 @@ function GetVarepsilonGenerators(F, K : MyComplex := [* *])
     VarepsGenerators := {K!llift(g) : g in Generators(G)};
 
     return f, c, VarepsGenerators;
-end function
-
-function FastMap(A,B,m)
-    Fmap:=hom<A->B|[m(A.j) : j in [1..#Generators(A)]]>;
-    return Fmap;
 end function;
+
+// function FastMap(A,B,m)
+//     Fmap:=hom<A->B|[m(A.j) : j in [1..#Generators(A)]]>;
+//     return Fmap;
+// end function;

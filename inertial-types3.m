@@ -4,7 +4,7 @@ load "Postprocessing.m";
 
 function ComputeChars(order, instantiation, filters)
     groups, maps, lift := instantiation();
-    Chars := CharactersOfOrder(groups[1], order);
+    Chars := FastCharactersOfOrder(groups[1], order);
     for filter in filters do
         Chars := [chi : chi in Chars | filter(chi, lift)];
     end for;

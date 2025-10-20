@@ -49,9 +49,12 @@ function CharacterExponents(k, G : HalfG := {})
             end for;
         end if;
 
-        points := {[G!1] cat p : p in AffinePoints(k - 1, G)};
+        TupleToList := func<t | [e : e in t]>;
+        points := {[G!1] cat TupleToList(p) : p in CartesianPower(G, k - 1)};
         for g in HalfG do
-            points := points join {[g] cat p : p in CharacterExponents(k - 1, G : HalfG:=HalfG)};
+            points := points join {
+                [g] cat p : p in CharacterExponents(k - 1, G : HalfG:=HalfG)
+            };
         end for;
         // points := points_affine_patch cat points_proj_infty;
     end if;
