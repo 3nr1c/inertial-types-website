@@ -1,3 +1,20 @@
+function CharactersOfOrder(G, n)
+    ZZ := Integers();
+    Zn := AdditiveGroup(Integers(n));
+
+    Q, GtoQ := quo<G | [ZZ!(Gcd(Order(g),n)) * g : g in Generators(G)]>;
+
+    GZn, t := Hom(Q, Zn);
+    QChars := {};
+    for f in GZn do
+        if not (-f in QChars) and Order(f) eq n then
+            Include(~QChars, f);
+        end if;
+    end for;
+
+    return [FastMap(GtoQ*(t(f))) : f in QChars];
+end function;
+
 function AffinePoints(k, G)
 // return all points in A_k(G)
     if k le 0 then 
@@ -70,24 +87,6 @@ function FastCharactersOfOrder(G, n)
     end for;
 
     return [*FastMap(GtoQ*f) : f in QChars*];
-end function;
-
-
-function CharactersOfOrder(G, n)
-    ZZ := Integers();
-    Zn := AdditiveGroup(Integers(n));
-
-    Q, GtoQ := quo<G | [ZZ!(Gcd(Order(g),n)) * g : g in Generators(G)]>;
-
-    GZn, t := Hom(Q, Zn);
-    QChars := {};
-    for f in GZn do
-        if not (-f in QChars) and Order(f) eq n then
-            Include(~QChars, f);
-        end if;
-    end for;
-
-    return [FastMap(GtoQ*(t(f))) : f in QChars];
 end function;
 
 function CharacterFactorsThrough(A, B, pi, chi)
