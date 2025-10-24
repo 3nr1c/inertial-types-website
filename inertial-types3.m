@@ -79,7 +79,7 @@ end function;
 function SupercuspidalRamified3(F, K, f, c, VarepsGenerators)
     assert Prime(F) eq 3;
     return ComputeChars(6, func< | ConComplex(F, K, f)>, 
-        func< chi, lift | VarepsilonFilter(VarepsGenerators, 3, chi, lift)>);
+        [func< chi, lift | VarepsilonFilter(VarepsGenerators, 3, chi, lift)>]);
 end function;
 
 function SupercuspidalRamified2args(F, K)

@@ -3,10 +3,9 @@ function TupleToSeq(t)
 end function;
 
 function CharactersOfOrder(G, n)
-    ZZ := Integers();
     Zn := AdditiveGroup(Integers(n));
 
-    Q, GtoQ := quo<G | [ZZ!(Gcd(Order(g),n)) * g : g in Generators(G)]>;
+    Q, GtoQ := quo<G | [n * g : g in Generators(G)]>;
 
     GZn, t := Hom(Q, Zn);
     QChars := {};
@@ -16,7 +15,7 @@ function CharactersOfOrder(G, n)
         end if;
     end for;
 
-    return [FastMap(GtoQ*(t(f))) : f in QChars];
+    return [*FastMap(GtoQ*(t(f))) : f in QChars*];
 end function;
 
 function CharacterExponents(Zn, r)
@@ -38,14 +37,8 @@ function CharacterExponents(Zn, r)
 end function;
 
 function FastCharactersOfOrder(G, n)
-    if not (n in {2, 3, 4}) then
-        return CharactersOfOrder(G, n);
-    end if;
-
-    ZZ := Integers();
     Zn := AdditiveGroup(Integers(n));
-    Q, GtoQ := quo<G | [ZZ!(Gcd(Order(g),n)) * g : g in Generators(G)]>;
-    Q;
+    Q, GtoQ := quo<G | [n * g : g in Generators(G)]>;
     Gens := Generators(Q);
     GensOfOrder_n := [g : g in Gens | Order(g) eq n];
     GensOfLowerOrder := [g : g in Gens | Order(g) lt n];

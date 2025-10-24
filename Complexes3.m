@@ -21,7 +21,8 @@ end function;
 function FastMap(m)
     A:=Domain(m);
     B:=Codomain(m);
-    Fmap:=hom<A->B|[m(A.j) : j in [1..#Generators(A)]]>;
+    Gens := [g : g in Generators(A)];
+    Fmap:= Homomorphism(A, B, Gens, [m(g) : g in Gens]);
     return Fmap;
 end function;
 
