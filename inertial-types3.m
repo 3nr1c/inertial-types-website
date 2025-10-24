@@ -6,7 +6,7 @@ function ComputeChars(order, instantiation, filters)
     groups, maps, lift := instantiation();
     Chars := FastCharactersOfOrder(groups[1], order);
     for filter in filters do
-        Chars := [chi : chi in Chars | filter(chi, lift)];
+        Chars := [*chi : chi in Chars | filter(chi, lift)*];
     end for;
     return AddConductor(Chars, groups, maps, order);
 end function;
