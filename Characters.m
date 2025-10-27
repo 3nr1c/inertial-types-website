@@ -7,13 +7,16 @@ function CharactersOfOrder(G, n)
 
     Q, GtoQ := quo<G | [n * g : g in Generators(G)]>;
 
-    GZn, t := Hom(Q, Zn);
+    QZn, t := Hom(Q, Zn);
     QChars := {};
-    for f in GZn do
+    for f in QZn do
         if not (-f in QChars) and Order(f) eq n then
             Include(~QChars, f);
         end if;
     end for;
+
+    // Debugging code
+    // [* [[*Order(chi),t(chi)(g),Order(g)*] : g in Generators(Q)] : chi in QChars *];
 
     return [*FastMap(GtoQ*(t(f))) : f in QChars*];
 end function;
@@ -36,7 +39,8 @@ function CharacterExponents(Zn, r)
     return exponents;
 end function;
 
-function FastCharactersOfOrder(G, n)
+function FastCharactersOfPrimePowerOrder(G, n)
+    ZZ := Integers();
     Zn := AdditiveGroup(Integers(n));
     Q, GtoQ := quo<G | [n * g : g in Generators(G)]>;
     Gens := Generators(Q);
@@ -52,7 +56,7 @@ function FastCharactersOfOrder(G, n)
     if #GensOfLowerOrder gt 0 then
         LowerOrderExponents := {
             e : e in CartesianProduct(
-                < {Zn!t : t in [0 .. n by Order(g)]} : g in GensOfLowerOrder >
+                < {Zn!t : t in [0 .. n by ZZ!(n/Order(g))]} : g in GensOfLowerOrder >
             )
         };
         CharExponents := {
@@ -65,7 +69,38 @@ function FastCharactersOfOrder(G, n)
         Append(~QChars, Homomorphism(Q, Zn, Gens, e));
     end for;
 
+    // Debugging code
+    // [* [chi(g) : g in Gens] : chi in QChars *];
+
     return [*FastMap(GtoQ*f) : f in QChars*];
+end function;
+
+function FastMapSum(f, g) 
+    A:=Domain(f);
+    B:=Codomain(f);
+    Gens := [x : x in Generators(A)];
+    Fmap:= Homomorphism(A, B, Gens, [f(x) + g(x) : x in Gens]);
+    return Fmap;
+end function;
+
+function FastCharactersOfOrder(G, n)
+    ls := Factorization(n);
+    Chars := [* *];
+    if not (Exponent(G) mod n eq 0) then return Chars; end if;
+    Zn := AdditiveGroup(Integers(n));
+    ZZ := Integers();
+
+    for l in ls do
+        lChars := FastCharactersOfPrimePowerOrder(G, l[1]^l[2]);
+        Zl := Codomain(lChars[1]);
+        ZltoZn := hom<Zl -> Zn | Zl!1 -> Zn!(ZZ!(n/(l[1]^l[2])))>;
+        if #Chars eq 0 then 
+            Chars := [* chi*ZltoZn : chi in lChars*];
+        else
+            Chars := [FastMapSum(chi, (psi*ZltoZn)) : chi in Chars, psi in lChars];
+        end if;
+    end for;
+    return Chars;
 end function;
 
 function CharacterFactorsThrough(A, B, pi, chi)

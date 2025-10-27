@@ -4,9 +4,18 @@ load "Postprocessing.m";
 
 function ComputeChars(order, instantiation, filters)
     groups, maps, lift := instantiation();
-    Chars := FastCharactersOfOrder(groups[1], order);
+    // groups[1];
+    // time Chars1 := CharactersOfOrder(groups[1], order);
+    time Chars := FastCharactersOfOrder(groups[1], order);
+
+    // Debugging code
+    // #Chars;
+    Gtilde := quo<groups[1] | order*groups[1]>;
+    assert #Chars / #Gtilde eq &*[(1 - (1/l[1])^#{g : g in Generators(groups[1]) | Order(g) mod l[1]^l[2] eq 0}) : l in Factorization(order)] / EulerPhi(order);
+
     for filter in filters do
         Chars := [*chi : chi in Chars | filter(chi, lift)*];
+        // #Chars;
     end for;
     return AddConductor(Chars, groups, maps, order);
 end function;
@@ -46,9 +55,9 @@ end function;
 
 
 function VarepsilonFilter(VarepsGenerators, minus_one, chi, lift)
-    for g in VarepsGenerators do
-        bar_g := Inverse(lift)(g);
-        if not IsIdentity(bar_g) and not (chi(bar_g) eq Codomain(chi)!minus_one) then
+    for bar_g in VarepsGenerators do
+        // bar_g := Inverse(lift)(g);
+        if not (chi(bar_g) eq Codomain(chi)!minus_one) then
             return false;
         end if;
     end for;
@@ -61,24 +70,37 @@ function SupercuspidalRamified2(F, K, f, c, VarepsGenerators)
 
     p, ram_deg, in_deg, pi, N := BaseValues(F);
     Cond, pi, Gal, y := ExtValues(F, K);
+    groups, maps, lift := ConComplex(F, K, f);
+
+    proj := Inverse(lift);
+    bar_y := proj(y^2);
+    VarepsGenerators := [proj(g) : g in VarepsGenerators | not IsIdentity(proj(g))];
     if (in_deg mod 2) eq 0 then
         // (in_deg mod 2) eq 0 checks if x^2+x+1 splits in F
         // Triply imprimitive with n = 4, characters must be quadratic on y
-        quadratic_filter := func< chi, lift | IsIdentity(2 * chi(Inverse(lift)(y)))>;
+        quadratic_filter := func< chi, lift | IsIdentity(chi(bar_y))>;
     else
         // Simply imprimitive with n = 4, characters must *not* be quadratic on y
-        quadratic_filter := func< chi, lift | not IsIdentity(2 * chi(Inverse(lift)(y)))>;
+        quadratic_filter := func< chi, lift | not IsIdentity(chi(bar_y))>;
     end if;
-    return ComputeChars(4, func< | ConComplex(F, K, f)>, 
+    return ComputeChars(4, func< | groups, maps, lift>, 
     [
-        quadratic_filter,   
+        quadratic_filter,
         func< chi, lift | VarepsilonFilter(VarepsGenerators, 2, chi, lift)>
     ]);
 end function;
 
 function SupercuspidalRamified3(F, K, f, c, VarepsGenerators)
     assert Prime(F) eq 3;
-    return ComputeChars(6, func< | ConComplex(F, K, f)>, 
+
+    p, ram_deg, in_deg, pi, N := BaseValues(F);
+    Cond, pi, Gal, y := ExtValues(F, K);
+    groups, maps, lift := ConComplex(F, K, f);
+
+    proj := Inverse(lift);
+    VarepsGenerators := [proj(g) : g in VarepsGenerators | not IsIdentity(proj(g))];
+
+    return ComputeChars(6, func< | groups, maps, lift>, 
         [func< chi, lift | VarepsilonFilter(VarepsGenerators, 3, chi, lift)>]);
 end function;
 
