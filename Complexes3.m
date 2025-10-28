@@ -60,7 +60,9 @@ function ConComplex(F, K, f)
     // This seems to be the slowest function (might want to do some timings)
     assert f gt AbsoluteRamificationDegree(K);
     UGroups, UMaps,ULift := UComplex(K, f);
-    #UGroups;
+    // Factorization(#UGroups[1]);
+
+    // #UGroups;
     UK1 := UGroups[1];
     UProj := Inverse(ULift);
     Uf := sub<UK1|[UProj(K!Norm(ChangePrecision(ULift(g),Precision(K)), F)) : g in Generators(UK1)]>;
@@ -70,6 +72,7 @@ function ConComplex(F, K, f)
     G,pr := quo<UGroups[1]|Uf>;
     CLift := Inverse(pr)*ULift;
     CGroups := Append(CGroups,G);
+    // Factorization(#G);
 
     for i in [1..f-1] do
         G,phi := quo<UGroups[i+1]|UMaps[i](Uf)>;

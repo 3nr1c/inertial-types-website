@@ -4,7 +4,7 @@ load "Postprocessing.m";
 
 function ComputeChars(order, instantiation, filters)
     groups, maps, lift := instantiation();
-    // groups[1];
+    groups[1];
     // time Chars1 := CharactersOfOrder(groups[1], order);
     time Chars := FastCharactersOfOrder(groups[1], order);
 
@@ -14,7 +14,7 @@ function ComputeChars(order, instantiation, filters)
     assert #Chars / #Gtilde eq &*[(1 - (1/l[1])^#{g : g in Generators(groups[1]) | Order(g) mod l[1]^l[2] eq 0}) : l in Factorization(order)] / EulerPhi(order);
 
     for filter in filters do
-        Chars := [*chi : chi in Chars | filter(chi, lift)*];
+        time Chars := [*chi : chi in Chars | filter(chi, lift)*];
         // #Chars;
     end for;
     return AddConductor(Chars, groups, maps, order);
