@@ -1,9 +1,9 @@
 load "inertial-types3.m";
 
-F := UnramifiedExtension(Q2,14);
-// K := FieldOfFractions(AllExtensions(F,2)[3]);
-R<x> := PolynomialRing(F);
-K := ext<F|x^2-UniformizingElement(F)>;
+F := UnramifiedExtension(Q2,6);
+K := FieldOfFractions(AllExtensions(F,2)[3]);
+// R<x> := PolynomialRing(F);
+// K := ext<F|x^2-UniformizingElement(F)>;
 
 K;
 
@@ -27,10 +27,10 @@ proj := Inverse(CLift);
 VarepsGenerators := {proj(g) : g in VarepsGenerators | not IsIdentity(proj(g))};
 
 G := CGroups[1];
+n := 4;
 G;
 Q, GtoQ := quo<G | n*G>;
 Q;
-n := 4;
 
 Gen:=[Q.i : i in [1..#Generators(Q)]];
 OrderNSeq := [i : i in [1..#Gen] | Order(Gen[i]) eq n];
@@ -126,6 +126,7 @@ Exps := {v : v in F[k] meet ExpSpace, k in [1..#OrderNSeq] | v[OrderNSeq[k]] eq 
 // end for;
 #Exps;
 Time(T);
+
 
 T2 := Time();
 Fil,H,ExpSpace := Filtration(Q,GtoQ,CGroups, CMaps, CLift, n);
