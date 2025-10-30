@@ -74,6 +74,7 @@ function SupercuspidalRamified2(F, K, f, c, VarepsGenerators)
 
     proj := Inverse(lift);
     bar_y := proj(y^2);
+    bar_y;
     VarepsGenerators := [proj(g) : g in VarepsGenerators | not IsIdentity(proj(g))];
     if (in_deg mod 2) eq 0 then
         // (in_deg mod 2) eq 0 checks if x^2+x+1 splits in F
