@@ -83,6 +83,66 @@ function FastMapSum(f, g)
     return Fmap;
 end function;
 
+function FastCharactersOfOrder4(G : EpsElts:={}, bar_y:=1, YVal:=0)
+    n := 4;
+    Q, GtoQ := quo<G | n*G>;
+
+    Gen:=[Q.i : i in [1..#Generators(Q)]];
+    OrderNSeq := [i : i in [1..#Gen] | Order(Gen[i]) eq n];
+    R:=Integers(n);
+    Rf:=RSpace(R,#Gen + 1);
+    ExpSpace:=Rf;
+    H:=Hom(Rf,RSpace(R,1));
+
+    for g in Gen do
+        if not (Order(g) mod n eq 0) then
+            OrdFil:=Order(g)*(H!(ElementToSequence(g) cat [0]));
+            ExpSpace:=ExpSpace meet Kernel(OrdFil);
+        end if;
+    end for;
+
+    // Varepsilon conditions
+    for g in EpsElts do
+        ExpSpace := ExpSpace meet Kernel(H!(ElementToSequence(GtoQ(g)) cat [2]));
+    end for;
+
+    // y condition
+    // Parent(bar_y);
+    // G;
+    bar_y2 := 2*GtoQ(bar_y);
+    ExpSpace := ExpSpace meet Kernel(H!(ElementToSequence(bar_y2) cat [YVal]));
+
+    ZeroRow := [0 : _ in [1 .. #Gen]];
+    Fks := [Rf];
+
+    for k in [2..#OrderNSeq] do
+        Condition := Kernel(H!(Insert(ZeroRow, OrderNSeq[k-1], 2)));
+        Append(~Fks, Fks[k-1] meet Condition);
+    end for;
+
+    One := [];
+
+    for k in [1..#OrderNSeq] do
+        OneRow := ZeroRow cat [0];
+        OneRow[OrderNSeq[k]] := 1;
+        OneRow[#Gen+1] := -1;
+        // OneRow;
+        Fks[k] := Fks[k] meet Kernel(H!OneRow);
+        // F[k];
+    end for;
+
+    Zn := AdditiveGroup(R);
+    ZZ := Integers();
+
+    function VectorToExps(v)
+        return [Zn!ZZ!v[i] : i in [1..#Gen]];
+    end function;
+
+    QChars := [Homomorphism(Q, Zn, Gen, VectorToExps(v)) : v in Fks[k] meet ExpSpace, k in [1..#OrderNSeq] | v[OrderNSeq[k]] eq 1];
+
+    return [*FastMap(GtoQ*f) : f in QChars*];
+end function;
+
 function FastCharactersOfOrder(G, n)
     ls := Factorization(n);
     Chars := [* *];

@@ -1,16 +1,16 @@
 load "inertial-types3.m";
 
 F := UnramifiedExtension(Q2,6);
-K := FieldOfFractions(AllExtensions(F,2)[3]);
-// R<x> := PolynomialRing(F);
-// K := ext<F|x^2-UniformizingElement(F)>;
-
+// K := FieldOfFractions(AllExtensions(F,2)[1]);
+R<x> := PolynomialRing(F);
+K := ext<F|x^2-UniformizingElement(F)>;
 K;
 
 p, ram_deg, in_deg, pi, N := BaseValues(F);
 Cond, pi, Gal, y := ExtValues(F,K);
 f := Max(N-Cond, 2*Cond);
 c := Cond;
+// if c eq 0 then continue; end if;
 
 UGroups, UMaps, ULift := UComplex(F, f);
 G := UGroups[f - c + 1];
@@ -100,11 +100,11 @@ else
 end if;
 
 ZeroRow := [0 : _ in [1 .. #Gen]];
-F := [Rf];
+Fks := [Rf];
 
 for k in [2..#OrderNSeq] do
     Condition := Kernel(H!(Insert(ZeroRow, OrderNSeq[k-1], 2)));
-    Append(~F, F[k-1] meet Condition);
+    Append(~Fks, Fks[k-1] meet Condition);
 end for;
 
 One := [];
@@ -114,12 +114,12 @@ for k in [1..#OrderNSeq] do
     OneRow[OrderNSeq[k]] := 1;
     OneRow[#Gen+1] := -1;
     // OneRow;
-    F[k] := F[k] meet Kernel(H!OneRow);
+    Fks[k] := Fks[k] meet Kernel(H!OneRow);
     // F[k];
 end for;
 
 T := Time();
-Exps := {v : v in F[k] meet ExpSpace, k in [1..#OrderNSeq] | v[OrderNSeq[k]] eq 1};
+Exps := {v : v in Fks[k] meet ExpSpace, k in [1..#OrderNSeq] | v[OrderNSeq[k]] eq 1};
 // Count := 0;
 // for k in [1 .. #OrderNSeq] do  
 //     // Exps := Exps join {v : v in F[k] meet ExpSpace | v[OrderNSeq[k]] eq 1};
