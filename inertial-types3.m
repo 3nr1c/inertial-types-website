@@ -73,17 +73,18 @@ function SupercuspidalRamified2(F, K, f, c, VarepsGenerators)
     groups, maps, lift := ConComplex(F, K, f);
 
     proj := Inverse(lift);
-    bar_y := proj(y);
-    VarepsGenerators := [proj(g) : g in VarepsGenerators | not IsIdentity(proj(g))];
+    bar_y2 := 2*proj(y);
+    Elements := [proj(g) : g in VarepsGenerators | not IsIdentity(proj(g))] cat [bar_y2];
+    Values := [2 : g in VarepsGenerators];
     if (in_deg mod 2) eq 0 then
         // (in_deg mod 2) eq 0 checks if x^2+x+1 splits in F
         // Triply imprimitive with n = 4, characters must be quadratic on y
-        YVal := 0;
+        Values cat:= [0];
     else
         // Simply imprimitive with n = 4, characters must *not* be quadratic on y
-        YVal := 2;
+        Values cat:= [2];
     end if;
-    return FastCharactersOfOrder4(groups[1] : EpsElts:=VarepsGenerators, bar_y:=bar_y, YVal:=YVal);
+    return FastCharactersOfOrder4(groups[1] : Elements:=Elements, Values:=Values);
 end function;
 
 function SupercuspidalRamified3(F, K, f, c, VarepsGenerators)

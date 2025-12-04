@@ -83,7 +83,9 @@ function FastMapSum(f, g)
     return Fmap;
 end function;
 
-function FastCharactersOfOrder4(G : EpsElts:={}, bar_y:=1, YVal:=0)
+function FastCharactersOfOrder4(G : Elements:=[], Values:=[])
+// function FastCharactersOfOrder4(G : Elements:=[], Values:=[], EpsElts:={}, bar_y:=1, YVal:=0)
+    assert #Elements eq #Values;
     n := 4;
     Q, GtoQ := quo<G | n*G>;
 
@@ -101,16 +103,20 @@ function FastCharactersOfOrder4(G : EpsElts:={}, bar_y:=1, YVal:=0)
         end if;
     end for;
 
-    // Varepsilon conditions
-    for g in EpsElts do
-        ExpSpace := ExpSpace meet Kernel(H!(ElementToSequence(GtoQ(g)) cat [2]));
+    for i in [1 .. #Elements] do
+        ExpSpace := ExpSpace meet 
+            Kernel(H!(ElementToSequence(GtoQ(Elements[i])) cat [Values[i]]));    
     end for;
+    // Varepsilon conditions
+    // for g in EpsElts do
+    //     ExpSpace := ExpSpace meet Kernel(H!(ElementToSequence(GtoQ(g)) cat [2]));
+    // end for;
 
     // y condition
     // Parent(bar_y);
     // G;
-    bar_y2 := 2*GtoQ(bar_y);
-    ExpSpace := ExpSpace meet Kernel(H!(ElementToSequence(bar_y2) cat [YVal]));
+    // bar_y2 := 2*GtoQ(bar_y);
+    // ExpSpace := ExpSpace meet Kernel(H!(ElementToSequence(bar_y2) cat [YVal]));
 
     ZeroRow := [0 : _ in [1 .. #Gen]];
     Fks := [Rf];
