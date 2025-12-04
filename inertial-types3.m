@@ -74,16 +74,20 @@ function SupercuspidalRamified2(F, K, f, c, VarepsGenerators)
 
     proj := Inverse(lift);
     bar_y2 := 2*proj(y);
-    Elements := [proj(g) : g in VarepsGenerators | not IsIdentity(proj(g))] cat [bar_y2];
-    Values := [2 : g in VarepsGenerators];
+
+    Elements := [proj(g) : g in VarepsGenerators | not IsIdentity(proj(g))];
+    Values := [2 : g in VarepsGenerators | not IsIdentity(proj(g))];
+    
+    Append(~Elements, bar_y2);
     if (in_deg mod 2) eq 0 then
         // (in_deg mod 2) eq 0 checks if x^2+x+1 splits in F
         // Triply imprimitive with n = 4, characters must be quadratic on y
-        Values cat:= [0];
+        Append(~Values, 0);
     else
         // Simply imprimitive with n = 4, characters must *not* be quadratic on y
-        Values cat:= [2];
+        Append(~Values, 2);
     end if;
+
     return FastCharactersOfOrder4(groups[1] : Elements:=Elements, Values:=Values);
 end function;
 
