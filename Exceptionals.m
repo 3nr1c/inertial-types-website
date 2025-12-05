@@ -56,8 +56,34 @@ function ExceptionalTypesTriply(F,L)
         y1:=Roots(PolynomialRing(E)!Polynomials[1])[1,1];
         y2:=Roots(PolynomialRing(E)!Polynomials[2])[1,1];
 
-        Chars1,CGroups1,CMaps1,CLift1:=SupercuspidalRamified2args(L,K1);
-        FilChars1:=Chars1;
+        // Initialize character conditions
+        p, ram_deg, in_deg, pi, N := BaseValues(L);
+        Cond, pi, Gal_L_K1, y := ExtValues(L,K1);
+        f := Max(N-Cond, 2*Cond);
+        c := Cond;
+
+        UGroups, UMaps, ULift := UComplex(L, f);
+        G := UGroups[f - c + 1];
+        if f - c + 1 eq 1 then
+            llift := ULift;
+        else
+            llift := Inverse(UMaps[f - c]) * ULift;
+        end if;
+        VarepsGenerators := {K1!llift(g) : g in Generators(G)};
+
+        CGroups1, CMaps1, CLift1 := ConComplex(L, K1, f);
+        proj := Inverse(CLift1);
+        bar_y2 := 2*proj(y);
+
+        Elements := [proj(g) : g in VarepsGenerators | not IsIdentity(proj(g))];
+        Values := [2 : g in VarepsGenerators | not IsIdentity(proj(g))];
+        
+        // We are computing triply imprimitive => bar_y2 goes to 0
+        Append(~Elements, bar_y2);
+        Append(~Values, 0);
+
+        //Chars1,CGroups1,CMaps1,CLift1:=SupercuspidalRamified2args(L,K1);
+        //FilChars1:=Chars1;
         //FilChars2:=Chars2;
         
         GalE,GalEtoAut:=AutomorphismGroup(E,F);
@@ -74,14 +100,16 @@ function ExceptionalTypesTriply(F,L)
         muUf1:=[Inverse(CLift1)(Norm(ChangePrecision(mu(E!E1!UEtoOE(g)),Precision(E)),K1)): g in Gen];
         //Uf2:=[Inverse(CLift2)(Norm(ChangePrecision(E!E1!UEtoOE(g),Precision(E)),K2)): g in Generators(UE)];
         //SigUf:=[Inverse(CLift2)(ExtendAutomorphism(sigma,K1,K2,y1,y2,CLift1(g))) : g in Uf1];
-        for g in Uf1 do
-            FilChars1:=[C : C in FilChars1 | IsIdentity(2*(C(g)))];
-        end for;
 
-        for i in [1..#Uf1] do
-            FilChars1:=[C : C in FilChars1 | C(Uf1[i]) eq C(muUf1[i])];
-        end for;
-        ExceptionalChars:=Append(ExceptionalChars,FilChars1);
+        Elements := Elements cat [2*g : g in Uf1];
+        Values := Values cat [0 : i in [1 .. #Uf1]];
+
+        Elements := Elements cat [Uf1[i] - muUf1[i] : i in [1 .. #Uf1]];
+        Values := Values cat [0 : i in [1 .. #Uf1]];
+
+        time ExceptionalChars:=Append(ExceptionalChars,
+            FastCharactersOfOrder4(CGroups1[1] : Elements:=Elements, Values:=Values)
+        );
     end for;
     return ExceptionalChars;
 end function;
