@@ -31,7 +31,7 @@ function PrincipalSeries(F, f : MyComplex:=[* *])
     
     AllChars := [* *];
     for n in {2, 3, 4, 6} do
-        AllChars cat:= FastCharactersOfOrder(groups[1], n);
+        AllChars cat:= FastCharactersOfOrder(groups[1], maps, n);
     end for;
 
     return AllChars;
@@ -48,7 +48,7 @@ function SupercuspidalUnramified(F, K, f)
     AllChars := [* *];
     for n in {3, 4, 6} do
         // AllChars cat:= ComputeChars(n, instantiation, [func< chi, ... | true >]);
-        AllChars cat:= FastCharactersOfOrder(groups[1], n);
+        AllChars cat:= FastCharactersOfOrder(groups[1], maps, n);
     end for;
 
     return AllChars;
@@ -94,7 +94,7 @@ function SupercuspidalRamified2(F, K, f, c, VarepsGenerators : KernelElements :=
         Append(~Values, 0);
     end for;
 
-    return FastCharactersOfOrder4(groups[1] : Elements:=Elements, Values:=Values);
+    return FastCharactersOfOrder(groups[1], maps, 4: Elements:=Elements, Values:=Values);
 end function;
 
 function SupercuspidalRamified3(F, K, f, c, VarepsGenerators)
@@ -108,33 +108,9 @@ function SupercuspidalRamified3(F, K, f, c, VarepsGenerators)
     VarepsGenerators := [proj(g) : g in VarepsGenerators | not IsIdentity(proj(g))];
     Values := [3 : g in VarepsGenerators];
 
-    return FastCharactersOfOrder(groups[1], 6 : Elements:=VarepsGenerators, Values:=Values);
+    return FastCharactersOfOrder(groups[1], maps, 6 : Elements:=VarepsGenerators, Values:=Values);
     // return ComputeChars(6, func< | groups, maps, lift>, 
     //     [func< chi, lift | VarepsilonFilter(VarepsGenerators, 3, chi, lift)>]);
-end function;
-
-function SupercuspidalRamified2args(F, K)
-    p, ram_deg, in_deg, pi, N := BaseValues(F);
-    Cond, pi, Gal, y := ExtValues(F,K);
-    f := Max(N-Cond, 2*Cond);
-    c := Cond;
-
-    UGroups, UMaps, ULift := UComplex(F, f);
-    G := UGroups[f - c + 1];
-    if f - c + 1 eq 1 then
-        llift := ULift;
-    else
-        llift := Inverse(UMaps[f - c]) * ULift;
-    end if;
-    VarepsGenerators := {K!llift(g) : g in Generators(G)};
-
-    if p eq 2 then
-        return SupercuspidalRamified2(F, K, f, c, VarepsGenerators);
-    elif p eq 3 then
-        return SupercuspidalRamified3(F, K, f, c, VarepsGenerators);
-    else
-        error Error("Prime must be 2 or 3");
-    end if;
 end function;
 
 
@@ -161,6 +137,7 @@ function InertialTypes(F)
 
     chars := PrincipalSeries(F, ff : MyComplex := [*groups, maps, lift*]);
     #chars;
+    Sort([c[2] : c in chars]);
     // [[*char[2],char[3]*] : char in chars];
     print("----");
 
@@ -171,7 +148,8 @@ function InertialTypes(F)
         c := Cond;
         if Cond eq 0 then
             chars := SupercuspidalUnramified(F,K,ff);
-            #chars;
+            Sort([c[2] : c in chars]);
+            printf "SCU: %o\n", #chars;
             // [[*char[2],char[3]*] : char in chars];
         else 
             f := Max(N-Cond, 2*Cond);
@@ -186,6 +164,7 @@ function InertialTypes(F)
             VarepsGenerators := {K!llift(g) : g in Generators(G)};
             chars := SupercuspidalRamified(F, K, f, c, VarepsGenerators);
             printf "%o characters\n", #chars;
+            Sort([c[2] : c in chars]);
             // [[*char[2],char[3]*] : char in chars];
             print("----");
         end if;
@@ -195,6 +174,9 @@ function InertialTypes(F)
     return 0;
 end function;
 
-Q2 := pAdicField(2,100);
+Q2 := pAdicField(2,1000);
 Q4 := UnramifiedExtension(Q2, 2);
 K := FieldOfFractions(AllExtensions(Q2, 2)[1]);
+
+Q3 := pAdicField(3,1000);
+Q9 := UnramifiedExtension(Q3, 2);
