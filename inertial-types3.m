@@ -1,6 +1,7 @@
 load "Complexes3.m";
 load "Characters.m";
 load "Postprocessing.m";
+load "Utils.m";
 
 function ComputeChars(order, instantiation, filters)
     groups, maps, lift := instantiation();
@@ -94,7 +95,7 @@ function SupercuspidalRamified2(F, K, f, c, VarepsGenerators : KernelElements :=
         Append(~Values, 0);
     end for;
 
-    return FastCharactersOfOrder(groups[1], maps, 4: Elements:=Elements, Values:=Values);
+    return FastCharactersOfPrimePowerOrder(groups[1], maps, 2, 2 : Elements:=Elements, Values:=Values);
 end function;
 
 function SupercuspidalRamified3(F, K, f, c, VarepsGenerators)
@@ -127,7 +128,7 @@ end function;
 
 function InertialTypes(F) 
     c := 0;
-    QuadExt := [FieldOfFractions(Z) : Z in AllExtensions(F, 2)];
+    QuadExt := AllQuadraticExtensions(F);
 
     p, ram_deg, in_deg, pi, N := BaseValues(F);
     ff := Floor(N/2);

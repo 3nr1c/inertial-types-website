@@ -120,8 +120,7 @@ end function;
 function InertialTypes(F) 
     c:=0;
     QuadExt:=[];
-    for Z in AllExtensions(F,2) do
-        K:=FieldOfFractions(Z);
+    for K in AllQuadraticExtensions(F) do
         QuadExt:=Append(QuadExt,K);
         m:=Valuation(Discriminant(K,F));
         c:=Max(m,c);

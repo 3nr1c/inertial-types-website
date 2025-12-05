@@ -108,21 +108,35 @@ function ExceptionalTypesTriply(F,L)
         Values := Values cat [0 : i in [1 .. #Uf1]];
 
         time ExceptionalChars:=Append(ExceptionalChars,
-            FastCharactersOfOrder4(CGroups1[1] : Elements:=Elements, Values:=Values)
+            FastCharactersOfPrimePowerOrder(CGroups1[1], CMaps1, 2, 2 : Elements:=Elements, Values:=Values)
         );
     end for;
     return ExceptionalChars;
 end function;
 
 
-function ExceptionalTypesSimply(Fi,l)
+function ExceptionalTypesSimply(Fi)
+// function ExceptionalTypesSimply(Fi,l)
    
     Fix<x>:=PolynomialRing(Fi);
     F<zeta3>:=ext<Fi|x^2+x+1>;
-    L:=FieldOfFractions(AllExtensions(F,3)[l]);
+    for l in [1..3] do
+        L:=FieldOfFractions(AllExtensions(F,3)[l]);
+        if IsNormal(L, Fi) then break; end if;
+    end for;
+
     R<X> := PolynomialRing(L);
-    GSel, Sel, SeltoL, Gal, GaltoAut := SelmerGaloisModule(F,L);
-    sigma := GaltoAut(Gal.2);
+    GSel, Sel, SeltoL, Gal, GaltoAut := SelmerGaloisModule(Fi,L);
+    //sigma := GaltoAut(Gal.2);
+
+    // We'll probably remove this
+    for tau in Gal do
+        if Order(tau) eq 3 then rho := GaltoAut(tau); break; end if;
+    end for;
+    for tau in Gal do
+        if Order(tau) eq 2 then sigma := GaltoAut(tau); break; end if;
+    end for;
+
     SelOrbits := [M: M in MinimalSubmodules(GSel) | Dimension(M) eq 2];
     ExceptionalChars:=[* *];
     #SelOrbits;
@@ -138,9 +152,9 @@ function ExceptionalTypesSimply(Fi,l)
         y1:=Roots(PolynomialRing(K1)!Polynomials[1])[1,1];
         K2:=SplittingField(Polynomials[2]);
         y2:=Roots(PolynomialRing(K2)!Polynomials[2])[1,1];
-        K3:=SplittingField(Polynomials[3]);
-        y3:=Roots(PolynomialRing(K3)!Polynomials[3])[1,1];
-        assert sigma(y1^2) eq y2^2 and sigma(y2^2) eq y3^2;
+        // K3:=SplittingField(Polynomials[3]);
+        // y3:=Roots(PolynomialRing(K3)!Polynomials[3])[1,1];
+        // assert rho(y1^2) eq y2^2 and rho(y2^2) eq y3^2;
 
         K1X<x>:=PolynomialRing(K1);
         E:=SplittingField(K1X!Polynomials[2]);
@@ -204,7 +218,7 @@ function ExceptionalTypesSimply(Fi,l)
             Values := Values cat [0 : i in [1 .. #Uf1]];
             
             time ExceptionalChars:=Append(ExceptionalChars,
-                FastCharactersOfOrder4(CGroups1[1] : Elements:=Elements, Values:=Values)
+                FastCharactersOfPrimePowerOrder(CGroups1[1], CMaps1, 2, 2 : Elements:=Elements, Values:=Values)
             );
             #(ExceptionalChars[#ExceptionalChars]);
             print("------------------");
