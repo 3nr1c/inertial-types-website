@@ -28,10 +28,10 @@ function PrincipalSeries(F, f : MyComplex:=[* *])
     else
         groups, maps, lift := UComplex(F, f);
     end if;
-    instantiation := func< | groups, maps, lift>;
+    
     AllChars := [* *];
     for n in {2, 3, 4, 6} do
-        AllChars cat:= ComputeChars(n, instantiation, [func< x, ... | true >]);
+        AllChars cat:= FastCharactersOfOrder(groups[1], n);
     end for;
 
     return AllChars;
@@ -44,10 +44,11 @@ function SupercuspidalUnramified(F, K, f)
     end if;
 
     groups, maps, lift := ConComplex(F, K, f);
-    instantiation := func< | groups, maps, lift>;
+    // instantiation := func< | groups, maps, lift>;
     AllChars := [* *];
     for n in {3, 4, 6} do
-        AllChars cat:= ComputeChars(n, instantiation, [func< chi, ... | true >]);
+        // AllChars cat:= ComputeChars(n, instantiation, [func< chi, ... | true >]);
+        AllChars cat:= FastCharactersOfOrder(groups[1], n);
     end for;
 
     return AllChars;
@@ -65,7 +66,7 @@ function VarepsilonFilter(VarepsGenerators, minus_one, chi, lift)
 end function;
 
 
-function SupercuspidalRamified2(F, K, f, c, VarepsGenerators)
+function SupercuspidalRamified2(F, K, f, c, VarepsGenerators : KernelElements := [])
     assert Prime(F) eq 2;
 
     p, ram_deg, in_deg, pi, N := BaseValues(F);
@@ -88,6 +89,11 @@ function SupercuspidalRamified2(F, K, f, c, VarepsGenerators)
         Append(~Values, 2);
     end if;
 
+    for e in KernelElements do
+        Append(~Elements, e);
+        Append(~Values, 0);
+    end for;
+
     return FastCharactersOfOrder4(groups[1] : Elements:=Elements, Values:=Values);
 end function;
 
@@ -100,9 +106,11 @@ function SupercuspidalRamified3(F, K, f, c, VarepsGenerators)
 
     proj := Inverse(lift);
     VarepsGenerators := [proj(g) : g in VarepsGenerators | not IsIdentity(proj(g))];
+    Values := [3 : g in VarepsGenerators];
 
-    return ComputeChars(6, func< | groups, maps, lift>, 
-        [func< chi, lift | VarepsilonFilter(VarepsGenerators, 3, chi, lift)>]);
+    return FastCharactersOfOrder(groups[1], 6 : Elements:=VarepsGenerators, Values:=Values);
+    // return ComputeChars(6, func< | groups, maps, lift>, 
+    //     [func< chi, lift | VarepsilonFilter(VarepsGenerators, 3, chi, lift)>]);
 end function;
 
 function SupercuspidalRamified2args(F, K)
@@ -127,31 +135,6 @@ function SupercuspidalRamified2args(F, K)
     else
         error Error("Prime must be 2 or 3");
     end if;
-end function;
-
-function SupercuspidalRamified2withoutArgs(F, K)
-    assert Prime(F) eq 2;
-
-    p, ram_deg, in_deg, pi, N := BaseValues(F);
-    f, c, VarepsGenerators := GetVarepsilonGenerators(F, K);
-    Cond, pi, Gal, y := ExtValues(F,K);
-
-    if (in_deg mod 2) eq 0 then
-        // (in_deg mod 2) eq 0 checks if x^2+x+1 splits in F
-        // Triply imprimitive with n = 4, characters must be quadratic on y
-        quadratic_filter := func< chi, lift | IsIdentity(2 * chi(Inverse(lift)(y)))>;
-    else
-        // Simply imprimitive with n = 4, characters must *not* be quadratic on y
-        quadratic_filter := func< chi, lift | not IsIdentity(2 * chi(Inverse(lift)(y)))>;
-    end if;
-    CGroups, CMaps, CLift := ConComplex(F, K, f);
-    // CGroups[1];
-    return ComputeChars(4, func< | CGroups, CMaps, CLift >, 
-                [
-                    quadratic_filter,
-                    func< chi, lift | VarepsilonFilter(VarepsGenerators, 2, chi, lift)>
-                ]), 
-        CGroups, CMaps, CLift;
 end function;
 
 

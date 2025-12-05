@@ -39,7 +39,7 @@ function CharacterExponents(Zn, r)
     return exponents;
 end function;
 
-function FastCharactersOfPrimePowerOrder(G, n)
+function OldFastCharactersOfPrimePowerOrder(G, n)
     ZZ := Integers();
     Zn := AdditiveGroup(Integers(n));
     Q, GtoQ := quo<G | [n * g : g in Generators(G)]>;
@@ -83,8 +83,65 @@ function FastMapSum(f, g)
     return Fmap;
 end function;
 
+function FastCharactersOfPrimePowerOrder(G, l, b: Elements:=[], Values:=[])
+    assert #Elements eq #Values;
+    n := l^b;
+    Q, GtoQ := quo<G | n*G>;
+
+    Gen:=[Q.i : i in [1..#Generators(Q)]];
+    OrderNSeq := [i : i in [1..#Gen] | Order(Gen[i]) eq n];
+    R:=Integers(n);
+    Rf:=RSpace(R,#Gen + 1);
+    ExpSpace:=Rf;
+    H:=Hom(Rf,RSpace(R,1));
+
+    // Equations to match the order of generating elements
+    for g in Gen do
+        if not (Order(g) mod n eq 0) then
+            OrdFil:=Order(g)*(H!(ElementToSequence(g) cat [0]));
+            ExpSpace:=ExpSpace meet Kernel(OrdFil);
+        end if;
+    end for;
+
+    // We add the external conditions
+    for i in [1 .. #Elements] do
+        ExpSpace := ExpSpace meet 
+            Kernel(H!(ElementToSequence(GtoQ(Elements[i])) cat [Values[i]]));    
+    end for;
+
+    ZeroRow := [0 : _ in [1 .. #Gen]];
+    Fks := [Rf];
+
+
+    for k in [2..#OrderNSeq] do
+        Condition := Kernel(H!(Insert(ZeroRow, OrderNSeq[k-1], l^(b-1))));
+        Append(~Fks, Fks[k-1] meet Condition);
+    end for;
+
+    One := [];
+
+    for k in [1..#OrderNSeq] do
+        OneRow := ZeroRow cat [0];
+        OneRow[OrderNSeq[k]] := 1;
+        OneRow[#Gen+1] := -1;
+        // OneRow;
+        Fks[k] := Fks[k] meet Kernel(H!OneRow);
+        // F[k];
+    end for;
+
+    Zn := AdditiveGroup(R);
+    ZZ := Integers();
+
+    function VectorToExps(v)
+        return [Zn!ZZ!v[i] : i in [1..#Gen]];
+    end function;
+
+    QChars := [Homomorphism(Q, Zn, Gen, VectorToExps(v)) : v in Fks[k] meet ExpSpace, k in [1..#OrderNSeq] | v[OrderNSeq[k]] eq 1];
+
+    return [*FastMap(GtoQ*f) : f in QChars*];
+end function;
+
 function FastCharactersOfOrder4(G : Elements:=[], Values:=[])
-// function FastCharactersOfOrder4(G : Elements:=[], Values:=[], EpsElts:={}, bar_y:=1, YVal:=0)
     assert #Elements eq #Values;
     n := 4;
     Q, GtoQ := quo<G | n*G>;
@@ -149,7 +206,7 @@ function FastCharactersOfOrder4(G : Elements:=[], Values:=[])
     return [*FastMap(GtoQ*f) : f in QChars*];
 end function;
 
-function FastCharactersOfOrder(G, n)
+function FastCharactersOfOrder(G, n : Elements:=[], Values:=[])
     ls := Factorization(n);
     Chars := [* *];
     if not (Exponent(G) mod n eq 0) then return Chars; end if;
@@ -157,7 +214,7 @@ function FastCharactersOfOrder(G, n)
     ZZ := Integers();
 
     for l in ls do
-        lChars := FastCharactersOfPrimePowerOrder(G, l[1]^l[2]);
+        lChars := FastCharactersOfPrimePowerOrder(G, l[1], l[2] : Elements:=Elements, Values:=Values);
         Zl := Codomain(lChars[1]);
         ZltoZn := hom<Zl -> Zn | Zl!1 -> Zn!(ZZ!(n/(l[1]^l[2])))>;
         if #Chars eq 0 then 
