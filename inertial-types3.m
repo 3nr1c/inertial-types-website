@@ -1,25 +1,6 @@
 load "Complexes3.m";
 load "Characters.m";
-load "Postprocessing.m";
 load "Utils.m";
-
-function ComputeChars(order, instantiation, filters)
-    groups, maps, lift := instantiation();
-    groups[1];
-    // time Chars1 := CharactersOfOrder(groups[1], order);
-    time Chars := FastCharactersOfOrder(groups[1], order);
-
-    // Debugging code
-    // #Chars;
-    Gtilde := quo<groups[1] | order*groups[1]>;
-    assert #Chars / #Gtilde eq &*[(1 - (1/l[1])^#{g : g in Generators(groups[1]) | Order(g) mod l[1]^l[2] eq 0}) : l in Factorization(order)] / EulerPhi(order);
-
-    for filter in filters do
-        time Chars := [*chi : chi in Chars | filter(chi, lift)*];
-        // #Chars;
-    end for;
-    return AddConductor(Chars, groups, maps, order);
-end function;
 
 function PrincipalSeries(F, f : MyComplex:=[* *])
     if #MyComplex eq 3 then
@@ -48,7 +29,6 @@ function SupercuspidalUnramified(F, K, f)
     // instantiation := func< | groups, maps, lift>;
     AllChars := [* *];
     for n in {3, 4, 6} do
-        // AllChars cat:= ComputeChars(n, instantiation, [func< chi, ... | true >]);
         AllChars cat:= FastCharactersOfOrder(groups[1], maps, n);
     end for;
 
@@ -110,8 +90,6 @@ function SupercuspidalRamified3(F, K, f, c, VarepsGenerators)
     Values := [3 : g in VarepsGenerators];
 
     return FastCharactersOfOrder(groups[1], maps, 6 : Elements:=VarepsGenerators, Values:=Values);
-    // return ComputeChars(6, func< | groups, maps, lift>, 
-    //     [func< chi, lift | VarepsilonFilter(VarepsGenerators, 3, chi, lift)>]);
 end function;
 
 
