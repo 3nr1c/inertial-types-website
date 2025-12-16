@@ -4,10 +4,13 @@ function AllQuadraticExtensions(F)
     SeltoF := Inverse(FtoSel);
 
     Extensions := [];
+    Twist:=[];
     for s in Sel do
         if IsIdentity(s) then continue; end if;
-        Append(~Extensions, SplittingField(x^2 - ChangePrecision(SeltoF(s), Precision(F))));
+        z:=ChangePrecision(SeltoF(s), Precision(F));
+        Append(~Twist,z);
+        Append(~Extensions, SplittingField(x^2 - z));
     end for;
 
-    return Extensions;
+    return Extensions, Twist;
 end function;

@@ -2,6 +2,7 @@ load "Complexes3.m";
 load "Characters.m";
 load "Utils.m";
 
+
 function PrincipalSeries(F, f : MyComplex:=[* *])
     if #MyComplex eq 3 then
         groups := MyComplex[1];
@@ -32,7 +33,7 @@ function SupercuspidalUnramified(F, K, f)
         AllChars cat:= FastCharactersOfOrder(groups[1], maps, n);
     end for;
 
-    return AllChars;
+    return AllChars,groups[1],lift,#groups;
 end function;
 
 
@@ -75,7 +76,7 @@ function SupercuspidalRamified2(F, K, f, c, VarepsGenerators : KernelElements :=
         Append(~Values, 0);
     end for;
 
-    return FastCharactersOfPrimePowerOrder(groups[1], maps, 2, 2 : Elements:=Elements, Values:=Values);
+    return FastCharactersOfPrimePowerOrder(groups[1], maps, 2, 2 : Elements:=Elements, Values:=Values),groups[1],lift,#groups;
 end function;
 
 function SupercuspidalRamified3(F, K, f, c, VarepsGenerators)
@@ -89,7 +90,7 @@ function SupercuspidalRamified3(F, K, f, c, VarepsGenerators)
     VarepsGenerators := [proj(g) : g in VarepsGenerators | not IsIdentity(proj(g))];
     Values := [3 : g in VarepsGenerators];
 
-    return FastCharactersOfOrder(groups[1], maps, 6 : Elements:=VarepsGenerators, Values:=Values);
+    return FastCharactersOfOrder(groups[1], maps, 6 : Elements:=VarepsGenerators, Values:=Values),groups[1],lift,#groups;
 end function;
 
 
@@ -104,54 +105,6 @@ function SupercuspidalRamified(F, K, f, c, VarepsGenerators)
     end if;
 end function;
 
-function InertialTypes(F) 
-    c := 0;
-    QuadExt := AllQuadraticExtensions(F);
-
-    p, ram_deg, in_deg, pi, N := BaseValues(F);
-    ff := Floor(N/2);
-    printf "f=%o\n", ff;
-    groups, maps, lift := UComplex(F, ff);
-    #groups;
-
-    chars := PrincipalSeries(F, ff : MyComplex := [*groups, maps, lift*]);
-    #chars;
-    Sort([c[2] : c in chars]);
-    // [[*char[2],char[3]*] : char in chars];
-    print("----");
-
-    i := 1;
-    for K in QuadExt do
-        i;
-        Cond, pi, Gal, y := ExtValues(F,K);
-        c := Cond;
-        if Cond eq 0 then
-            chars := SupercuspidalUnramified(F,K,ff);
-            Sort([c[2] : c in chars]);
-            printf "SCU: %o\n", #chars;
-            // [[*char[2],char[3]*] : char in chars];
-        else 
-            f := Max(N-Cond, 2*Cond);
-            printf "f=%o\n", f;
-            printf "c=%o\n", c;
-            G := groups[ff - c + 1];
-            if ff - c + 1 eq 1 then
-                llift := lift;
-            else
-                llift := Inverse(maps[ff - c]) * lift;
-            end if;
-            VarepsGenerators := {K!llift(g) : g in Generators(G)};
-            chars := SupercuspidalRamified(F, K, f, c, VarepsGenerators);
-            printf "%o characters\n", #chars;
-            Sort([c[2] : c in chars]);
-            // [[*char[2],char[3]*] : char in chars];
-            print("----");
-        end if;
-        i +:= 1;
-    end for;
-
-    return 0;
-end function;
 
 Q2 := pAdicField(2,1000);
 Q4 := UnramifiedExtension(Q2, 2);

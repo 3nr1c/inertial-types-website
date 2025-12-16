@@ -35,6 +35,9 @@ function ExceptionalTypesTriply(F,L)
 
     SelOrbits := [M: M in MinimalSubmodules(GSel) | Dimension(M) eq 2];
     ExceptionalChars:=[* *];
+    ExGroups:=[* *];
+    ExLifts:=[* *];
+    ExExp:=[* *];
     for orbit in SelOrbits do
         Polynomials := [];
         roots := [];
@@ -107,11 +110,18 @@ function ExceptionalTypesTriply(F,L)
         Elements := Elements cat [Uf1[i] - muUf1[i] : i in [1 .. #Uf1]];
         Values := Values cat [0 : i in [1 .. #Uf1]];
 
-        time ExceptionalChars:=Append(ExceptionalChars,
-            FastCharactersOfPrimePowerOrder(CGroups1[1], CMaps1, 2, 2 : Elements:=Elements, Values:=Values)
-        );
+        time Caracteres:=FastCharactersOfPrimePowerOrder(CGroups1[1], CMaps1, 2, 2 : Elements:=Elements, Values:=Values);
+
+        if not IsEmpty(Caracteres) then 
+            ExceptionalChars:=Append(ExceptionalChars,Caracteres);
+            ExGroups:=Append(ExGroups,CGroups1[1]);
+            ExLifts:=Append(ExLifts,CLift1);
+            ExExp:=Append(ExExp,#CGroups1);
+            Domain(CLift1) eq Domain(Caracteres[1,1]);
+        end if;
     end for;
-    return ExceptionalChars;
+
+    return ExceptionalChars,ExGroups,ExLifts,ExExp;
 end function;
 
 
@@ -139,6 +149,9 @@ function ExceptionalTypesSimply(Fi)
 
     SelOrbits := [M: M in MinimalSubmodules(GSel) | Dimension(M) eq 2];
     ExceptionalChars:=[* *];
+    ExGroups:=[* *];
+    ExLifts:=[* *];
+    ExExp:=[* *];
     #SelOrbits;
     for orbit in SelOrbits do
         Polynomials := [];
@@ -217,12 +230,17 @@ function ExceptionalTypesSimply(Fi)
             Elements := Elements cat [Uf1[i] - muUf2[i] : i in [1 .. #Uf1]];
             Values := Values cat [0 : i in [1 .. #Uf1]];
             
-            time ExceptionalChars:=Append(ExceptionalChars,
-                FastCharactersOfPrimePowerOrder(CGroups1[1], CMaps1, 2, 2 : Elements:=Elements, Values:=Values)
-            );
-            #(ExceptionalChars[#ExceptionalChars]);
+            time Caracteres:=FastCharactersOfPrimePowerOrder(CGroups1[1], CMaps1, 2, 2 : Elements:=Elements, Values:=Values);
+
+            if not IsEmpty(Caracteres) then 
+                ExceptionalChars:=Append(ExceptionalChars,Caracteres);
+                ExGroups:=Append(ExGroups,CGroups1[1]);
+                ExLifts:=Append(ExLifts,CLift1);
+                ExExp:=Append(ExExp,#CGroups1);
+                Domain(CLift1) eq Domain(Caracteres[1,1]);
+            end if;
             print("------------------");
         end if;
     end for;
-    return ExceptionalChars;
+    return ExceptionalChars,ExGroups,ExLifts,ExExp;
 end function;
