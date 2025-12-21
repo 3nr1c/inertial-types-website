@@ -16,7 +16,7 @@ function InertialTypes(F)
     PSLift:=lift;
     PSExp:=#groups;
     #PSChar;
-    Sort([c[2] : c in PSChar]);
+    [*[ c`Character`Order, c`CondExp ] : c in PSChar*];
     // [[*char[2],char[3]*] : char in chars];
     print("----");
 
@@ -33,7 +33,7 @@ function InertialTypes(F)
         c := Cond;
         if Cond eq 0 then
             SCUChars,SCUGroup,SCULift,SCUexp := SupercuspidalUnramified(F,K,ff);
-            Sort([c[2] : c in SCUChars]);
+            [*[ c`Character`Order, c`CondExp ] : c in SCUChars*];
             printf "SCU: %o\n", #SCUChars;
             // [[*char[2],char[3]*] : char in chars];
         else 
@@ -53,8 +53,9 @@ function InertialTypes(F)
             //SCRGroups := Append(SCRGroups,Rgroup);
             //SCRLifts := Append(SCRLifts,Rlift);
             //SCRexp:=Append(SCRexp,exp);
-            printf "%o characters\n", #SCR;
-            //Sort([c[2] : c in SCR]);
+            printf "%o characters\n", #SCRChars[t];
+            // Sort([c`CondExp : c in SCRChars[t]]);
+            [*[ c`Character`Order, c`CondExp ] : c in SCRChars[t]*];
             // [[*char[2],char[3]*] : char in chars];
             print("----");
         end if;
@@ -86,7 +87,6 @@ function InertialTypes(F)
         end if;
     end if;
 
-
     return Twist,PSChar,PSGroup,PSLift,PSExp,SCUChars,SCUGroup,SCULift,SCUexp,SCRChars,SCRGroups,SCRLifts,SCRexp,Ex8Chars,Ex8Groups,Ex8Lifts,Ex8exp,Ex24Chars,Ex24Groups,Ex24Lifts,Ex24exp;
 end function;
 
@@ -95,7 +95,7 @@ ZZ:=Integers();
 Q2:=pAdicField(2,100);
 R<x>:=PolynomialRing(Q2);
 Q4<phi>:=ext<Q2|x^2-x-1>;
-K := FieldOfFractions(AllExtensions(Q2, 2)[1]);
+K := FieldOfFractions(AllExtensions(Q4, 2)[1]);
 
 load "CurvesQ4.m";
 load "EllipticCurves.m";
@@ -105,6 +105,6 @@ Q9 := UnramifiedExtension(Q3, 2);
 
 
 
-Twist,PSChar,PSGroup,PSLift,PSExp,SCUChars,SCUGroup,SCULift,SCUexp,SCRChars,SCRGroups,SCRLifts,SCRexp,Ex8Chars,Ex8Groups,Ex8Lifts,Ex8exp,Ex24Chars,Ex24Groups,Ex24Lifts,Ex24exp:=InertialTypes(Q4);
+Twist,PSChar,PSGroup,PSLift,PSExp,SCUChars,SCUGroup,SCULift,SCUexp,SCRChars,SCRGroups,SCRLifts,SCRexp,Ex8Chars,Ex8Groups,Ex8Lifts,Ex8exp,Ex24Chars,Ex24Groups,Ex24Lifts,Ex24exp:=InertialTypes(Q2);
 
 InTypeOf(ExE[7,22],Twist,PSChar,PSGroup,PSLift,PSExp,SCUChars,SCUGroup,SCULift,SCUexp,SCRChars,SCRGroups,SCRLifts,SCRexp,Ex8Chars,Ex8Groups,Ex8Lifts,Ex8exp,Ex24Chars,Ex24Groups,Ex24Lifts,Ex24exp);

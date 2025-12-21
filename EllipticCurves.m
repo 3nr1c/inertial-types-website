@@ -32,11 +32,10 @@ function FindChar(L,chars,group,lift,d)
     UL,ULtoOL:=UnitGroup(OL);
     Gen:=[g : g in Generators(UL)];
     Norms:=[Inverse(lift)(Norm(ChangePrecision(L!L1!ULtoOL(g),Precision(L)),K)): g in Gen];
-    chi:=[c[1]: c in chars];
     for g in Norms do   
-        chi:=[c : c in chi | IsIdentity(c(g))];
+        chars:=[c : c in chars | IsIdentity(c`Map(g))];
     end for;
-    if IsEmpty(chi) then return 0; else return chi[1]; end if;
+    if IsEmpty(chars) then return 0; else return chars[1]; end if;
 end function;
 
 function FindSCRChar(E,L,Twist,SCRChars,SCRGroups,SCRLifts,SCRexp)

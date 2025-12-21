@@ -110,14 +110,14 @@ function ExceptionalTypesTriply(F,L)
         Elements := Elements cat [Uf1[i] - muUf1[i] : i in [1 .. #Uf1]];
         Values := Values cat [0 : i in [1 .. #Uf1]];
 
-        time Caracteres:=FastCharactersOfPrimePowerOrder(CGroups1[1], CMaps1, 2, 2 : Elements:=Elements, Values:=Values);
+        time Caracteres:=FastCharactersOfPrimePowerOrder(CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements, Values:=Values);
 
         if not IsEmpty(Caracteres) then 
             ExceptionalChars:=Append(ExceptionalChars,Caracteres);
             ExGroups:=Append(ExGroups,CGroups1[1]);
             ExLifts:=Append(ExLifts,CLift1);
             ExExp:=Append(ExExp,#CGroups1);
-            Domain(CLift1) eq Domain(Caracteres[1,1]);
+            Domain(CLift1) eq Domain(Caracteres[1]`Map);
         end if;
     end for;
 
@@ -230,14 +230,14 @@ function ExceptionalTypesSimply(Fi)
             Elements := Elements cat [Uf1[i] - muUf2[i] : i in [1 .. #Uf1]];
             Values := Values cat [0 : i in [1 .. #Uf1]];
             
-            time Caracteres:=FastCharactersOfPrimePowerOrder(CGroups1[1], CMaps1, 2, 2 : Elements:=Elements, Values:=Values);
+            time Caracteres:=FastCharactersOfPrimePowerOrder(CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements, Values:=Values);
 
             if not IsEmpty(Caracteres) then 
                 ExceptionalChars:=Append(ExceptionalChars,Caracteres);
                 ExGroups:=Append(ExGroups,CGroups1[1]);
                 ExLifts:=Append(ExLifts,CLift1);
                 ExExp:=Append(ExExp,#CGroups1);
-                Domain(CLift1) eq Domain(Caracteres[1,1]);
+                Domain(CLift1) eq Domain(Caracteres[1]`Map);
             end if;
             print("------------------");
         end if;

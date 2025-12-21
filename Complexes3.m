@@ -1,3 +1,5 @@
+load "Utils.m";
+
 function BaseValues(F)
     Z := Integers();
     p := Prime(F);
@@ -14,16 +16,6 @@ function ExtValues(F,K)
     Gal := Automorphisms(K,F);
     y := pi/Gal[2](pi);
     return Cond,pi,Gal,y;
-end function;
-
-//Given two groups A,B and a map m define as a composite of different maps it returns the map that goes directly from A to B without 
-// passing thorough all the composites. 
-function FastMap(m)
-    A:=Domain(m);
-    B:=Codomain(m);
-    Gens := [g : g in Generators(A)];
-    Fmap:= Homomorphism(A, B, Gens, [m(g) : g in Gens]);
-    return Fmap;
 end function;
 
 

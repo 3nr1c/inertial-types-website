@@ -1,3 +1,6 @@
+Attach("InertiaTypes.spec");
+load "Utils.m";
+
 function TupleToSeq(t)
     return [x : x in t];
 end function;
@@ -83,7 +86,7 @@ function FastMapSum(f, g)
     return Fmap;
 end function;
 
-function FastCharactersOfPrimePowerOrder(G, Maps, l, b: Elements:=[], Values:=[])
+function FastCharactersOfPrimePowerOrder(G, l, b, Maps, lift: Elements:=[], Values:=[])
     assert #Elements eq #Values;
     n := l^b;
     Q, GtoQ := quo<G | n*G>;
@@ -152,36 +155,37 @@ function FastCharactersOfPrimePowerOrder(G, Maps, l, b: Elements:=[], Values:=[]
 
     Exponents := [v : v in Fks[k] meet ExpSpace, k in [1..#OrderNSeq] | v[OrderNSeq[k]] eq 1];
 
-    QChars := [
-        [*
-            Homomorphism(Q, Zn, Gen, VectorToExps(v)), 
-            Min([#Fil - i + 1 : i in [1..#Fil] | v in Fil[i]])
-        *] : v in Exponents
-    ];
-    return [*[*FastMap(GtoQ*f[1]), f[2]*] : f in QChars*];
+    Chars := [];
+    for v in Exponents do
+        vFil := Max([i : i in [1..#Fil] | v in Fil[i]]);
+        Conductor := #Fil - vFil + 1;
+        if vFil gt 1 then
+            thisLift := Inverse(Maps[vFil - 1]) * lift;
+        else
+            thisLift := lift;
+        end if;
+
+        phi := NewInertiaCharacter(n, Conductor, thisLift, Gen, VectorToExps(v));
+        phi`Map := GtoQ * phi`Map;
+
+        Append(~Chars, phi);
+    end for;
+
+    return Chars;
 end function;
 
-function FastCharactersOfOrder(G, Maps, n : Elements:=[], Values:=[])
+function FastCharactersOfOrder(G, n, Maps, lift : Elements:=[], Values:=[])
     ls := Factorization(n);
-    Chars := [* *];
+    Chars := [];
     if not (Exponent(G) mod n eq 0) then return Chars; end if;
-    Zn := AdditiveGroup(Integers(n));
-    ZZ := Integers();
 
     for l in ls do
-        lChars := FastCharactersOfPrimePowerOrder(G, Maps, l[1], l[2] : Elements:=Elements, Values:=Values);
-        if #lChars eq 0 then return [* *]; end if;
-        Zl := Codomain(lChars[1][1]);
-        ZltoZn := hom<Zl -> Zn | Zl!1 -> Zn!(ZZ!(n/(l[1]^l[2])))>;
-        if #Chars eq 0 then 
-            Chars := [* [* chi[1]*ZltoZn, chi[2] *] : chi in lChars*];
+        rChars := FastCharactersOfPrimePowerOrder(G, l[1], l[2], Maps, lift : Elements:=Elements, Values:=Values);
+        if #rChars eq 0 then return [];
+        elif #Chars eq 0 then 
+            Chars := rChars;
         else
-            Chars := [* 
-                [* 
-                    FastMapSum(chi[1], (psi[1]*ZltoZn)), 
-                    Max(chi[2], psi[2])
-                *] : chi in Chars, psi in lChars 
-            *];
+            Chars *:= rChars;
         end if;
     end for;
     return Chars;
