@@ -83,7 +83,7 @@ declare attributes InertiaType:
 
 intrinsic Print(tau::InertiaType)
 {Print tau}
-    print("Inertia Character of the field");
+    print("Inertia Type of the field");
     print("\t"),tau`BaseField;
     printf "of CondExp exponent %o\n", tau`CondExp;
     printf "with underlying character of order %o and CondExp exponent %o",

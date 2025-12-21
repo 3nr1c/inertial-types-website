@@ -121,7 +121,7 @@ function ExceptionalTypesTriply(F,L)
         end if;
     end for;
 
-    return ExceptionalChars,ExGroups,ExLifts,ExExp;
+    return ExceptionalChars;
 end function;
 
 
@@ -242,5 +242,5 @@ function ExceptionalTypesSimply(Fi)
             print("------------------");
         end if;
     end for;
-    return ExceptionalChars,ExGroups,ExLifts,ExExp;
+    return ExceptionalChars;
 end function;

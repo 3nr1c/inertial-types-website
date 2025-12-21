@@ -37,7 +37,7 @@ function SupercuspidalUnramified(F, K, f)
         ];
     end for;
 
-    return SCU,groups[1],lift,#groups;
+    return SCU;
 end function;
 
 
@@ -80,7 +80,10 @@ function SupercuspidalRamified2(F, K, f, c, VarepsGenerators : KernelElements :=
         Append(~Values, 0);
     end for;
 
-    return FastCharactersOfPrimePowerOrder(groups[1], 2, 2, maps, lift : Elements:=Elements, Values:=Values),groups[1],lift,#groups;
+    return [
+        NewSupercuspidalRamifiedIT(phi, F)
+        : phi in FastCharactersOfPrimePowerOrder(groups[1], 2, 2, maps, lift : Elements:=Elements, Values:=Values)
+    ];
 end function;
 
 function SupercuspidalRamified3(F, K, f, c, VarepsGenerators)
@@ -94,21 +97,22 @@ function SupercuspidalRamified3(F, K, f, c, VarepsGenerators)
     VarepsGenerators := [proj(g) : g in VarepsGenerators | not IsIdentity(proj(g))];
     Values := [3 : g in VarepsGenerators];
 
-    return FastCharactersOfOrder(groups[1], 6, maps, lift : Elements:=VarepsGenerators, Values:=Values),groups[1],lift,#groups;
+    return [
+        NewSupercuspidalRamifiedIT(phi, F)
+        : phi in FastCharactersOfOrder(groups[1], 6, maps, lift : Elements:=VarepsGenerators, Values:=Values)
+    ];
 end function;
 
 
 function SupercuspidalRamified(F, K, f, c, VarepsGenerators)
     p := Prime(F);
     if p eq 2 then
-        InertiaCharacters, b, c, d := SupercuspidalRamified2(F, K, f, c, VarepsGenerators);
+        return SupercuspidalRamified2(F, K, f, c, VarepsGenerators);
     elif p eq 3 then
-        InertiaCharacters, b, c, d := SupercuspidalRamified3(F, K, f, c, VarepsGenerators);
+        return SupercuspidalRamified3(F, K, f, c, VarepsGenerators);
     else
         error Error("Prime must be 2 or 3");
     end if;
-
-    return [NewSupercuspidalRamifiedIT(phi, F) : phi in InertiaCharacters], b, c, d;
 end function;
 
 
