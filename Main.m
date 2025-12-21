@@ -3,7 +3,7 @@ load "Exceptionals.m";
 
 function InertialTypes(F) 
     c := 0;
-    QuadExt,Twist:= AllQuadraticExtensions(F);
+    QuadExt,Twist:= AllQuadraticExtensions(F : Selmer:=true);
 
     p, ram_deg, in_deg, pi, N := BaseValues(F);
     ff := Floor(N/2);
@@ -22,7 +22,7 @@ function InertialTypes(F)
     // SCRGroups:=[*0: t in [1..#QuadExt-1] *];
     // SCRLifts :=[*0: t in [1..#QuadExt-1] *];
     // SCRexp:=[];
-    SCR := [];
+    SCR := [* 0 : _ in [1..#Twist] *];
     for t in [1..#QuadExt] do
         K:=QuadExt[t];
         i;
@@ -45,7 +45,7 @@ function InertialTypes(F)
             end if;
             VarepsGenerators := {K!llift(g) : g in Generators(G)};
             SCR_K := SupercuspidalRamified(F, K, f, c, VarepsGenerators);
-            Append(~SCR, SCR_K);
+            SCR[t] := SCR_K;
             //Rchars,Rgroup,Rlift,exp:=SupercuspidalRamified(F, K, f, c, VarepsGenerators);
             //SCRChars := Append(SCRChars,Rchars);
             //SCRGroups := Append(SCRGroups,Rgroup);
@@ -53,8 +53,8 @@ function InertialTypes(F)
             //SCRexp:=Append(SCRexp,exp);
             printf "%o characters\n", #SCR_K;
             // Sort([c`CondExp : c in SCRChars[t]]);
-            SCR_K;
-            // [*[ c`Character`Order, c`CondExp ] : c in SCR_K*];
+            // SCR_K;
+            [*[ c`Character`Order, c`CondExp ] : c in SCR_K*];
             // [[*char[2],char[3]*] : char in chars];
             print("----");
         end if;
@@ -102,7 +102,7 @@ Q9 := UnramifiedExtension(Q3, 2);
 
 
 
-Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(Q2);
+Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(Q4);
 // Twist,PSChar,PSGroup,PSLift,PSExp,SCUChars,SCUGroup,SCULift,SCUexp,SCRChars,SCRGroups,SCRLifts,SCRexp,Ex8Chars,Ex8Groups,Ex8Lifts,Ex8exp,Ex24Chars,Ex24Groups,Ex24Lifts,Ex24exp:=InertialTypes(Q2);
 
-// InTypeOf(ExE[7,22],Twist,PSChar,PSGroup,PSLift,PSExp,SCUChars,SCUGroup,SCULift,SCUexp,SCRChars,SCRGroups,SCRLifts,SCRexp,Ex8Chars,Ex8Groups,Ex8Lifts,Ex8exp,Ex24Chars,Ex24Groups,Ex24Lifts,Ex24exp);
+InTypeOf(E[5,1],Twist, PS, SCU, SCR, Ex8, Ex24);

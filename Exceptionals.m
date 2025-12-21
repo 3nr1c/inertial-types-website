@@ -113,7 +113,9 @@ function ExceptionalTypesTriply(F,L)
         time Caracteres:=FastCharactersOfPrimePowerOrder(CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements, Values:=Values);
 
         if not IsEmpty(Caracteres) then 
-            ExceptionalChars:=Append(ExceptionalChars,Caracteres);
+            Append(~ExceptionalChars,[
+                NewExceptionalIT(phi, F, L) : phi in Caracteres
+            ]);
             ExGroups:=Append(ExGroups,CGroups1[1]);
             ExLifts:=Append(ExLifts,CLift1);
             ExExp:=Append(ExExp,#CGroups1);
@@ -233,7 +235,9 @@ function ExceptionalTypesSimply(Fi)
             time Caracteres:=FastCharactersOfPrimePowerOrder(CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements, Values:=Values);
 
             if not IsEmpty(Caracteres) then 
-                ExceptionalChars:=Append(ExceptionalChars,Caracteres);
+                Append(~ExceptionalChars,[
+                    NewExceptionalIT(phi, F, L) : phi in Caracteres
+                ]);
                 ExGroups:=Append(ExGroups,CGroups1[1]);
                 ExLifts:=Append(ExLifts,CLift1);
                 ExExp:=Append(ExExp,#CGroups1);

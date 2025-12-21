@@ -1,5 +1,6 @@
 declare type InertiaCharacter;
 declare attributes InertiaCharacter:
+    GrpExp,
     CondExp,
     Field,
     Lift,
@@ -8,6 +9,7 @@ declare attributes InertiaCharacter:
 ;
 
 intrinsic NewInertiaCharacter(Order::RngIntElt, 
+                                GrpExp::RngIntElt,
                                 CondExp::RngIntElt,  
                                 Lift::.,
                                 Elements::SeqEnum[GrpAbElt], 
@@ -18,13 +20,21 @@ intrinsic NewInertiaCharacter(Order::RngIntElt,
     B := Parent(Values[1]);
     assert IsAbelian(B);
 
+    assert GrpExp ge CondExp;
+    phi`GrpExp := CondExp;
+    phi`CondExp := CondExp;
+
     phi`Map := Homomorphism(A, B, Elements, Values);
     phi`Order := Order;
-    phi`CondExp := CondExp;
     phi`Lift := Lift;
     phi`Field := Codomain(Lift);
 
     return phi;
+end intrinsic;
+
+intrinsic '@'(x::., phi::InertiaCharacter) -> .
+{Return the image of x through the character phi}
+    return phi`Map(x);
 end intrinsic;
 
 intrinsic Print(phi::InertiaCharacter)
@@ -85,14 +95,13 @@ intrinsic Print(tau::InertiaType)
 {Print tau}
     print("Inertia Type of the field");
     print("\t"),tau`BaseField;
-    printf "of CondExp exponent %o\n", tau`CondExp;
-    printf "with underlying character of order %o and CondExp exponent %o",
+    printf "of conductor exponent %o\n", tau`CondExp;
+    printf "with underlying character of order %o and conductor exponent %o",
         tau`Character`Order, tau`Character`CondExp;
 end intrinsic;
 
 
 declare type PrincipalSeriesIT: InertiaType;
-declare attributes PrincipalSeriesIT: Character;
 
 intrinsic NewPrincipalSeriesIT(phi::InertiaCharacter) -> PrincipalSeriesIT
 {Create the principal series inertia type given by the character phi}
@@ -105,7 +114,6 @@ end intrinsic;
 
 
 declare type SupercuspidalUnramifiedIT: InertiaType;
-declare attributes SupercuspidalUnramifiedIT: Character;
 
 intrinsic NewSupercuspidalUnramifiedIT(phi::InertiaCharacter, F::FldPad) -> SupercuspidalUnramifiedIT
 {Create the supercuspidal unramified inertia type of F induced by the character phi}
@@ -122,13 +130,11 @@ end intrinsic;
 
 declare type SupercuspidalRamifiedIT: InertiaType;
 declare attributes SupercuspidalRamifiedIT:
-    InducingField,
-    Character
+    InducingField
 ;
 
 intrinsic NewSupercuspidalRamifiedIT(phi::InertiaCharacter, F::FldPad) -> SupercuspidalRamifiedIT
-{Create the (simply imprimitive) supercuspidal ramified inertia 
-    type of F induced by the character phi}
+{Create the supercuspidal ramified inertia type of F induced by the character phi}
     assert Degree(phi`Field, F) eq 2;
 
     CondExpFK := Valuation(Discriminant(phi`Field, F));
@@ -138,12 +144,46 @@ intrinsic NewSupercuspidalRamifiedIT(phi::InertiaCharacter, F::FldPad) -> Superc
     scr`BaseField := F;
     scr`CondExp := CondExpFK + phi`CondExp;
     scr`Character := phi;
+    scr`InducingField := phi`Field;
 
     return scr;
 end intrinsic;
 
-declare type TriplyImprimitiveIT: InertiaType;
-declare attributes TriplyImprimitiveIT:
-    InducingFields,
-    Characters
+declare type ExceptionalIT: InertiaType;
+declare attributes ExceptionalIT:
+    CubicField
 ;
+
+
+intrinsic NewExceptionalIT(phi::InertiaCharacter, F::FldPad, L::FldPad) -> ExceptionalIT
+{Create the exceptional inertia type of F given by the character phi}
+    assert Degree(L, F) eq 3;
+
+    CondExpFK := Valuation(Discriminant(phi`Field, F));
+    assert CondExpFK gt 0;
+
+    exc := New(ExceptionalIT);
+    exc`BaseField := F;
+    exc`CondExp := -1;
+    exc`Character := phi;
+    exc`CubicField := L;
+
+    return exc;
+end intrinsic;
+
+intrinsic SemistabilityDefect(tau::InertiaType) -> RngIntElt
+{Returns the semistability defect of tau}
+    if Type(tau) eq PrincipalSeriesIT then
+        return tau`Character`order;
+    elif Type(tau) eq SupercuspidalUnramifiedIT then
+        return tau`Character`order;
+    elif Type(tau) eq SupercuspidalRamifiedIT then
+        return -1;
+    elif Type(tau) eq ExceptionalIT then
+        if (AbsoluteInertiaDegree(tau`Field) mod 2) eq 0 then
+            return 8;
+        else
+            return 24;
+        end if;
+    end if;
+end intrinsic;

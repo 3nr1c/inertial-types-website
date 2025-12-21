@@ -157,15 +157,9 @@ function FastCharactersOfPrimePowerOrder(G, l, b, Maps, lift: Elements:=[], Valu
 
     Chars := [];
     for v in Exponents do
-        vFil := Max([i : i in [1..#Fil] | v in Fil[i]]);
-        Conductor := #Fil - vFil + 1;
-        if vFil gt 1 then
-            thisLift := Inverse(Maps[vFil - 1]) * lift;
-        else
-            thisLift := lift;
-        end if;
+        CondExp := Min([#Fil - i + 1 : i in [1..#Fil] | v in Fil[i]]);
 
-        phi := NewInertiaCharacter(n, Conductor, thisLift, Gen, VectorToExps(v));
+        phi := NewInertiaCharacter(n, #Fil, CondExp, lift, Gen, VectorToExps(v));
         phi`Map := GtoQ * phi`Map;
 
         Append(~Chars, phi);

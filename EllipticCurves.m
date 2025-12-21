@@ -23,29 +23,41 @@ function mTorsionField(E1, m)
     return L;
 end function;
 
+function FindInertiaType(L, CandidateTypes)
+    // Warning: this function will only work if all the candidate types
+    // have a character with same Field, GrpExp and lift
+    chi := CandidateTypes[1]`Character;
+    K := chi`Field;
+    exp := Max(chi`GrpExp, AbsoluteRamificationDegree(L) + 1);
+    lift := chi`Lift;
 
-function FindChar(L,chars,group,lift,d)
-    K:=Codomain(lift);
-    exp:=Max(d,AbsoluteRamificationDegree(L)+1);
-    L1:=ChangePrecision(L,exp);
-    OL:=Integers(L1);
-    UL,ULtoOL:=UnitGroup(OL);
-    Gen:=[g : g in Generators(UL)];
+    L1 := ChangePrecision(L, exp);
+    OL := Integers(L1);
+    UL, ULtoOL := UnitGroup(OL);
+    Gen := [g : g in Generators(UL)];
     Norms:=[Inverse(lift)(Norm(ChangePrecision(L!L1!ULtoOL(g),Precision(L)),K)): g in Gen];
-    for g in Norms do   
-        chars:=[c : c in chars | IsIdentity(c`Map(g))];
+    for tau in CandidateTypes do
+        found := true;
+        for g in Norms do
+            if not IsIdentity(tau`Character(g)) then
+                found := false;
+                break;
+            end if;
+        end for;
+        if found then return tau; end if;
     end for;
-    if IsEmpty(chars) then return 0; else return chars[1]; end if;
+    return 0;
 end function;
 
-function FindSCRChar(E,L,Twist,SCRChars,SCRGroups,SCRLifts,SCRexp)
+
+function FindSCRType(E,L,Twist,SCR)
     F:=BaseRing(E);
     p, ram_deg, in_deg, pi, N := BaseValues(F);
     if p eq 2 then m := 3; else m := 5; end if;
     Lx<x>:=PolynomialRing(L);
     Inductions:=[];
     for j in [1..#Twist] do
-        if not IsEmpty(Roots(x^2-Twist[j])) then
+        if not IsEmpty(Roots(x^2-Lx!Twist[j])) then
             Inductions:=Append(Inductions,j);
             Inductions;  
         end if;          
@@ -54,18 +66,19 @@ function FindSCRChar(E,L,Twist,SCRChars,SCRGroups,SCRLifts,SCRexp)
     if (in_deg mod 2 eq 0) then
         Chars:=[* *];
         for j in Inductions do
-            E1:=BaseChange(E,Codomain(SCRLifts[j]));
+            E1:=BaseChange(E,SCR[j][1]`Character`Field);
             L:= mTorsionField(E1,m);
-            chi:=FindChar(L,SCRChars[j],SCRGroups[j],SCRLifts[j],SCRexp[j]);
+            E1;
+            chi:=FindInertiaType(L,SCR[j]);
             Chars:=Append(Chars,chi);
         end for;
         return Chars;
     else
         for j in Inductions do
             if Valuation(Conductor(BaseChange(QuadraticTwist(E,Twist[j]),L))) eq 0 then
-                E1:=BaseChange(E,Codomain(SCRLifts[j]));
+                E1:=BaseChange(E,SCR[j][1]`Character`Field);
                 L:= mTorsionField(E1,m);
-                chi:=FindChar(L,SCRChars[j],SCRGroups[j],SCRLifts[j],SCRexp[j]);
+                chi:=FindInertiaType(L,SCR[j]);
                 return chi;
             end if;
         end for;
@@ -73,7 +86,7 @@ function FindSCRChar(E,L,Twist,SCRChars,SCRGroups,SCRLifts,SCRexp)
 end function;
 
 
-function InTypeOf(E,Twist,PSChar,PSGroup,PSLift,PSExp,SCUChars,SCUGroup,SCULift,SCUexp,SCRChars,SCRGroups,SCRLifts,SCRexp,Ex8Chars,Ex8Group,Ex8Lift,Ex8exp,Ex24Chars,Ex24Groups,Ex24Lifts,Ex24exp);
+function InTypeOf(E,Twist, PS, SCU, SCR, Ex8, Ex24);
     F := BaseRing(E);
     p, ram_deg, in_deg, pi, N := BaseValues(F);
     if p eq 2 then m := 3; else m := 5; end if;
@@ -84,40 +97,40 @@ function InTypeOf(E,Twist,PSChar,PSGroup,PSLift,PSExp,SCUChars,SCUGroup,SCULift,
         if d eq 24 then
             if e eq 8 then 
                 print("Exceptional Q8");
-                E1:=BaseChange(E,Codomain(Ex8Lift));
+                E1:=BaseChange(E,Ex8[1]`Character`Field);
                 L:=mTorsionField(E1,m);
-                chi:= FindChar(L,Ex8Chars,Ex8Group,Ex8Lift,Ex8exp);
+                chi:= FindInertiaType(L,Ex8);
             else 
                 print("Exceptional SL2F3");
                 Lx<x>:=PolynomialRing(L);
                 chi:=[* *];
-                for i in [1..#Ex24Groups] do
-                    K:=BaseRing(Codomain(Ex24Lifts[i,1]));
-                    
+                for i in [1..#Ex24] do
+                    K := BaseRing(Ex24[i,1,1]`Character`Field);
+
                     if not IsEmpty(Roots(Lx!DefiningPolynomial(K,Q4))) then 
-                        for k in [1..#Ex24Chars[i]] do
+                        for k in [1..#Ex24] do
                             i,k;
-                            E1:=BaseChange(E,Codomain(Ex24Lifts[i,k]));
-                            time L:= mTorsionField(E1,m);
-                            time char:=FindChar(L,Ex24Chars[i,k],Ex24Groups[i,k],Ex24Lifts[i,k],Ex24exp[i,k]);
+                            E1:=BaseChange(E,Ex24[i,k,1]`Character`Field);
+                            time L := mTorsionField(E1, m);
+                            time char := FindInertiaType(L, Ex24[i,k]);
                             print("------------------------");
-                            if not Type(char) eq HomGrp then continue; end if;
+                            if Type(char) eq RngIntElt then continue; end if;
                             chi:=Append(chi,char);
-                        end for;   
-                    end if;     
+                        end for;
+                    end if;
                 end for;
             end if;
         elif IsAbelian(L,F) then 
             print("PrincipalSeries");
-            chi:=FindChar(L,PSChar,PSGroup,PSLift,PSExp);
+            chi:=FindInertiaType(L,PS);
         elif RamificationDegree(L,F) lt 8 then
             print("SCU");
-            E1:=BaseChange(E,Codomain(SCULift));
+            E1:=BaseChange(E,SCU[1]`Character`Lift);
             L:= mTorsionField(E1,m);
-            chi:=FindChar(L,SCUChars,SCUGroup,SCULift,SCUexp);
+            chi:=FindInertiaType(L,SCU);
         else 
             print("SCR");
-            chi:=FindSCRChar(E,L,Twist,SCRChars,SCRGroups,SCRLifts,SCRexp);
+            chi:=FindSCRType(E,L,Twist,SCR);//Chars,SCRGroups,SCRLifts,SCRexp);
 
 
 
@@ -125,10 +138,10 @@ function InTypeOf(E,Twist,PSChar,PSGroup,PSLift,PSExp,SCUChars,SCUGroup,SCULift,
     elif p eq 3 then
         if IsAbelian(L,F) then
             print("PrincipalSeries");
-            chi:=FindChar(L,PSChar,PSGroup,PSLift,PSExp);
+            chi:=FindInertiaType(L,PS);
         elif RamificationDegree(L,F) lt 8 then 
             print("SCU");
-            chi:=FindChar(L,SCUChars,SCUGroup,SCULift,SCUexp);
+            chi:=FindInertiaType(L,SCU);
         else print("SCR");
         end if;
     end if;

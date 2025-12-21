@@ -1,16 +1,23 @@
-function AllQuadraticExtensions(F)
-    R<x> := PolynomialRing(F);
-    Sel,FtoSel := pSelmerGroup(2,F);
-    SeltoF := Inverse(FtoSel);
-
+function AllQuadraticExtensions(F : Selmer:=false)
     Extensions := [];
     Twist:=[];
-    for s in Sel do
-        if IsIdentity(s) then continue; end if;
-        z:=ChangePrecision(SeltoF(s), Precision(F));
-        Append(~Twist,z);
-        Append(~Extensions, SplittingField(x^2 - z));
-    end for;
+    if Selmer then
+        R<x> := PolynomialRing(F);
+        Sel,FtoSel := pSelmerGroup(2,F);
+        SeltoF := Inverse(FtoSel);
+
+        for s in Sel do
+            if IsIdentity(s) then continue; end if;
+            z:=ChangePrecision(SeltoF(s), Precision(F));
+            Append(~Extensions, SplittingField(x^2 - z));
+            Append(~Twist,Discriminant(SplittingField(x^2 - z), F));
+        end for;
+    else
+        for Z in AllExtensions(F, 2) do
+            Append(~Extensions, FieldOfFractions(Z));
+            Append(~Twist, Discriminant(FieldOfFractions(Z), F));
+        end for;
+    end if;
 
     return Extensions, Twist;
 end function;
