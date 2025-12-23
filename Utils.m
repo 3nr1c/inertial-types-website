@@ -1,4 +1,4 @@
-function AllQuadraticExtensions(F : Selmer:=false)
+function AllQuadraticExtensions(F : Selmer:=true)
     Extensions := [];
     Twist:=[];
     if Selmer then
@@ -10,7 +10,7 @@ function AllQuadraticExtensions(F : Selmer:=false)
             if IsIdentity(s) then continue; end if;
             z:=ChangePrecision(SeltoF(s), Precision(F));
             Append(~Extensions, SplittingField(x^2 - z));
-            Append(~Twist,Discriminant(SplittingField(x^2 - z), F));
+            Append(~Twist, z);
         end for;
     else
         for Z in AllExtensions(F, 2) do

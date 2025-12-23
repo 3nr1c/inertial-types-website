@@ -22,7 +22,7 @@ function InertialTypes(F)
     // SCRGroups:=[*0: t in [1..#QuadExt-1] *];
     // SCRLifts :=[*0: t in [1..#QuadExt-1] *];
     // SCRexp:=[];
-    SCR := [* 0 : _ in [1..#Twist] *];
+    SCR := [* [] : _ in [1..#Twist] *];
     for t in [1..#QuadExt] do
         K:=QuadExt[t];
         i;
@@ -92,17 +92,17 @@ ZZ:=Integers();
 Q2:=pAdicField(2,100);
 R<x>:=PolynomialRing(Q2);
 Q4<phi>:=ext<Q2|x^2-x-1>;
-K := FieldOfFractions(AllExtensions(Q4, 2)[1]);
+// K := FieldOfFractions(AllExtensions(Q4, 2)[1]);
 
-load "CurvesQ4.m";
-load "EllipticCurves.m";
+// load "CurvesQ4.m";
+// load "EllipticCurves.m";
 
-Q3 := pAdicField(3,100);
-Q9 := UnramifiedExtension(Q3, 2);
+// Q3 := pAdicField(3,100);
+// Q9 := UnramifiedExtension(Q3, 2);
 
 
 
-Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(Q4);
-// Twist,PSChar,PSGroup,PSLift,PSExp,SCUChars,SCUGroup,SCULift,SCUexp,SCRChars,SCRGroups,SCRLifts,SCRexp,Ex8Chars,Ex8Groups,Ex8Lifts,Ex8exp,Ex24Chars,Ex24Groups,Ex24Lifts,Ex24exp:=InertialTypes(Q2);
+// Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(Q4);
+// // Twist,PSChar,PSGroup,PSLift,PSExp,SCUChars,SCUGroup,SCULift,SCUexp,SCRChars,SCRGroups,SCRLifts,SCRexp,Ex8Chars,Ex8Groups,Ex8Lifts,Ex8exp,Ex24Chars,Ex24Groups,Ex24Lifts,Ex24exp:=InertialTypes(Q2);
 
-InTypeOf(E[5,1],Twist, PS, SCU, SCR, Ex8, Ex24);
+// InTypeOf(E[5,1],Twist, PS, SCU, SCR, Ex8, Ex24);

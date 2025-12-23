@@ -8,6 +8,10 @@ declare attributes InertiaCharacter:
     Map
 ;
 
+// print(phi);
+// phi * psi;
+// phi(x);
+
 intrinsic NewInertiaCharacter(Order::RngIntElt, 
                                 GrpExp::RngIntElt,
                                 CondExp::RngIntElt,  
@@ -112,6 +116,25 @@ intrinsic NewPrincipalSeriesIT(phi::InertiaCharacter) -> PrincipalSeriesIT
     return ps;
 end intrinsic;
 
+intrinsic 'eq'(tau1::InertiaType, tau2::InertiaType) -> BoolElt
+{Determines whether the two types are isomorphic 
+as representations of inertia}
+// TODO: treat inverses & triply imprimitives
+    if not Type(tau1) eq Type(tau2) then return false;
+    else return tau1`Character`Map eq tau2`Character`Map;
+    end if;
+end intrinsic;
+
+// intrinsic 'in'(tau::InertiaType, list::.) -> BoolElt
+// {Returns whether tau is in list}
+//     print(1);
+//     for i in [1..#list] do
+//         if tau eq list[i] then
+//             return true; 
+//         end if;
+//     end for;
+//     return false;
+// end intrinsic;
 
 declare type SupercuspidalUnramifiedIT: InertiaType;
 
@@ -133,6 +156,12 @@ declare attributes SupercuspidalRamifiedIT:
     InducingField
 ;
 
+// declare type SimplyImprimitiveIT: SupercuspidalRamifiedIT;
+// declare type TriplyImprimitiveIT: SupercuspidalRamifiedIT;
+// declare attributes TriplyImprimitiveIT:
+//     Characters
+// ;
+
 intrinsic NewSupercuspidalRamifiedIT(phi::InertiaCharacter, F::FldPad) -> SupercuspidalRamifiedIT
 {Create the supercuspidal ramified inertia type of F induced by the character phi}
     assert Degree(phi`Field, F) eq 2;
@@ -148,6 +177,12 @@ intrinsic NewSupercuspidalRamifiedIT(phi::InertiaCharacter, F::FldPad) -> Superc
 
     return scr;
 end intrinsic;
+
+// intrinsic GetTripleOfCharacters(tau::SupercuspidalRamifiedIT) -> [Character]
+//     assert in_deg(tau`BaseField) % 2 eq 0;
+//     // code
+//     return [phi1,phi2,phi3];
+// end intrinsic;
 
 declare type ExceptionalIT: InertiaType;
 declare attributes ExceptionalIT:

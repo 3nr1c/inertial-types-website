@@ -25,7 +25,7 @@ end function;
 
 function FindInertiaType(L, CandidateTypes)
     // Warning: this function will only work if all the candidate types
-    // have a character with same Field, GrpExp and lift
+    // have a character with same Field, GrpExp and Lift
     chi := CandidateTypes[1]`Character;
     K := chi`Field;
     exp := Max(chi`GrpExp, AbsoluteRamificationDegree(L) + 1);
@@ -58,6 +58,7 @@ function FindSCRType(E,L,Twist,SCR)
     Inductions:=[];
     for j in [1..#Twist] do
         if not IsEmpty(Roots(x^2-Lx!Twist[j])) then
+            if IsEmpty(SCR[j]) then continue; end if;
             Inductions:=Append(Inductions,j);
             Inductions;  
         end if;          
@@ -79,7 +80,8 @@ function FindSCRType(E,L,Twist,SCR)
                 E1:=BaseChange(E,SCR[j][1]`Character`Field);
                 L:= mTorsionField(E1,m);
                 chi:=FindInertiaType(L,SCR[j]);
-                return chi;
+                if Type(chi) eq RngIntElt then continue;
+                else return chi; end if;
             end if;
         end for;
     end if;
@@ -94,7 +96,7 @@ function InTypeOf(E,Twist, PS, SCU, SCR, Ex8, Ex24);
     d := Degree(L,F);
     e := RamificationDegree(L,F);
     if p eq 2 then
-        if d eq 24 then
+        if d ge 24 then
             if e eq 8 then 
                 print("Exceptional Q8");
                 E1:=BaseChange(E,Ex8[1]`Character`Field);
@@ -105,18 +107,15 @@ function InTypeOf(E,Twist, PS, SCU, SCR, Ex8, Ex24);
                 Lx<x>:=PolynomialRing(L);
                 chi:=[* *];
                 for i in [1..#Ex24] do
-                    K := BaseRing(Ex24[i,1,1]`Character`Field);
+                    K := Ex24[i][1]`Character`Field;
 
-                    if not IsEmpty(Roots(Lx!DefiningPolynomial(K,Q4))) then 
-                        for k in [1..#Ex24] do
-                            i,k;
-                            E1:=BaseChange(E,Ex24[i,k,1]`Character`Field);
-                            time L := mTorsionField(E1, m);
-                            time char := FindInertiaType(L, Ex24[i,k]);
-                            print("------------------------");
-                            if Type(char) eq RngIntElt then continue; end if;
-                            chi:=Append(chi,char);
-                        end for;
+                    if not IsEmpty(Roots(Lx!DefiningPolynomial(K,F))) then 
+                        E1:=BaseChange(E,Ex24[i][1]`Character`Field);
+                        time L := mTorsionField(E1, m);
+                        time char := FindInertiaType(L, Ex24[i]);
+                        print("------------------------");
+                        if Type(char) eq RngIntElt then continue; end if;
+                        chi:=Append(chi,char);
                     end if;
                 end for;
             end if;
@@ -131,9 +130,6 @@ function InTypeOf(E,Twist, PS, SCU, SCR, Ex8, Ex24);
         else 
             print("SCR");
             chi:=FindSCRType(E,L,Twist,SCR);//Chars,SCRGroups,SCRLifts,SCRexp);
-
-
-
         end if;
     elif p eq 3 then
         if IsAbelian(L,F) then
@@ -143,6 +139,7 @@ function InTypeOf(E,Twist, PS, SCU, SCR, Ex8, Ex24);
             print("SCU");
             chi:=FindInertiaType(L,SCU);
         else print("SCR");
+            chi:=FindSCRType(E,L,Twist,SCR);//Chars,SCRGroups,SCRLifts,SCRexp);
         end if;
     end if;
 return chi;
