@@ -12,6 +12,7 @@ S,Print,Print tau,0,1,0,0,1,0,0,0,0,InertiaType,,-38,-38,-38,-38,-38,-38
 T,PrincipalSeriesIT,-,1,InertiaType
 S,NewPrincipalSeriesIT,Create the principal series inertia type given by the character phi,0,1,0,0,0,0,0,0,0,InertiaCharacter,,PrincipalSeriesIT,-38,-38,-38,-38,-38
 S,eq,Determines whether the two types are isomorphic as representations of inertia,0,2,0,0,0,0,0,0,0,InertiaType,,0,0,InertiaType,,36,-38,-38,-38,-38,-38
+S,in,Returns whether tau is in list,1,1,1,82,0,InertiaType,2,0,0,0,0,0,0,0,82,,0,0,InertiaType,,36,-38,-38,-38,-38,-38
 T,SupercuspidalUnramifiedIT,-,1,InertiaType
 S,NewSupercuspidalUnramifiedIT,Create the supercuspidal unramified inertia type of F induced by the character phi,0,2,0,0,0,0,0,0,0,400,,0,0,InertiaCharacter,,SupercuspidalUnramifiedIT,-38,-38,-38,-38,-38
 T,SupercuspidalRamifiedIT,-,1,InertiaType

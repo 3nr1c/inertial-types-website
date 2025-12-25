@@ -121,20 +121,21 @@ intrinsic 'eq'(tau1::InertiaType, tau2::InertiaType) -> BoolElt
 as representations of inertia}
 // TODO: treat inverses & triply imprimitives
     if not Type(tau1) eq Type(tau2) then return false;
-    else return tau1`Character`Map eq tau2`Character`Map;
+    else 
+        
+        return tau1`Character`Map eq tau2`Character`Map;
     end if;
 end intrinsic;
 
-// intrinsic 'in'(tau::InertiaType, list::.) -> BoolElt
-// {Returns whether tau is in list}
-//     print(1);
-//     for i in [1..#list] do
-//         if tau eq list[i] then
-//             return true; 
-//         end if;
-//     end for;
-//     return false;
-// end intrinsic;
+intrinsic 'in'(tau::InertiaType, list::[InertiaType]) -> BoolElt
+{Returns whether tau is in list}
+    for rho in list do
+        if tau eq rho then
+            return true; 
+        end if;
+    end for;
+    return false;
+end intrinsic;
 
 declare type SupercuspidalUnramifiedIT: InertiaType;
 
