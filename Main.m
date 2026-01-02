@@ -89,10 +89,10 @@ end function;
 
 
 ZZ:=Integers();
-Q2:=pAdicField(2,100);
+Q2:=pAdicField(2,500);
 R<x>:=PolynomialRing(Q2);
 Q4<phi>:=ext<Q2|x^2-x-1>;
-K := FieldOfFractions(AllExtensions(Q4, 2)[1]);
+// K := FieldOfFractions(AllExtensions(Q4, 2)[1]);
 
 // load "CurvesQ4.m";
 // load "EllipticCurves.m";
@@ -102,7 +102,7 @@ K := FieldOfFractions(AllExtensions(Q4, 2)[1]);
 
 
 
-Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(Q4);
+// Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(Q4);
 // // Twist,PSChar,PSGroup,PSLift,PSExp,SCUChars,SCUGroup,SCULift,SCUexp,SCRChars,SCRGroups,SCRLifts,SCRexp,Ex8Chars,Ex8Groups,Ex8Lifts,Ex8exp,Ex24Chars,Ex24Groups,Ex24Lifts,Ex24exp:=InertialTypes(Q2);
 
 // InTypeOf(E[5,1],Twist, PS, SCU, SCR, Ex8, Ex24);

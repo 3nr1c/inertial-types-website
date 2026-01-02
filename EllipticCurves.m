@@ -14,12 +14,18 @@ function mTorsionField(E1, m)
     g2 := R!g;
     roots := Roots(g2);
 
-    for r in roots do
+    if m eq 3 then
+        r:=roots[1]; 
         z1 := Evaluate(R!f,r[1]);
         L := SplittingField(R!(x^2-z1));
         R<x> := PolynomialRing(L);
-    end for;
-
+    else
+        for r in roots do
+            z1 := Evaluate(R!f,r[1]);
+            L := SplittingField(R!(x^2-z1));
+            R<x> := PolynomialRing(L);
+        end for;
+    end if;
     return L;
 end function;
 
@@ -49,7 +55,6 @@ function FindInertiaType(L, CandidateTypes)
     return 0;
 end function;
 
-
 function FindSCRType(E,L,Twist,SCR)
     F:=BaseRing(E);
     p, ram_deg, in_deg, pi, N := BaseValues(F);
@@ -57,8 +62,8 @@ function FindSCRType(E,L,Twist,SCR)
     Lx<x>:=PolynomialRing(L);
     Inductions:=[];
     for j in [1..#Twist] do
-        if not IsEmpty(Roots(x^2-Lx!Twist[j])) then
-            if IsEmpty(SCR[j]) then continue; end if;
+        if IsEmpty(SCR[j]) then continue; end if;
+        if not IsEmpty(Roots(x^2-Lx!Twist[j])) then    
             Inductions:=Append(Inductions,j);
             Inductions;  
         end if;          
@@ -85,6 +90,7 @@ function FindSCRType(E,L,Twist,SCR)
             end if;
         end for;
     end if;
+    return 0;
 end function;
 
 
@@ -92,45 +98,61 @@ function InTypeOf(E,Twist, PS, SCU, SCR, Ex8, Ex24);
     F := BaseRing(E);
     p, ram_deg, in_deg, pi, N := BaseValues(F);
     if p eq 2 then m := 3; else m := 5; end if;
+    CondExp:=Valuation(Conductor(E));
     L := mTorsionField(E,m);
     d := Degree(L,F);
     e := RamificationDegree(L,F);
+    chi:=0;
     if p eq 2 then
         if d ge 24 then
-            if e eq 8 then 
-                print("Exceptional Q8");
-                E1:=BaseChange(E,Ex8[1]`Character`Field);
-                L:=mTorsionField(E1,m);
-                chi:= FindInertiaType(L,Ex8);
+            if e eq 8 then
+                if #Ex8 gt 0 then 
+                    print("Exceptional Q8");
+                    E1:=BaseChange(E,Ex8[1]`Character`Field);
+                    L:=mTorsionField(E1,m);
+                    chi:= FindInertiaType(L,Ex8);
+                end if;
             else 
-                print("Exceptional SL2F3");
-                Lx<x>:=PolynomialRing(L);
-                chi:=[* *];
-                for i in [1..#Ex24] do
-                    K := Ex24[i][1]`Character`Field;
+                if not [#Ex24[i] : i in [1..#Ex24]] eq [0 : j in [1..#Ex24]] then
+                    print("Exceptional SL2F3");
+                    Lx<x>:=PolynomialRing(L);
+                    chi:=[* *];
+                    for i in [1..#Ex24] do
+                        if #Ex24[i] gt 0 then
+                            K := Ex24[i][1]`Character`Field;
 
-                    if not IsEmpty(Roots(Lx!DefiningPolynomial(K,F))) then 
-                        E1:=BaseChange(E,Ex24[i][1]`Character`Field);
-                        time L := mTorsionField(E1, m);
-                        time char := FindInertiaType(L, Ex24[i]);
-                        print("------------------------");
-                        if Type(char) eq RngIntElt then continue; end if;
-                        chi:=Append(chi,char);
-                    end if;
-                end for;
+                            if not IsEmpty(Roots(Lx!DefiningPolynomial(K,F))) then 
+                                E1:=BaseChange(E,Ex24[i][1]`Character`Field);
+                                time L := mTorsionField(E1, m);
+                                time char := FindInertiaType(L, Ex24[i]);
+                                print("------------------------");
+                                return char;
+                                if Type(char) eq RngIntElt then continue; end if;
+                                chi:=char;
+                            end if;
+                        end if;
+                    end for;
+                end if;
             end if;
-        elif IsAbelian(L,F) then 
-            print("PrincipalSeries");
-            chi:=FindInertiaType(L,PS);
+        elif IsAbelian(L,F) then
+            if #PS gt 0 then  
+                print("PrincipalSeries");
+                chi:=FindInertiaType(L,PS);
+            end if;
         elif RamificationDegree(L,F) lt 8 then
-            print("SCU");
-            E1:=BaseChange(E,SCU[1]`Character`Lift);
-            L:= mTorsionField(E1,m);
-            chi:=FindInertiaType(L,SCU);
+            if #SCU gt 0 then
+                print("SCU");
+                E1:=BaseChange(E,SCU[1]`Character`Field);
+                L:= mTorsionField(E1,m);
+                chi:=FindInertiaType(L,SCU);
+            end if;
         else 
-            print("SCR");
-            chi:=FindSCRType(E,L,Twist,SCR);//Chars,SCRGroups,SCRLifts,SCRexp);
+            if not [#SCR[i] : i in [1..#SCR]] eq [0 : j in [1..#SCR]] then
+                print("SCR");
+                chi:=FindSCRType(E,L,Twist,SCR);//Chars,SCRGroups,SCRLifts,SCRexp);
+            end if;    
         end if;
+
     elif p eq 3 then
         if IsAbelian(L,F) then
             print("PrincipalSeries");

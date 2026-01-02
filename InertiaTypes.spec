@@ -71,6 +71,7 @@ intrinsic '*'(phi::InertiaCharacter, psi::InertiaCharacter) -> InertiaCharacter
     ZntoZmn := hom<Zn -> Zmn | Zn!1 -> Zmn!m>;
 
     product := New(InertiaCharacter);
+    product`GrpExp := phi`GrpExp;
     product`Order := phi`Order * psi`Order;
     product`CondExp := Max(phi`CondExp, psi`CondExp);
     product`Map := FastMapSum(phi`Map * ZmtoZmn, psi`Map * ZntoZmn);
