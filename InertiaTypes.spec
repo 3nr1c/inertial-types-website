@@ -71,6 +71,7 @@ intrinsic '*'(phi::InertiaCharacter, psi::InertiaCharacter) -> InertiaCharacter
     ZntoZmn := hom<Zn -> Zmn | Zn!1 -> Zmn!m>;
 
     product := New(InertiaCharacter);
+    product`GrpExp := phi`GrpExp;
     product`Order := phi`Order * psi`Order;
     product`CondExp := Max(phi`CondExp, psi`CondExp);
     product`Map := FastMapSum(phi`Map * ZmtoZmn, psi`Map * ZntoZmn);
@@ -214,10 +215,18 @@ intrinsic SemistabilityDefect(tau::InertiaType) -> RngIntElt
     elif Type(tau) eq SupercuspidalUnramifiedIT then
         return tau`Character`order;
     elif Type(tau) eq SupercuspidalRamifiedIT then
-        return -1;
-    elif Type(tau) eq ExceptionalIT then
-        if (AbsoluteInertiaDegree(tau`Field) mod 2) eq 0 then
+        if Prime(tau`BaseField) eq 2 then
             return 8;
+        elif Prime(tau`BaseField) eq 3 then
+            return 12;
+        else return -1; end if;
+    elif Type(tau) eq ExceptionalIT then
+        if (AbsoluteInertiaDegree(tau`BaseField) mod 2) eq 0 then
+            if RamificationDegree(tau`CubicField, tau`BaseField) eq 1 then
+                return 8;
+            else 
+                return 24;
+            end if;
         else
             return 24;
         end if;
