@@ -166,16 +166,19 @@ for i,j,k in [1,0] do
                 if not Type(tau) eq RngIntElt then
                     PSc[CondExp]:=Remove(PSc[CondExp],Index(PSc[CondExp],tau));
                     Append(~AllCurves["PS",CondExp],[*E,tau*]);
-                    AllCurves;
+                    E;
                     for t in FTwist do
                         E1:=QuadraticTwist(E,t);
                         CondExp1:=Valuation(Conductor(E1));
                         if not CondExp1 in Keys(PSc) or IsEmpty(PSc[CondExp1]) then continue; end if;
+                        
                         L:=mTorsionField(E1,3);
                         tau:=FindInertiaType(L, PSc[CondExp1]);
+
                         if not Type(tau) eq RngIntElt then
-                        PSc[CondExp1]:=Remove(PSc[CondExp1],Index(PSc[CondExp1],tau));
-                        Append(~AllCurves["PS",CondExp1],[*E1,tau*]);
+                            PSc[CondExp1]:=Remove(PSc[CondExp1],Index(PSc[CondExp1],tau));
+                            Append(~AllCurves["PS",CondExp1],[*E1,tau*]);
+                            E1;
                         end if;
                     end for;
                 end if;
@@ -216,17 +219,20 @@ for i,j,k in [1,0] do
                 if not Type(tau) eq RngIntElt then
                     SCUc[CondExp]:=Remove(SCUc[CondExp],Index(SCUc[CondExp],tau));
                     Append(~AllCurves["SCU",CondExp],[*E,tau*]);
-                    AllCurves;
+                    E;
                     for t in FTwist do
                         E1:=QuadraticTwist(E,t);
                         CondExp1:=Valuation(Conductor(E1));
                         if not CondExp1 in Keys(SCUc) or IsEmpty(SCUc[CondExp1]) then continue; end if;
+
                         EK1:=BaseChange(E1,SCUc[CondExp1][1]`Character`Field);
                         L:= mTorsionField(EK1,3);
                         tau:=FindInertiaType(L, SCUc[CondExp1]);
+
                         if not Type(tau) eq RngIntElt then
-                        SCUc[CondExp1]:=Remove(SCUc[CondExp1],Index(SCUc[CondExp1],tau));
-                        Append(~AllCurves["SCU",CondExp1],[*E1,tau*]);
+                            SCUc[CondExp1]:=Remove(SCUc[CondExp1],Index(SCUc[CondExp1],tau));
+                            Append(~AllCurves["SCU",CondExp1],[*E1,tau*]);
+                            E1;
                         end if;
                     end for;
                 end if;

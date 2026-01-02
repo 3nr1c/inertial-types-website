@@ -89,7 +89,7 @@ end function;
 
 
 ZZ:=Integers();
-Q2:=pAdicField(2,500);
+Q2:=pAdicField(2,100);
 R<x>:=PolynomialRing(Q2);
 Q4<phi>:=ext<Q2|x^2-x-1>;
 // K := FieldOfFractions(AllExtensions(Q4, 2)[1]);
