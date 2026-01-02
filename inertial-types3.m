@@ -116,7 +116,7 @@ function SupercuspidalRamified(F, K, f, c, VarepsGenerators)
 end function;
 
 
-Q2 := pAdicField(2,1000);
+Q2 := pAdicField(2,500);
 Q4 := UnramifiedExtension(Q2, 2);
 K := FieldOfFractions(AllExtensions(Q2, 2)[1]);
 

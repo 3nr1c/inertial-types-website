@@ -22,6 +22,25 @@ function AllQuadraticExtensions(F : Selmer:=true)
     return Extensions, Twist;
 end function;
 
+function FundamentalTwist(Twist)
+    test:=[];
+    FTwist:=[];
+    F:=Parent(Twist[1]);
+    R<x> := PolynomialRing(F);
+    Sel,FtoSel := pSelmerGroup(2,F);
+    SeltoF := Inverse(FtoSel);
+    for t in Twist do
+        if RamificationDegree(SplittingField(x^2-t),F) eq 1 then sun:=FtoSel(t); end if;
+    end for;
+
+    for t in Twist do
+    s:=FtoSel(t);
+    if (not s eq sun) and (not s in test) and (not s*sun in test) then test:=Append(test,s); FTwist:=Append(FTwist,t); end if;  
+    end for;
+
+    return FTwist;
+end function;
+
 function FastMap(m)
 // Given two groups A,B and a map m define as a composite
 // of different maps it returns the map that goes directly from A to B without 
