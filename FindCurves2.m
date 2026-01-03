@@ -138,7 +138,7 @@ end for;
 function FindPS(F,PSc,AllCurves,FTwist)
     FTwist := [1] cat FTwist;
 
-    ECGenerator := EllipticCurveGenerator(F);
+    ECGenerator := EllipticCurveGenerator(F : InitialBase := 3, method := 2);
     while &or [#c gt 0 : c in PSc] do
         E := Next(ECGenerator);
 
@@ -225,11 +225,10 @@ function FindSCR(F,SCRc,AllCurves,Twist,FTwist)
     p, ram_deg, in_deg, pi, N := BaseValues(F);
 
     for i in [1..#SCRc] do  
-        ECGenerator := EllipticCurveGenerator(F : InitialBase := 10);
+        ECGenerator := EllipticCurveGenerator(F : InitialBase := 4);
         if IsEmpty(Keys(SCRc[i])) then continue; end if;
         while &or [#c gt 0 : c in SCRc[i]] do
             E := Next(ECGenerator);
-            ECGenerator`counter;
 
             CondExp:=Valuation(Conductor(E));
             if not CondExp in Keys(SCRc[i]) or IsEmpty(SCRc[i,CondExp]) then continue; end if;
@@ -287,7 +286,7 @@ function FindEx24(F, Ex24c, AllCurves, Twist, FTwist)
         end for;
         Poly;
 
-        ECGenerator := EllipticCurveGenerator(F);
+        ECGenerator := EllipticCurveGenerator(F : InitialBase := 4, method := 1);
         while &or [#c gt 0 : c in Ex24c[i]] do
             E := Next(ECGenerator);
 
@@ -306,7 +305,9 @@ function FindEx24(F, Ex24c, AllCurves, Twist, FTwist)
 
                 Lx<x>:=PolynomialRing(L);
 
-                if HasRoot(Lx!Poly) then 
+                hasRoot := HasRoot(Lx!Poly);
+
+                if hasRoot then 
                     E1 := BaseChange(E, K);
                     time L1 := mTorsionField(E1, 3);
                     time tau := FindInertiaType(L1, Ex24c[i, CondExp]);

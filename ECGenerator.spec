@@ -7,10 +7,11 @@ declare attributes CrvEllGenerator:
     Base,
     counter,
     ijk,
-    curve
+    curve,
+    method
 ;
 
-intrinsic EllipticCurveGenerator(F::FldPad : InitialBase := 2) -> CrvEllGenerator 
+intrinsic EllipticCurveGenerator(F::FldPad : InitialBase := 4, method := 1) -> CrvEllGenerator 
 {Create an object that yields elliptic curves over F with potentially good reduction}
     ECG := New(CrvEllGenerator);
     ECG`F := F;
@@ -22,6 +23,7 @@ intrinsic EllipticCurveGenerator(F::FldPad : InitialBase := 2) -> CrvEllGenerato
     ECG`ijk := -1;
     ECG`counter := -1;
     ECG`curve := EllipticCurveWithjInvariant(1/pi);
+    ECG`method := method;
     return ECG;
 end intrinsic;
 
@@ -51,12 +53,24 @@ intrinsic Next(G::CrvEllGenerator) -> CrvEll
         end while;
         i, j, k := Explode(ijk);
 
-        if k eq 1 then
-            G`counter +:= 1;
-        elif j eq 1 then
-            G`counter +:= (G`Base^2);
-        else 
-            G`counter +:= (G`Base^4);
+        // The following prevents stalling if either of i,j,k is zero
+        // Change always accordingly with the formulas for a2, a4, a6 below
+        if G`method eq 1 then
+            if k eq 1 then
+                G`counter +:= 1;
+            elif j eq 1 then
+                G`counter +:= (G`Base);
+            else 
+                G`counter +:= (G`Base)^2;
+            end if;
+        else //method eq 2
+            if k eq 1 then
+                G`counter +:= 1;
+            elif j eq 1 then
+                G`counter +:= (G`Base)^2;
+            else 
+                G`counter +:= (G`Base)^4;
+            end if;
         end if;
 
 
@@ -68,9 +82,15 @@ intrinsic Next(G::CrvEllGenerator) -> CrvEll
             a, b, c, d, e, f := Explode(abcdef);
 
             // Cook a curve
-            a2 := i*G`pi^a * G`u^b;
-            a4 := j*G`pi^c * G`u^d;
-            a6 := k*G`pi^e * G`u^f;
+            if G`method eq 1 then
+                a2 := i*G`pi^d * G`u^a;
+                a4 := j*G`pi^e * G`u^b;
+                a6 := k*G`pi^f * G`u^c;
+            else //method eq 2
+                a2 := i*G`pi^a * G`u^b;
+                a4 := j*G`pi^c * G`u^d;
+                a6 := k*G`pi^e * G`u^f;
+            end if;
             found, E := IsEllipticCurve([G`F!0,a2,0,a4,a6]);
             if found and (Valuation(jInvariant(E)) lt 0 or IsIsomorphic(E, G`curve)) then
                 found := false;
