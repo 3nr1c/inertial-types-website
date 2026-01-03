@@ -201,7 +201,12 @@ intrinsic NewExceptionalIT(phi::InertiaCharacter, F::FldPad, L::FldPad) -> Excep
 
     exc := New(ExceptionalIT);
     exc`BaseField := F;
-    exc`CondExp := -1;
+
+    InductionCondExp := phi`CondExp + Valuation(Discriminant(phi`Field, L));
+    RamificationLF := RamificationDegree(L,F);
+
+
+    exc`CondExp := Integers()!(2 + (InductionCondExp - 2)/RamificationLF);
     exc`Character := phi;
     exc`CubicField := L;
 
@@ -215,18 +220,10 @@ intrinsic SemistabilityDefect(tau::InertiaType) -> RngIntElt
     elif Type(tau) eq SupercuspidalUnramifiedIT then
         return tau`Character`order;
     elif Type(tau) eq SupercuspidalRamifiedIT then
-        if Prime(tau`BaseField) eq 2 then
-            return 8;
-        elif Prime(tau`BaseField) eq 3 then
-            return 12;
-        else return -1; end if;
+        return -1;
     elif Type(tau) eq ExceptionalIT then
-        if (AbsoluteInertiaDegree(tau`BaseField) mod 2) eq 0 then
-            if RamificationDegree(tau`CubicField, tau`BaseField) eq 1 then
-                return 8;
-            else 
-                return 24;
-            end if;
+        if (AbsoluteInertiaDegree(tau`Field) mod 2) eq 0 then
+            return 8;
         else
             return 24;
         end if;
