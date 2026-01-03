@@ -52,7 +52,7 @@ function FindInertiaType(L, CandidateTypes)
         end for;
         if found then return tau; end if;
     end for;
-    return 0;
+    return New(NullIT);
 end function;
 
 function FindSCRType(E,L,Twist,SCR)
@@ -85,12 +85,12 @@ function FindSCRType(E,L,Twist,SCR)
                 E1:=BaseChange(E,SCR[j][1]`Character`Field);
                 L:= mTorsionField(E1,m);
                 chi:=FindInertiaType(L,SCR[j]);
-                if Type(chi) eq RngIntElt then continue;
+                if IsNull(chi) then continue;
                 else return chi; end if;
             end if;
         end for;
     end if;
-    return 0;
+    return New(NullIT);
 end function;
 
 

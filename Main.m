@@ -89,9 +89,12 @@ end function;
 
 
 ZZ:=Integers();
-Q2:=pAdicField(2,100);
+Q2:=pAdicField(2,200);
 R<x>:=PolynomialRing(Q2);
 Q4<phi>:=ext<Q2|x^2-x-1>;
+
+F:=FieldOfFractions(AllExtensions(Q2,2)[2]);
+Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(F);
 // K := FieldOfFractions(AllExtensions(Q4, 2)[1]);
 
 // load "CurvesQ4.m";

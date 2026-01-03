@@ -1,4 +1,5 @@
-load "Main.m";
+Attach("ECGenerator.spec");
+// load "Main.m";
 load "EllipticCurves.m";
 
 function CompareType(E, Twist, PS, SCU, SCR, Ex8, Ex24,AllCurves)
@@ -65,8 +66,8 @@ function CompareType(E, Twist, PS, SCU, SCR, Ex8, Ex24,AllCurves)
 end function;
 
 
-F:=FieldOfFractions(AllExtensions(Q2,2)[2]);
-Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(F);
+// F:=FieldOfFractions(AllExtensions(Q2,2)[2]);
+// Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(F);
 FTwist:=FundamentalTwist(Twist);
 AllCurves:=AssociativeArray();
 AllCurves["PS"] := AssociativeArray();
@@ -95,9 +96,9 @@ for tau in SCU do
     end if;
 end for;
 
-SCRc  := AssociativeArray();
+SCRc := [];
 for i in [1..#SCR] do
-    SCRc[i]:=AssociativeArray();
+    Append(~SCRc, AssociativeArray());
     for tau in SCR[i] do
         if not (tau`CondExp in Keys(SCRc[i])) then
             SCRc[i,tau`CondExp] := [tau];
@@ -119,298 +120,229 @@ for tau in Ex8 do
     end if;
 end for;
 
-Ex24c  := AssociativeArray();
+Ex24c := [];
 for i in [1..#Ex24] do
+    Append(~Ex24c, AssociativeArray());
     for tau in Ex24[i] do
-        CondExp:=tau`Character`CondExp+Valuation(Discriminant(tau`Character`Field,tau`CubicField));
-        if not ([i,CondExp] in Keys(Ex24c)) then
-            Ex24c[[i,CondExp]] := [tau];
-            AllCurves["Ex24",[i,CondExp]]:=[* *]; 
+        if not (tau`CondExp in Keys(Ex24c[i])) then
+            Ex24c[i,tau`CondExp] := [tau];
+            AllCurves["Ex24",[i,tau`CondExp]]:=[* *]; 
         else
-            Append(~Ex24c[[i,CondExp]], tau);
+            Append(~Ex24c[i,tau`CondExp], tau);
         end if;
     end for;
 end for;
 
 
-
-
-//OF:=ChangePrecision(Integers(F),AbsoluteRamificationDegree(F)+1);
-//UF:=UnitGroup(OF);
-//Gen:=Generators(UF);
-//u:=[a: a in Gen][1];
 
 function FindPS(F,PSc,AllCurves,FTwist)
-p, ram_deg, in_deg, pi, N := BaseValues(F);
-u := 1 + pi;
+    FTwist := [1] cat FTwist;
 
-for i,j,k in [1,0] do
-    for a, b, c, d, e, f in [0..3] do  
-        if &and [IsEmpty(c) : c in PSc] then return AllCurves; end if;
-        i,j,k,a,b,c,d,e,f;
-        a2 := i*pi^d * u^a;
-        a4 := j*pi^e * u^b;
-        a6 := k*pi^f * u^c;
-        isEC, E := IsEllipticCurve([F!0,a2,0,a4,a6]);
-        if not isEC then continue; end if;
-        if (Valuation(jInvariant(E)) gt 0) then 
-            CondExp:=Valuation(Conductor(E));
-            if not CondExp in Keys(PSc) or IsEmpty(PSc[CondExp]) then continue; end if;
-                L:=mTorsionField(E,3);
-            if  (RamificationDegree(L,F) ge 8) then 
-                continue; 
-            elif (not IsAbelian(L,F)) then 
-                    continue; 
-            else
-                tau:=FindInertiaType(L, PSc[CondExp]);
-                if not Type(tau) eq RngIntElt then
-                    PSc[CondExp]:=Remove(PSc[CondExp],Index(PSc[CondExp],tau));
-                    Append(~AllCurves["PS",CondExp],[*E,tau*]);
-                    AllCurves;
-                    for t in FTwist do
-                        E1:=QuadraticTwist(E,t);
-                        CondExp1:=Valuation(Conductor(E1));
-                        if not CondExp1 in Keys(PSc) or IsEmpty(PSc[CondExp1]) then continue; end if;
-                        L:=mTorsionField(E1,3);
-                        tau:=FindInertiaType(L, PSc[CondExp1]);
-                        if not Type(tau) eq RngIntElt then
-                        PSc[CondExp1]:=Remove(PSc[CondExp1],Index(PSc[CondExp1],tau));
-                        Append(~AllCurves["PS",CondExp1],[*E1,tau*]);
-                        end if;
-                    end for;
-                end if;
-            end if;
+    ECGenerator := EllipticCurveGenerator(F);
+    while &or [#c gt 0 : c in PSc] do
+        E := Next(ECGenerator);
+
+        CondExp := Valuation(Conductor(E));
+        if not CondExp in Keys(PSc) or IsEmpty(PSc[CondExp]) then continue; end if;
+
+        L := mTorsionField(E,3);
+        if  (RamificationDegree(L,F) ge 8) then 
+            continue; 
+        elif (not IsAbelian(L,F)) then 
+            continue; 
+        else
+            follow := false; i := 1;
+            repeat 
+                E1 := QuadraticTwist(E,FTwist[i]);
+                CondExp1 := Valuation(Conductor(E1));
+
+                if not CondExp1 in Keys(PSc) or IsEmpty(PSc[CondExp1]) then continue; end if;
+
+                L := i eq 1 select L else mTorsionField(E1,3);
+                tau := FindInertiaType(L, PSc[CondExp1]);
+                    
+                if IsNull(tau) then continue; end if;
+
+                Exclude(~PSc[CondExp1], tau);
+                Append(~AllCurves["PS",CondExp1],[*E1,tau*]);
+                follow := true;
+                tau;
+                i +:= 1;
+            until not (follow and i le #FTwist);
         end if;
-    end for;
-end for;
-
-return AllCurves;
+    end while;
+    return AllCurves;
 end function;
 
 function FindSCU(F,SCUc,AllCurves,FTwist)
-p, ram_deg, in_deg, pi, N := BaseValues(F);
-u := 1 + pi;
 
-for i,j,k in [1,0] do
-    for a, b, c, d, e, f in [0..3] do  
-        if &and [IsEmpty(c) : c in SCUc] then return AllCurves; end if;
-        i,j,k,a,b,c,d,e,f;
-        a2 := i*pi^d * u^a;
-        a4 := j*pi^e * u^b;
-        a6 := k*pi^f * u^c;
-        isEC, E := IsEllipticCurve([F!0,a2,0,a4,a6]);
-        if not isEC then continue; end if;
-        if (Valuation(jInvariant(E)) gt 0) then 
-            CondExp:=Valuation(Conductor(E));
-            if not CondExp in Keys(SCUc) or IsEmpty(SCUc[CondExp]) then continue; end if;
-                L:=mTorsionField(E,3);
-            if  (RamificationDegree(L,F) ge 8) then 
-                continue; 
-            elif IsAbelian(L,F) then 
-                    continue; 
-            else
-                EK:=BaseChange(E,SCUc[CondExp][1]`Character`Field);
-                L:= mTorsionField(EK,3);
-                tau:=FindInertiaType(L, SCUc[CondExp]);
-                if not Type(tau) eq RngIntElt then
-                    SCUc[CondExp]:=Remove(SCUc[CondExp],Index(SCUc[CondExp],tau));
-                    Append(~AllCurves["SCU",CondExp],[*E,tau*]);
-                    AllCurves;
-                    for t in FTwist do
-                        E1:=QuadraticTwist(E,t);
-                        CondExp1:=Valuation(Conductor(E1));
-                        if not CondExp1 in Keys(SCUc) or IsEmpty(SCUc[CondExp1]) then continue; end if;
-                        EK1:=BaseChange(E1,SCUc[CondExp1][1]`Character`Field);
-                        L:= mTorsionField(EK1,3);
-                        tau:=FindInertiaType(L, SCUc[CondExp1]);
-                        if not Type(tau) eq RngIntElt then
-                        SCUc[CondExp1]:=Remove(SCUc[CondExp1],Index(SCUc[CondExp1],tau));
-                        Append(~AllCurves["SCU",CondExp1],[*E1,tau*]);
-                        end if;
-                    end for;
-                end if;
-            end if;
+    ECGenerator := EllipticCurveGenerator(F);
+    i := 0;
+    while &or [#c gt 0 : c in SCUc] do
+        E := Next(ECGenerator);
+
+        CondExp := Valuation(Conductor(E));
+        if not CondExp in Keys(SCUc) or IsEmpty(SCUc[CondExp]) then continue; end if;
+
+        L := mTorsionField(E,3);
+        if (RamificationDegree(L,F) ge 8) then 
+            continue; 
+        elif IsAbelian(L,F) then 
+            continue; 
+        else
+            EK := BaseChange(E,SCUc[CondExp][1]`Character`Field);
+            L := mTorsionField(EK,3);
+            tau := FindInertiaType(L, SCUc[CondExp]);
+
+            if IsNull(tau) then continue; end if;
+
+            Exclude(~SCUc[CondExp], tau);
+            Append(~AllCurves["SCU",CondExp], [*E,tau*]);
+            i+:=1;i;
+            
+            for t in FTwist do
+                E1 := QuadraticTwist(E,t);
+                CondExp1 := Valuation(Conductor(E1));
+
+                if not CondExp1 in Keys(SCUc) or IsEmpty(SCUc[CondExp1]) then continue; end if;
+
+                EK1 := BaseChange(E1,SCUc[CondExp1][1]`Character`Field);
+                L := mTorsionField(EK1,3);
+                tau := FindInertiaType(L, SCUc[CondExp1]);
+
+                if IsNull(tau) then continue; end if;
+                
+                Exclude(~SCUc[CondExp1], tau);
+                Append(~AllCurves["SCU", CondExp1], [*E1,tau*]);
+                i+:=1;i;
+            end for;
         end if;
-    end for;
-end for;
-
-return AllCurves;
+    end while;
+    return AllCurves;
 end function;
 
 function FindSCR(F,SCRc,AllCurves,Twist,FTwist)
-p, ram_deg, in_deg, pi, N := BaseValues(F);
-u := 1 + pi;
-Fx<x>:=PolynomialRing(F);
+    p, ram_deg, in_deg, pi, N := BaseValues(F);
 
-for f in Keys(SCRc) do
-    if IsEmpty(Keys(SCRc[f])) then continue; end if;
-    for i,j,k in [1,0] do
-        if &and [IsEmpty(c) : c in SCRc[f]] then break; end if;
-        for a, b, c, d, e, g in [0..3] do  
-            if &and [IsEmpty(c) : c in SCRc[f]] then break; end if;
-            i,j,k,a,b,c,d,e,g;
-            a2 := i*pi^d * u^a;
-            a4 := j*pi^e * u^b;
-            a6 := k*pi^g * u^c;
-            isEC, E := IsEllipticCurve([F!0,a2,0,a4,a6]);
-            if not isEC then continue; end if;
-            if (Valuation(jInvariant(E)) gt 0) then 
-                CondExp:=Valuation(Conductor(E));
-                if not CondExp in Keys(SCRc[f]) or IsEmpty(SCRc[f,CondExp]) then continue; end if;
-                    L:=mTorsionField(E,3);
-                if not (RamificationDegree(L,F) eq 8) then 
-                    continue; 
-                elif (in_deg mod 2 eq 0) and Degree(L,F) ge 24 then 
-                    continue; 
-                elif (IsSquare(L!Twist[f])) and (Valuation(Conductor(BaseChange(QuadraticTwist(E,Twist[f]),L))) eq 0) then
-                    EK:=BaseChange(E,SCRc[f,CondExp][1]`Character`Field);
-                    L:= mTorsionField(EK,3);
-                    tau:=FindInertiaType(L, SCRc[f,CondExp]);
-                    if not Type(tau) eq RngIntElt then
-                        SCRc[f,CondExp]:=Exclude(SCRc[f,CondExp],tau);
-                        Append(~AllCurves["SCR",[f,CondExp]],[*E,tau*]);
-                        AllCurves;
-                        for t in FTwist do
-                            E1:=QuadraticTwist(E,t);
-                            CondExp1:=Valuation(Conductor(E1));
-                            if not CondExp1 in Keys(SCRc[f]) or IsEmpty(SCRc[f,CondExp1]) then continue; end if;
-                            EK1:=BaseChange(E1,SCRc[f,CondExp1][1]`Character`Field);
-                            L:= mTorsionField(EK1,3);
-                            tau:=FindInertiaType(L, SCRc[f,CondExp1]);
-                            if not Type(tau) eq RngIntElt then
-                            SCRc[f,CondExp1]:=Exclude(SCRc[f,CondExp1],tau);
-                            Append(~AllCurves["SCR",[f,CondExp1]],[*E1,tau*]);
-                            end if;
-                        end for;
-                    end if;
-                end if;
-            end if;
-        end for;
-    end for;
-end for;
+    for i in [1..#SCRc] do  
+        ECGenerator := EllipticCurveGenerator(F : InitialBase := 10);
+        if IsEmpty(Keys(SCRc[i])) then continue; end if;
+        while &or [#c gt 0 : c in SCRc[i]] do
+            E := Next(ECGenerator);
+            ECGenerator`counter;
 
-return AllCurves;
-end function;
+            CondExp:=Valuation(Conductor(E));
+            if not CondExp in Keys(SCRc[i]) or IsEmpty(SCRc[i,CondExp]) then continue; end if;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//PSCurves:=[* *];
-//PSTypes:=[* *];
-//SCUCurves:=[* *];
-//SCUTypes:=[* *];
-//SCRCurves:=[* *];
-//SCRTypes:=[* *];
-//Ex24Curves:=[* *];
-//Ex24Types:=[* *];
-//Ex8Curves:=[* *];
-//Ex8Types:=[* *];
-/*
-AllCurves:=[*[* *],[* *],[* *],[* *],[* *]*];
-
-
-
-for i,j,k in [0,1] do
-    for a, b, c, d, e, f in [0..3] do  
-        if (#PS eq 0) and (#SCU eq 0) and  ([#SCR[i] : i in [1..#SCR]] eq [0 : j in [1..#SCR]]) then break; end if;
-            a,b,c,d,e,f;
-            a2 := i*pi^a * u^d;
-            a4 := j*pi^b * u^e;
-            a6 := k*pi^c * u^f;
-
-            isEC, E := IsEllipticCurve([F!0,a2,0,a4,a6]);
-            if not isEC then continue; end if;
-            if Valuation(jInvariant(E)) gt 0 then 
-                L:=mTorsionField(E,3);
-                if Degree(L,F) eq 48 then continue;
-                else
-                    tau, PS, SCU, SCR, Ex8, Ex24,AllCurves:=CompareType(E, Twist, PS, SCU, SCR, Ex8, Ex24, AllCurves);
-                    if not Type(tau) eq RngIntElt then
-                        for t in FTwist do
-                            E1:=QuadraticTwist(E,t);
-                            tau, PS, SCU, SCR, Ex8, Ex24, AllCurves:=CompareType(E1, Twist, PS, SCU, SCR, Ex8, Ex24, AllCurves);
-                        end for;
-                    end if;
-                end if;
-            end if;
-    end for;
-end for;
-
-ExceptionalFields:=[* *];
-ExceptionalCurves:=[* *];
-function CompareReduction(E,Fields)
-for L in Fields do
-    if Valuation(Conductor(BaseChange(E,L))) eq 0 then return false; end if;
-end for;
-return true;
-end function;
-
-for a, b, c, d, e, f in [0..3] do  
-    if (#PS eq 0) and (#SCU eq 0) and  ([#SCR[i] : i in [1..#SCR]] eq [0 : j in [1..#SCR]]) then break; end if;
-        a,b,c,d,e,f;
-        a2 := pi^a * u^d;
-        a4 := pi^b * u^e;
-        a6 := pi^c * u^f;
-
-        isEC, E := IsEllipticCurve([F!0,a2,0,a4,a6]);
-        if not isEC then continue; end if;
-        if Valuation(jInvariant(E)) gt 0 then 
             L:=mTorsionField(E,3);
-            if not (Degree(L,F) eq 48) then continue;
-            else
-                if CompareReduction(E,ExceptionalFields) then
-                    ExceptionalCurves:=Append(ExceptionalCurves,E);
-                    ExceptionalFields:=Append(ExceptionalFields,L);
-                    for t in FundamentalTwist do
-                        E1:=QuadraticTwist(E,t);
-                        if CompareReduction(E1,ExceptionalFields) then
-                            ExceptionalCurves:=Append(ExceptionalCurves,E1);
-                            ExceptionalFields:=Append(ExceptionalFields,mTorsionField(E1,3));
-                        end if;
-                    end for;
-                end if;
+            if not (RamificationDegree(L,F) eq 8) then 
+                continue; 
+            elif (in_deg mod 2 eq 0) and Degree(L,F) ge 24 then 
+                continue; 
+            elif (IsSquare(L!Twist[i])) and (Valuation(Conductor(BaseChange(QuadraticTwist(E,Twist[i]),L))) eq 0) then
+
+                EK := BaseChange(E,SCRc[i,CondExp,1]`Character`Field);
+                L := mTorsionField(EK,3);
+                tau := FindInertiaType(L, SCRc[i,CondExp]);
+
+                if IsNull(tau) then continue; end if;
+
+                Exclude(~SCRc[i,CondExp],tau);
+                Append(~AllCurves["SCR",[i,CondExp]],[*E,tau*]);
+                tau;
+
+                for t in FTwist do
+                    E1 := QuadraticTwist(E,t);
+                    CondExp1 := Valuation(Conductor(E1));
+                    
+                    if not CondExp1 in Keys(SCRc[i]) or IsEmpty(SCRc[i,CondExp1]) then continue; end if;
+
+                    EK1 := BaseChange(E1,SCRc[i,CondExp1,1]`Character`Field);
+                    L := mTorsionField(EK1,3);
+                    tau := FindInertiaType(L, SCRc[i,CondExp1]);
+
+                    if IsNull(tau) then continue; end if;
+
+                    Exclude(~SCRc[i,CondExp1],tau);
+                    Append(~AllCurves["SCR",[i,CondExp1]],[*E1,tau*]);
+                    tau;
+                end for;
             end if;
-        end if;
-        #ExceptionalCurves;
-end for;
-*/
+        end while;
+    end for;
+
+    return AllCurves;
+end function;
+
+function FindEx24(F, Ex24c, AllCurves, Twist, FTwist)
+    p, ram_deg, in_deg, pi, N := BaseValues(F);
+
+    for i in [1..#Ex24c] do
+        if #Keys(Ex24c[i]) eq 0 then continue; end if;
+        for c in Ex24c[i] do
+            CubicField := c[1]`CubicField;
+            K := c[1]`Character`Field;
+            Poly := DefiningPolynomial(K, CubicField);
+            break;
+        end for;
+        Poly;
+
+        ECGenerator := EllipticCurveGenerator(F);
+        while &or [#c gt 0 : c in Ex24c[i]] do
+            E := Next(ECGenerator);
+
+            CondExp := Valuation(Conductor(E));
+            if not CondExp in Keys(Ex24c[i]) or IsEmpty(Ex24c[i,CondExp]) then continue; end if;
+
+            L:=mTorsionField(E,3);
+            d := Degree(L,F);
+            if (in_deg mod 2 eq 0) and d lt 24 then
+                continue;
+            elif (in_deg mod 2 eq 1) and d lt 48 then
+                continue; 
+            else
+                L := mTorsionField(BaseChange(E,CubicField), 3);
+                if Degree(L, CubicField)*Degree(CubicField, F) ne d then continue; end if;
+
+                Lx<x>:=PolynomialRing(L);
+
+                if HasRoot(Lx!Poly) then 
+                    E1 := BaseChange(E, K);
+                    time L1 := mTorsionField(E1, 3);
+                    time tau := FindInertiaType(L1, Ex24c[i, CondExp]);
+                    print("------------------------");
+                    Exclude(~Ex24c[i,CondExp], tau);
+                    Append(~AllCurves["Ex24",[i,CondExp]], [*E, tau*]);
+                    tau;
+                    #Ex24c[i,CondExp];
+
+                    for t in FTwist do
+                        E1 := QuadraticTwist(E,t);
+                        CondExp1 := Valuation(Conductor(E1));
+                        
+                        if not CondExp1 in Keys(Ex24c[i]) or IsEmpty(Ex24c[i,CondExp1]) then continue; end if;
+
+                        EK1 := BaseChange(E1, K);
+                        time L1 := mTorsionField(EK1,3);
+                        time tau := FindInertiaType(L1, Ex24c[i,CondExp1]);
+
+                        if IsNull(tau) then continue; end if;
+
+                        print("------------------------");
+                        Exclude(~Ex24c[i,CondExp1], tau);
+                        Append(~AllCurves["Ex24",[i,CondExp1]], [*E1, tau*]);
+                        tau;
+                        #Ex24c[i,CondExp1];
+                    end for;
+                    // if Type(char) eq RngIntElt then continue; end if;
+                    // chi:=char;
+                else
+                    print("Poly has no root");
+                end if;
+
+            end if;
+        end while;
+    end for;
+
+    return AllCurves;
+end function;

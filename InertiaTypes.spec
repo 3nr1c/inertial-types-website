@@ -96,6 +96,14 @@ declare attributes InertiaType:
     Character
 ;
 
+declare type NullIT: InertiaType;
+
+intrinsic IsNull(tau::InertiaType) -> BoolElt
+{Returns true if and only if tau is of type NullIT}
+    return Type(tau) eq NullIT;
+end intrinsic;
+
+
 intrinsic Print(tau::InertiaType)
 {Print tau}
     print("Inertia Type of the field");
@@ -103,6 +111,11 @@ intrinsic Print(tau::InertiaType)
     printf "of conductor exponent %o\n", tau`CondExp;
     printf "with underlying character of order %o and conductor exponent %o",
         tau`Character`Order, tau`Character`CondExp;
+end intrinsic;
+
+intrinsic Print(tau::NullIT)
+{Print the Null Inertia Type}
+    print("NullIT");
 end intrinsic;
 
 
