@@ -138,7 +138,7 @@ end for;
 function FindPS(F,PSc,AllCurves,FTwist)
     FTwist := [1] cat FTwist;
 
-    ECGenerator := EllipticCurveGenerator(F : InitialBase := 3, method := 2);
+    ECGenerator := EllipticCurveGenerator(F : InitialBase := 4, method := 1);
     while &or [#c gt 0 : c in PSc] do
         E := Next(ECGenerator);
 
@@ -155,6 +155,7 @@ function FindPS(F,PSc,AllCurves,FTwist)
             repeat 
                 E1 := QuadraticTwist(E,FTwist[i]);
                 CondExp1 := Valuation(Conductor(E1));
+                i +:= 1;
 
                 if not CondExp1 in Keys(PSc) or IsEmpty(PSc[CondExp1]) then continue; end if;
 
@@ -167,7 +168,6 @@ function FindPS(F,PSc,AllCurves,FTwist)
                 Append(~AllCurves["PS",CondExp1],[*E1,tau*]);
                 follow := true;
                 tau;
-                i +:= 1;
             until not (follow and i le #FTwist);
         end if;
     end while;
@@ -285,8 +285,9 @@ function FindEx24(F, Ex24c, AllCurves, Twist, FTwist)
             break;
         end for;
         Poly;
+        Keys(Ex24c[i]);
 
-        ECGenerator := EllipticCurveGenerator(F : InitialBase := 4, method := 1);
+        ECGenerator := EllipticCurveGenerator(F : InitialBase := 5, method := 2);
         while &or [#c gt 0 : c in Ex24c[i]] do
             E := Next(ECGenerator);
 
