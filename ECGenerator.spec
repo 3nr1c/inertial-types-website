@@ -27,30 +27,14 @@ intrinsic EllipticCurveGenerator(F::FldPad : InitialBase := 4, method := 2) -> C
     return ECG;
 end intrinsic;
 
+// function NextMethod1(G)
+// end function;
+
 intrinsic Next(G::CrvEllGenerator) -> CrvEll
 {Return a new elliptic curve according to the internal state of the generator}
     found := false;
     repeat
-        // The following prevents stalling if either of i,j,k is zero
-        // Change always accordingly with the formulas for a2, a4, a6 below
-        if G`method eq 1 then
-            if G`ijk mod 2 eq 1 then // k eq 1
-                G`counter +:= 1;
-            elif G`ijk mod 4 eq 2 then // j eq 1
-                G`counter +:= G`Base;
-            else // i eq 1
-                G`counter +:= (G`Base)^2;
-            end if;
-        else //method eq 2
-            if G`ijk mod 2 eq 1 then // k eq 1
-                G`counter +:= 1;
-            elif G`ijk mod 4 eq 2 then // j eq 1
-                G`counter +:= (G`Base)^2;
-            else // i eq 1
-                G`counter +:= (G`Base)^4;
-            end if;
-        end if;
-
+        G`counter +:= 1;
         if G`counter gt (G`Base^6 - 1) then
             G`ijk +:= 1;
             G`counter := 0;
@@ -60,10 +44,10 @@ intrinsic Next(G::CrvEllGenerator) -> CrvEll
             end if;
         end if;
 
-        abcdef := IntegerToSequence(G`counter, G`Base);
+        abcdef := Reverse(IntegerToSequence(G`counter, G`Base));
         if G`Base eq G`InitialBase or (&or [t ge G`Base-1 : t in abcdef]) then
             // Assign the parameters to letters
-            ijk := IntegerToSequence(G`ijk, 2);
+            ijk := Reverse(IntegerToSequence(G`ijk, 2));
             while #ijk lt 3 do
                 Insert(~ijk, 1, 0);
             end while;
@@ -76,10 +60,20 @@ intrinsic Next(G::CrvEllGenerator) -> CrvEll
 
             // Cook a curve
             if G`method eq 1 then
+                if (i eq 0 and (d gt 0 or a gt 0)) or 
+                    (j eq 0 and (e gt 0 or b gt 0)) or
+                    (k eq 0 and (f gt 0 or c gt 0)) then
+                    continue;
+                end if;
                 a2 := i*G`pi^d * G`u^a;
                 a4 := j*G`pi^e * G`u^b;
                 a6 := k*G`pi^f * G`u^c;
             else //method eq 2
+                if (i eq 0 and (a gt 0 or b gt 0)) or 
+                    (j eq 0 and (c gt 0 or d gt 0)) or
+                    (k eq 0 and (e gt 0 or f gt 0)) then
+                    continue;
+                end if;
                 a2 := i*G`pi^a * G`u^b;
                 a4 := j*G`pi^c * G`u^d;
                 a6 := k*G`pi^e * G`u^f;

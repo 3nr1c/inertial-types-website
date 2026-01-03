@@ -138,7 +138,7 @@ end for;
 function FindPS(F,PSc,AllCurves,FTwist)
     FTwist := [1] cat FTwist;
 
-    ECGenerator := EllipticCurveGenerator(F : InitialBase := 4, method := 1);
+    ECGenerator := EllipticCurveGenerator(F : InitialBase := 5, method := 2);
     while &or [#c gt 0 : c in PSc] do
         E := Next(ECGenerator);
 
@@ -176,7 +176,7 @@ end function;
 
 function FindSCU(F,SCUc,AllCurves,FTwist)
 
-    ECGenerator := EllipticCurveGenerator(F);
+    ECGenerator := EllipticCurveGenerator(F : InitialBase := 2, method := 2);
     i := 0;
     while &or [#c gt 0 : c in SCUc] do
         E := Next(ECGenerator);
@@ -198,6 +198,7 @@ function FindSCU(F,SCUc,AllCurves,FTwist)
 
             Exclude(~SCUc[CondExp], tau);
             Append(~AllCurves["SCU",CondExp], [*E,tau*]);
+            tau;
             i+:=1;i;
             
             for t in FTwist do
@@ -214,6 +215,7 @@ function FindSCU(F,SCUc,AllCurves,FTwist)
                 
                 Exclude(~SCUc[CondExp1], tau);
                 Append(~AllCurves["SCU", CondExp1], [*E1,tau*]);
+                tau;
                 i+:=1;i;
             end for;
         end if;
