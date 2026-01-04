@@ -1,13 +1,13 @@
 Attach("ECGenerator.spec");
 
-function Generate10000Curves()
+function Generate1000Curves()
     Q2 := pAdicField(2,100);
     F := FieldOfFractions(AllExtensions(Q2,2)[1]);
 
-    ECG := EllipticCurveGenerator(F : method := 2);
+    ECG := EllipticCurveGenerator(F);
     curves := [];
     i := 0;
-    while #curves lt 10000 do
+    while #curves lt 1000 do
         E := Next(ECG);
         found := false;
         for E1 in curves do
@@ -23,14 +23,14 @@ function Generate10000Curves()
     return 0;
 end function;
 
-function Generate10000jInvariants()
+function Generate1000jInvariants()
     Q2 := pAdicField(2,100);
     F := FieldOfFractions(AllExtensions(Q2,2)[1]);
 
-    ECG := EllipticCurveGenerator(F : InitialBase := 4);
+    ECG := EllipticCurveGenerator(F);
     js := [];
     i := 0;
-    while #js lt 10000 do
+    while #js lt 1000 do
         E := Next(ECG);
         found := jInvariant(E) in js;
         if not found then 

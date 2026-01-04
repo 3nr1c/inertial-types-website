@@ -1,7 +1,7 @@
 load "Exceptionals.m";
 
 
-function InertialTypes(F) 
+function InertialTypes(F : SkipExceptionals := false) 
     c := 0;
     QuadExt,Twist:= AllQuadraticExtensions(F : Selmer:=true);
 
@@ -61,9 +61,9 @@ function InertialTypes(F)
         i +:= 1;
     end for;
 
-    if p eq 2 then
-        Ex24:=[* *];
-        Ex8:=[* *];
+    Ex24:=[* *];
+    Ex8:=[* *];
+    if p eq 2 and not SkipExceptionals then
         // Ex24Groups:=[* *];
         // Ex8Groups:=[* *];
         // Ex24Lifts:=[* *];
@@ -93,8 +93,8 @@ Q2:=pAdicField(2,200);
 R<x>:=PolynomialRing(Q2);
 Q4<phi>:=ext<Q2|x^2-x-1>;
 
-F:=FieldOfFractions(AllExtensions(Q2,2)[2]);
-Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(F);
+// F:=FieldOfFractions(AllExtensions(Q2,2)[6]);
+time Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(Q2);
 // K := FieldOfFractions(AllExtensions(Q4, 2)[1]);
 
 // load "CurvesQ4.m";

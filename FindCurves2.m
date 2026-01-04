@@ -96,9 +96,11 @@ for tau in SCU do
     end if;
 end for;
 
-SCRc := [];
+SCRc := AssociativeArray();
 for i in [1..#SCR] do
-    Append(~SCRc, AssociativeArray());
+    if #SCR[i] gt 0 then
+        SCRc[i] := AssociativeArray();
+    end if;
     for tau in SCR[i] do
         if not (tau`CondExp in Keys(SCRc[i])) then
             SCRc[i,tau`CondExp] := [tau];
@@ -120,9 +122,11 @@ for tau in Ex8 do
     end if;
 end for;
 
-Ex24c := [];
+Ex24c := AssociativeArray();
 for i in [1..#Ex24] do
-    Append(~Ex24c, AssociativeArray());
+    if #Ex24[i] gt 0 then
+        Ex24c[i] := AssociativeArray();
+    end if;
     for tau in Ex24[i] do
         if not (tau`CondExp in Keys(Ex24c[i])) then
             Ex24c[i,tau`CondExp] := [tau];
@@ -226,8 +230,9 @@ end function;
 function FindSCR(F,SCRc,AllCurves,Twist,FTwist)
     p, ram_deg, in_deg, pi, N := BaseValues(F);
 
-    for i in [1..#SCRc] do  
-        ECGenerator := EllipticCurveGenerator(F : InitialBase := 4);
+    for i in Keys(SCRc) do  
+        i; [#c : c in SCRc[i]];
+        ECGenerator := EllipticCurveGenerator(F : InitialBase := 2, method := 2);
         if IsEmpty(Keys(SCRc[i])) then continue; end if;
         while &or [#c gt 0 : c in SCRc[i]] do
             E := Next(ECGenerator);
@@ -278,7 +283,7 @@ end function;
 function FindEx24(F, Ex24c, AllCurves, Twist, FTwist)
     p, ram_deg, in_deg, pi, N := BaseValues(F);
 
-    for i in [1..#Ex24c] do
+    for i in Keys(Ex24c) do
         if #Keys(Ex24c[i]) eq 0 then continue; end if;
         for c in Ex24c[i] do
             CubicField := c[1]`CubicField;
@@ -288,8 +293,9 @@ function FindEx24(F, Ex24c, AllCurves, Twist, FTwist)
         end for;
         Poly;
         Keys(Ex24c[i]);
+        [#c : c in Ex24c[i]];
 
-        ECGenerator := EllipticCurveGenerator(F : InitialBase := 5, method := 2);
+        ECGenerator := EllipticCurveGenerator(F : InitialBase := 2, method := 2);
         while &or [#c gt 0 : c in Ex24c[i]] do
             E := Next(ECGenerator);
 
@@ -349,4 +355,86 @@ function FindEx24(F, Ex24c, AllCurves, Twist, FTwist)
     end for;
 
     return AllCurves;
+end function;
+
+function FindAllCurves(F, Twist, PSc, SCUc, SCRc, Ex8c, Ex24c, AllCurves)
+    time AllCurves := FindPS(F,PSc,AllCurves,FTwist);
+    assert &+[#c : c in PSc] eq &+[#c : c in AllCurves["PS"]];
+
+    time AllCurves := FindSCU(F,SCUc,AllCurves,FTwist);
+    assert &+[#c : c in SCUc] eq &+[#c : c in AllCurves["SCU"]];
+
+    time AllCurves := FindSCR(F,SCRc,AllCurves,Twist,FTwist);
+    assert &+[#d : d in c, c in SCRc] eq &+[#c : c in AllCurves["SCR"]];
+
+    time AllCurves := FindEx24(F,Ex24c,AllCurves,Twist,FTwist);
+    assert &+[#d : d in c, c in Ex24c] eq &+[#c : c in AllCurves["Ex24"]];
+
+
+    return AllCurves;
+end function;
+
+function SaveAllCurves(F, AllCurves, filename)
+    FP := Open(filename, "w");
+    Write(FP, Sprint(DefiningPolynomial(F)));
+    Write(FP, "\n\n");
+
+    Write(FP, "// Principal Series\n");
+    for CondExp in Keys(AllCurves["PS"]) do
+        print(AllCurves["PS", CondExp]);
+        for E in AllCurves["PS", CondExp] do
+            print(E);
+            Write(FP, Sprint(CondExp));
+            Write(FP, ", ");
+            Write(FP, Sprint(aInvariants(E[1])));
+            Write(FP, "\n");
+        end for;
+    end for;
+    Write(FP, "\n");
+
+    Write(FP, "// Supercuspidal Unramified\n");
+    for CondExp in Keys(AllCurves["SCU"]) do
+        print(AllCurves["SCU", CondExp]);
+        for E in AllCurves["SCU", CondExp] do
+            print(E);
+            Write(FP, Sprint(CondExp));
+            Write(FP, ", ");
+            Write(FP, Sprint(aInvariants(E[1])));
+            Write(FP, "\n");
+        end for;
+    end for;
+    Write(FP, "\n");
+
+    Write(FP, "// Supercuspidal Ramified\n");
+    for k in Keys(AllCurves["SCR"]) do
+        Write(FP, Sprint(DefiningPolynomial(AllCurves["SCR", k, 1, 2]`Character`Field, F)));
+        Write(FP, "\n");
+        for E in AllCurves["SCR", k] do
+            print(E);
+            Write(FP, Sprint(k[2]));
+            Write(FP, ", ");
+            Write(FP, Sprint(aInvariants(E[1])));
+            Write(FP, "\n");
+        end for;
+        Write(FP, "\n");
+    end for;
+    Write(FP, "\n");
+
+    Write(FP, "// Exceptionals of size 24\n");
+    for k in Keys(AllCurves["Ex24"]) do
+        Write(FP, Sprint(DefiningPolynomial(AllCurves["Ex24", k, 1, 2]`CubicField, F)));
+        Write(FP, "\n");
+        for E in AllCurves["Ex24", k] do
+            print(E);
+            Write(FP, Sprint(k[2]));
+            Write(FP, ", ");
+            Write(FP, Sprint(aInvariants(E[1])));
+            Write(FP, "\n");
+        end for;
+        Write(FP, "\n");
+    end for;
+    Write(FP, "\n");
+    // We close the file object
+    delete FP;
+    return 0;
 end function;

@@ -79,7 +79,7 @@ intrinsic Next(G::CrvEllGenerator) -> CrvEll
                 a6 := k*G`pi^e * G`u^f;
             end if;
             found, E := IsEllipticCurve([G`F!0,a2,0,a4,a6]);
-            if found and (Valuation(jInvariant(E)) lt 0 or IsIsomorphic(E, G`curve)) then
+            if found and (Valuation(jInvariant(E)) lt 0) then
                 found := false;
             elif found then
                 // i,j,k,a,b,c,d,e,f;

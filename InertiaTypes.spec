@@ -96,6 +96,29 @@ declare attributes InertiaType:
     Character
 ;
 
+intrinsic 'eq'(tau1::InertiaType, tau2::InertiaType) -> BoolElt
+{Determines whether the two types are isomorphic 
+as representations of inertia}
+// TODO: treat inverses & triply imprimitives
+    if not Type(tau1) eq Type(tau2) then return false;
+    else 
+        
+        return tau1`Character`Map eq tau2`Character`Map;
+    end if;
+end intrinsic;
+
+intrinsic 'in'(tau::InertiaType, list::[InertiaType]) -> BoolElt
+{Returns whether tau is in list}
+    for rho in list do
+        if tau eq rho then
+            return true; 
+        end if;
+    end for;
+    return false;
+end intrinsic;
+
+////////////////
+
 declare type NullIT: InertiaType;
 
 intrinsic IsNull(tau::InertiaType) -> BoolElt
@@ -119,6 +142,9 @@ intrinsic Print(tau::NullIT)
 end intrinsic;
 
 
+////////////////
+
+
 declare type PrincipalSeriesIT: InertiaType;
 
 intrinsic NewPrincipalSeriesIT(phi::InertiaCharacter) -> PrincipalSeriesIT
@@ -130,26 +156,17 @@ intrinsic NewPrincipalSeriesIT(phi::InertiaCharacter) -> PrincipalSeriesIT
     return ps;
 end intrinsic;
 
-intrinsic 'eq'(tau1::InertiaType, tau2::InertiaType) -> BoolElt
-{Determines whether the two types are isomorphic 
-as representations of inertia}
-// TODO: treat inverses & triply imprimitives
-    if not Type(tau1) eq Type(tau2) then return false;
-    else 
-        
-        return tau1`Character`Map eq tau2`Character`Map;
-    end if;
+intrinsic Print(tau::InertiaType)
+{Print tau}
+    print("Inertia Type of the field");
+    print("\t"),tau`BaseField;
+    printf "of conductor exponent %o\n", tau`CondExp;
+    printf "with underlying character of order %o and conductor exponent %o",
+        tau`Character`Order, tau`Character`CondExp;
 end intrinsic;
 
-intrinsic 'in'(tau::InertiaType, list::[InertiaType]) -> BoolElt
-{Returns whether tau is in list}
-    for rho in list do
-        if tau eq rho then
-            return true; 
-        end if;
-    end for;
-    return false;
-end intrinsic;
+
+
 
 declare type SupercuspidalUnramifiedIT: InertiaType;
 
