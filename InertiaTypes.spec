@@ -102,8 +102,14 @@ as representations of inertia}
 // TODO: treat inverses & triply imprimitives
     if not Type(tau1) eq Type(tau2) then return false;
     else 
-        
-        return tau1`Character`Map eq tau2`Character`Map;
+        if tau1`Character`Map eq tau2`Character`Map then
+            return true;
+        else
+            for g in Generators(Domain(tau1`Character`Map)) do 
+                if Integers(4)!ElementToSequence(tau1`Character`Map(g))[1] ne -Integers(4)!ElementToSequence(tau2`Character`Map(g))[1] then return false; end if;
+            end for;
+            return true;
+        end if;
     end if;
 end intrinsic;
 
