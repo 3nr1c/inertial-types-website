@@ -107,10 +107,18 @@ function ExceptionalTypesTriply(F,L)
         Elements := Elements cat [2*g : g in Uf1];
         Values := Values cat [0 : i in [1 .. #Uf1]];
 
+        //Elements2:=Elements cat [Uf1[i] + muUf1[i] : i in [1 .. #Uf1]];
+
         Elements := Elements cat [Uf1[i] - muUf1[i] : i in [1 .. #Uf1]];
         Values := Values cat [0 : i in [1 .. #Uf1]];
 
         time Caracteres:=FastCharactersOfPrimePowerOrder(CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements, Values:=Values);
+        //time Caracteres2:=FastCharactersOfPrimePowerOrder(CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements2, Values:=Values);
+
+        //print("+++++++++++++++++++++++++++++++++++++++++++");
+        //#Caracteres;
+        //#Caracteres2;
+        //print("+++++++++++++++++++++++++++++++++++++++++++");
 
         if not IsEmpty(Caracteres) then 
             Append(~ExceptionalChars,[
@@ -158,8 +166,10 @@ function ExceptionalTypesSimply(Fi)
     for orbit in SelOrbits do
         Polynomials := [];
         roots := [];
+        g:=GaltoAut(Gal.1);
+        assert(IsIdentity(Gal.1));
         for i in [1..3] do
-            g:=GaltoAut(Gal.2^i);
+            g:=g*rho;
             z := g(ChangePrecision(SeltoL(Sel!ElementToSequence(GSel!orbit.1)), Precision(L)));
             Append(~Polynomials, X^2 - z);
         end for;
@@ -167,9 +177,9 @@ function ExceptionalTypesSimply(Fi)
         y1:=Roots(PolynomialRing(K1)!Polynomials[1])[1,1];
         K2:=SplittingField(Polynomials[2]);
         y2:=Roots(PolynomialRing(K2)!Polynomials[2])[1,1];
-        // K3:=SplittingField(Polynomials[3]);
-        // y3:=Roots(PolynomialRing(K3)!Polynomials[3])[1,1];
-        // assert rho(y1^2) eq y2^2 and rho(y2^2) eq y3^2;
+        K3:=SplittingField(Polynomials[3]);
+        y3:=Roots(PolynomialRing(K3)!Polynomials[3])[1,1];
+        assert rho(y1^2) eq y2^2 and rho(y2^2) eq y3^2;
 
         K1X<x>:=PolynomialRing(K1);
         E:=SplittingField(K1X!Polynomials[2]);
@@ -211,7 +221,7 @@ function ExceptionalTypesSimply(Fi)
                 if IsZero((GalEtoAut(tau)(y1)-y2)) and IsZero((GalEtoAut(tau)(zeta3)-zeta3)) then mu:=GalEtoAut(tau); break; end if;
             end for;
             for tau in GalE do
-                if IsZero((GalEtoAut(tau)(zeta3)-zeta3^2)) then delta:=GalEtoAut(tau); break; end if; 
+                if IsZero((GalEtoAut(tau)(y1)-y1)) and IsZero((GalEtoAut(tau)(zeta3)-zeta3^2)) then delta:=GalEtoAut(tau); break; end if; 
             end for;
 
             E1:=ChangePrecision(E,#CGroups1);
@@ -221,7 +231,7 @@ function ExceptionalTypesSimply(Fi)
 
             Uf1:=[Inverse(CLift1)(Norm(ChangePrecision(E!E1!UEtoOE(g),Precision(E)),K1)): g in Gen];
             muUf1:=[Inverse(CLift1)(Norm(ChangePrecision(mu(E!E1!UEtoOE(g)),Precision(E)),K1)): g in Gen];
-            muUf2:=[Inverse(CLift1)(Norm(ChangePrecision(delta(E!E1!UEtoOE(g)),Precision(E)),K1)): g in Gen];
+            deltaUf1:=[Inverse(CLift1)(Norm(ChangePrecision(delta(E!E1!UEtoOE(g)),Precision(E)),K1)): g in Gen];
             
             Elements := Elements cat [2*g : g in Uf1];
             Values := Values cat [0 : i in [1 .. #Uf1]];
@@ -229,10 +239,23 @@ function ExceptionalTypesSimply(Fi)
             Elements := Elements cat [Uf1[i] - muUf1[i] : i in [1 .. #Uf1]];
             Values := Values cat [0 : i in [1 .. #Uf1]];
 
-            Elements := Elements cat [Uf1[i] - muUf2[i] : i in [1 .. #Uf1]];
+            Elements2 := Elements cat [Uf1[i] + deltaUf1[i] : i in [1 .. #Uf1]];
+
+            Elements := Elements cat [Uf1[i] - deltaUf1[i] : i in [1 .. #Uf1]];
             Values := Values cat [0 : i in [1 .. #Uf1]];
+
+            
+
             
             time Caracteres:=FastCharactersOfPrimePowerOrder(CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements, Values:=Values);
+            time Caracteres2:=FastCharactersOfPrimePowerOrder(CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements2, Values:=Values);
+
+            print("+++++++++++++++++++++++++++++++++++++++++++");
+            #Caracteres;
+            #Caracteres2;
+            print("+++++++++++++++++++++++++++++++++++++++++++");
+
+            Caracteres:=Caracteres cat Caracteres2;
 
             if not IsEmpty(Caracteres) then 
                 Append(~ExceptionalChars,[
