@@ -1,5 +1,5 @@
 Attach("ECGenerator.spec");
-// load "Main.m";
+load "Main.m";
 load "EllipticCurves.m";
 
 function CompareType(E, Twist, PS, SCU, SCR, Ex8, Ex24,AllCurves)
@@ -124,15 +124,16 @@ end for;
 
 Ex24c := AssociativeArray();
 for i in [1..#Ex24] do
-    if #Ex24[i] gt 0 then
-        Ex24c[i] := AssociativeArray();
-    end if;
     for tau in Ex24[i] do
-        if not (tau`CondExp in Keys(Ex24c[i])) then
-            Ex24c[i,tau`CondExp] := [tau];
+        if not (tau`CondExp in Keys(Ex24c)) then
+            Ex24c[tau`CondExp]:= AssociativeArray();
+        end if;
+
+        if not i in Keys(Ex24c[tau`CondExp]) then 
+            Ex24c[tau`CondExp,i]:=[tau]; 
             AllCurves["Ex24",[i,tau`CondExp]]:=[* *]; 
         else
-            Append(~Ex24c[i,tau`CondExp], tau);
+            Append(~Ex24c[tau`CondExp,i], tau);
         end if;
     end for;
 end for;
@@ -280,27 +281,93 @@ function FindSCR(F,SCRc,AllCurves,Twist,FTwist)
     return AllCurves;
 end function;
 
+// function FindEx24(F, Ex24c, AllCurves, Twist, FTwist)
+//     p, ram_deg, in_deg, pi, N := BaseValues(F);
+
+//     for i in Keys(Ex24c) do
+//         if #Keys(Ex24c[i]) eq 0 then continue; end if;
+//         for c in Ex24c[i] do
+//             CubicField := c[1]`CubicField;
+//             K := c[1]`Character`Field;
+//             Poly := DefiningPolynomial(K, CubicField);
+//             break;
+//         end for;
+//         Poly;
+//         Keys(Ex24c[i]);
+//         [#c : c in Ex24c[i]];
+
+//         ECGenerator := EllipticCurveGenerator(F : InitialBase := 2, method := 2);
+//         while &or [#c gt 0 : c in Ex24c[i]] do
+//             E := Next(ECGenerator);
+
+//             CondExp := Valuation(Conductor(E));
+//             if not CondExp in Keys(Ex24c[i]) or IsEmpty(Ex24c[i,CondExp]) then continue; end if;
+
+//             L:=mTorsionField(E,3);
+//             d := Degree(L,F);
+//             if (in_deg mod 2 eq 0) and d lt 24 then
+//                 continue;
+//             elif (in_deg mod 2 eq 1) and d lt 48 then
+//                 continue; 
+//             else
+//                 L := mTorsionField(BaseChange(E,CubicField), 3);
+//                 if Degree(L, CubicField)*Degree(CubicField, F) ne d then continue; end if;
+
+//                 Lx<x>:=PolynomialRing(L);
+
+//                 hasRoot := HasRoot(Lx!Poly);
+
+//                 if hasRoot then 
+//                     E1 := BaseChange(E, K);
+//                     time L1 := mTorsionField(E1, 3);
+//                     time tau := FindInertiaType(L1, Ex24c[i, CondExp]);
+//                     print("------------------------");
+//                     Exclude(~Ex24c[i,CondExp], tau);
+//                     Append(~AllCurves["Ex24",[i,CondExp]], [*E, tau*]);
+//                     tau;
+//                     #Ex24c[i,CondExp];
+
+//                     for t in FTwist do
+//                         E1 := QuadraticTwist(E,t);
+//                         CondExp1 := Valuation(Conductor(E1));
+                        
+//                         if not CondExp1 in Keys(Ex24c[i]) or IsEmpty(Ex24c[i,CondExp1]) then continue; end if;
+
+//                         EK1 := BaseChange(E1, K);
+//                         time L1 := mTorsionField(EK1,3);
+//                         time tau := FindInertiaType(L1, Ex24c[i,CondExp1]);
+
+//                         if IsNull(tau) then continue; end if;
+
+//                         print("------------------------");
+//                         Exclude(~Ex24c[i,CondExp1], tau);
+//                         Append(~AllCurves["Ex24",[i,CondExp1]], [*E1, tau*]);
+//                         tau;
+//                         #Ex24c[i,CondExp1];
+//                     end for;
+//                     // if Type(char) eq RngIntElt then continue; end if;
+//                     // chi:=char;
+//                 else
+//                     print("Poly has no root");
+//                 end if;
+
+//             end if;
+//         end while;
+//     end for;
+
+//     return AllCurves;
+// end function;
+
 function FindEx24(F, Ex24c, AllCurves, Twist, FTwist)
     p, ram_deg, in_deg, pi, N := BaseValues(F);
 
-    for i in Keys(Ex24c) do
-        if #Keys(Ex24c[i]) eq 0 then continue; end if;
-        for c in Ex24c[i] do
-            CubicField := c[1]`CubicField;
-            K := c[1]`Character`Field;
-            Poly := DefiningPolynomial(K, CubicField);
-            break;
-        end for;
-        Poly;
-        Keys(Ex24c[i]);
-        [#c : c in Ex24c[i]];
-
+    for CondExpTau in Keys(Ex24c) do
         ECGenerator := EllipticCurveGenerator(F : InitialBase := 2, method := 2);
-        while &or [#c gt 0 : c in Ex24c[i]] do
+        while &or [#c gt 0 : c in Ex24c[CondExpTau]] do
             E := Next(ECGenerator);
 
             CondExp := Valuation(Conductor(E));
-            if not CondExp in Keys(Ex24c[i]) or IsEmpty(Ex24c[i,CondExp]) then continue; end if;
+            if CondExp ne CondExpTau then continue; end if;
 
             L:=mTorsionField(E,3);
             d := Degree(L,F);
@@ -309,46 +376,81 @@ function FindEx24(F, Ex24c, AllCurves, Twist, FTwist)
             elif (in_deg mod 2 eq 1) and d lt 48 then
                 continue; 
             else
-                L := mTorsionField(BaseChange(E,CubicField), 3);
-                if Degree(L, CubicField)*Degree(CubicField, F) ne d then continue; end if;
+                E;
+                print("+++++++++++++++++++++++++++++++");
+                for i in Keys(Ex24c[CondExpTau]) do 
 
-                Lx<x>:=PolynomialRing(L);
+                    if IsEmpty(Ex24c[CondExpTau,i]) then continue; end if;
 
-                hasRoot := HasRoot(Lx!Poly);
+                    CubicField:=Ex24c[CondExpTau,i][1]`CubicField;
+                    print("Compute L time");
+                    time L := mTorsionField(BaseChange(E,CubicField), 3);
+                    if Degree(L, F) ne d then continue; end if;
 
-                if hasRoot then 
-                    E1 := BaseChange(E, K);
-                    time L1 := mTorsionField(E1, 3);
-                    time tau := FindInertiaType(L1, Ex24c[i, CondExp]);
-                    print("------------------------");
-                    Exclude(~Ex24c[i,CondExp], tau);
-                    Append(~AllCurves["Ex24",[i,CondExp]], [*E, tau*]);
-                    tau;
-                    #Ex24c[i,CondExp];
+                    K:=Ex24c[CondExpTau,i][1]`Character`Field;
+                    Poly:=DefiningPolynomial(K,CubicField);
+                    Lx<x>:=PolynomialRing(L);
+                    print("has root time");
+                    time hasRoot := HasRoot(Lx!Poly);
 
-                    for t in FTwist do
-                        E1 := QuadraticTwist(E,t);
-                        CondExp1 := Valuation(Conductor(E1));
-                        
-                        if not CondExp1 in Keys(Ex24c[i]) or IsEmpty(Ex24c[i,CondExp1]) then continue; end if;
-
-                        EK1 := BaseChange(E1, K);
-                        time L1 := mTorsionField(EK1,3);
-                        time tau := FindInertiaType(L1, Ex24c[i,CondExp1]);
-
-                        if IsNull(tau) then continue; end if;
-
+                    if hasRoot then 
+                        E1 := BaseChange(E, K);
+                        time L1 := mTorsionField(E1, 3);
+                        time tau := FindInertiaType(L1, Ex24c[CondExp,i]);
+                        if IsNull(tau) then break; end if;
                         print("------------------------");
-                        Exclude(~Ex24c[i,CondExp1], tau);
-                        Append(~AllCurves["Ex24",[i,CondExp1]], [*E1, tau*]);
+                        Exclude(~Ex24c[CondExp,i], tau);
+                        Append(~AllCurves["Ex24",[i,CondExp]], [*E, tau*]);
                         tau;
-                        #Ex24c[i,CondExp1];
-                    end for;
-                    // if Type(char) eq RngIntElt then continue; end if;
-                    // chi:=char;
-                else
-                    print("Poly has no root");
-                end if;
+                        #Ex24c[CondExpTau,i];
+                        i;
+
+
+                        for t in FTwist do
+                            Et := QuadraticTwist(E,t);
+                            CondExp1 := Valuation(Conductor(Et));
+                            
+                            if not CondExp1 in Keys(Ex24c) then return [*E,t*]; end if;
+                            
+                            j:=i;
+                            NumberOfOrbits:=#(&join [Keys(c) : c in Ex24c]);
+                            for k in [0..NumberOfOrbits-1]  do 
+                                j:=(j-1+k mod NumberOfOrbits)+1; 
+                                if not j in Keys(Ex24c[CondExp1]) then continue; end if;
+
+                                if IsEmpty(Ex24c[CondExp1,j]) then continue; end if;
+                                CubicField:=Ex24c[CondExp1,j][1]`CubicField;
+                                Lt:=mTorsionField(BaseChange(Et,CubicField),3);
+                                if Degree(Lt, F) ne d then continue; end if;
+
+                                K:=Ex24c[CondExp1,j][1]`Character`Field;
+                                Poly:=DefiningPolynomial(K,CubicField);
+                                Lx<x>:=PolynomialRing(Lt);
+                                print("has root time");
+                                time hasRoot := HasRoot(Lx!Poly);
+
+                                if hasRoot then 
+                                    E1 := BaseChange(Et, K);
+                                    time L1 := mTorsionField(E1, 3);
+                                    time tau := FindInertiaType(L1, Ex24c[CondExp1,j]);
+                                    if IsNull(tau) then return[*E,t*]; end if;
+                                    print("------------------------");
+                                    Exclude(~Ex24c[CondExp1,j], tau);
+                                    Append(~AllCurves["Ex24",[j,CondExp1]], [*Et, tau*]);
+                                    tau;
+                                    #Ex24c[CondExp1,j];
+                                    j;
+                                    break;
+                                end if;
+                            end for;
+                        end for;
+                        // if Type(char) eq RngIntElt then continue; end if;
+                        // chi:=char;
+                        break;
+                    else
+                        print("Poly has no root");
+                    end if;
+                end for;
 
             end if;
         end while;
@@ -356,6 +458,9 @@ function FindEx24(F, Ex24c, AllCurves, Twist, FTwist)
 
     return AllCurves;
 end function;
+
+
+
 
 function FindAllCurves(F, Twist, PSc, SCUc, SCRc, Ex8c, Ex24c, AllCurves)
     time AllCurves := FindPS(F,PSc,AllCurves,FTwist);

@@ -51,3 +51,17 @@ function FastMap(m)
     Fmap:= Homomorphism(A, B, Gens, [m(g) : g in Gens]);
     return Fmap;
 end function;
+
+function OptimalNorms(L,F,f)
+
+r:=RamificationDegree(L,F);
+c:=Max(r*(f-1)+1,AbsoluteRamificationDegree(L)+1);
+assert Ceiling(c/r) ge f;
+LowPrecL:=ChangePrecision(L,c);
+OL:=Integers(LowPrecL);
+UL,ULtoOL:=UnitGroup(OL);
+GenUL:=SetToSequence(Generators(UL));
+
+return [ChangePrecision(Norm(ChangePrecision(L!LowPrecL!ULtoOL(g),Precision(L)),F),Precision(F)) :g in GenUL],[ChangePrecision(L!LowPrecL!ULtoOL(g),Precision(L)) :g in GenUL];
+
+end function;

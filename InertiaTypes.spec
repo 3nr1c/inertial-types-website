@@ -98,21 +98,18 @@ declare attributes InertiaType:
 
 intrinsic 'eq'(tau1::InertiaType, tau2::InertiaType) -> BoolElt
 {Determines whether the two types are isomorphic 
-as representations of inertia.}
-// TODO: triply imprimitives
+as representations of inertia}
+// TODO: treat inverses & triply imprimitives
     if not Type(tau1) eq Type(tau2) then return false;
     else 
-        isIsom, i := IsIsomorphic(Codomain(tau1`Character`Map), Codomain(tau2`Character`Map));
-        if not isIsom then return false; end if;
-
-        plus := true;
-        minus := true;
-        for g in Generators(Domain(tau1`Character`Map)) do 
-            plus := plus and i(tau1`Character`Map(g)) eq tau2`Character`Map(g);
-            minus := minus and i(tau1`Character`Map(g)) eq -tau2`Character`Map(g);
-            if not (plus or minus) then return false; end if;
-        end for;
-        return true;
+        if tau1`Character`Map eq tau2`Character`Map then
+            return true;
+        else
+            for g in Generators(Domain(tau1`Character`Map)) do 
+                if Integers(4)!ElementToSequence(tau1`Character`Map(g))[1] ne -Integers(4)!ElementToSequence(tau2`Character`Map(g))[1] then return false; end if;
+            end for;
+            return true;
+        end if;
     end if;
 end intrinsic;
 
@@ -244,7 +241,6 @@ intrinsic NewExceptionalIT(phi::InertiaCharacter, F::FldPad, L::FldPad) -> Excep
     InductionCondExp := phi`CondExp + Valuation(Discriminant(phi`Field, L));
     RamificationLF := RamificationDegree(L,F);
 
-    // RamificationLF; phi`CondExp; Valuation(Discriminant(phi`Field, L)); InductionCondExp; InductionCondExp -2;
 
     exc`CondExp := Integers()!(2 + (InductionCondExp - 2)/RamificationLF);
     exc`Character := phi;
