@@ -96,6 +96,7 @@ for tau in SCU do
     end if;
 end for;
 
+/*
 SCRc := AssociativeArray();
 for i in [1..#SCR] do
     if #SCR[i] gt 0 then
@@ -110,10 +111,27 @@ for i in [1..#SCR] do
         end if;
     end for;
 end for;
+*/
+
+SCRc := AssociativeArray();
+for i in [1..#SCR] do
+    for tau in SCR[i] do
+        if not (tau`CondExp in Keys(SCRc)) then
+            SCRc[tau`CondExp]:= AssociativeArray();
+        end if;
+
+        if not i in Keys(SCRc[tau`CondExp]) then 
+            SCRc[tau`CondExp,i]:=[tau]; 
+            AllCurves["SCR",[i,tau`CondExp]]:=[* *]; 
+        else
+            Append(~SCRc[tau`CondExp,i], tau);
+        end if;
+    end for;
+end for;
 
 Ex8c  := AssociativeArray();
 for tau in Ex8 do
-    CondExp:=tau`Character`CondExp+Valuation(Discriminant(tau`Character`Field,tau`CubicField));
+    CondExp:=tau`CondExp;
     if not (CondExp in Keys(Ex8c)) then
         Ex8c[CondExp] := [tau];
         AllCurves["Ex8",CondExp]:=[* *];
@@ -228,6 +246,7 @@ function FindSCU(F,SCUc,AllCurves,FTwist)
     return AllCurves;
 end function;
 
+/*
 function FindSCR(F,SCRc,AllCurves,Twist,FTwist)
     p, ram_deg, in_deg, pi, N := BaseValues(F);
 
@@ -237,6 +256,8 @@ function FindSCR(F,SCRc,AllCurves,Twist,FTwist)
         if IsEmpty(Keys(SCRc[i])) then continue; end if;
         while &or [#c gt 0 : c in SCRc[i]] do
             E := Next(ECGenerator);
+            ECGenerator`counter;
+
 
             CondExp:=Valuation(Conductor(E));
             if not CondExp in Keys(SCRc[i]) or IsEmpty(SCRc[i,CondExp]) then continue; end if;
@@ -246,7 +267,10 @@ function FindSCR(F,SCRc,AllCurves,Twist,FTwist)
                 continue; 
             elif (in_deg mod 2 eq 0) and Degree(L,F) ge 24 then 
                 continue; 
-            elif (IsSquare(L!Twist[i])) and (Valuation(Conductor(BaseChange(QuadraticTwist(E,Twist[i]),L))) eq 0) then
+            else
+                time if not (IsSquare(L!Twist[i])) then continue; end if;
+                time if not((Valuation(L!Discriminant(QuadraticTwist(E,Twist[i]))) mod 12 eq 0)) then continue;end if;
+                time if not (Valuation(Conductor(BaseChange(QuadraticTwist(E,Twist[i]),L))) eq 0) then continue; end if;
 
                 EK := BaseChange(E,SCRc[i,CondExp,1]`Character`Field);
                 L := mTorsionField(EK,3);
@@ -273,6 +297,67 @@ function FindSCR(F,SCRc,AllCurves,Twist,FTwist)
                     Exclude(~SCRc[i,CondExp1],tau);
                     Append(~AllCurves["SCR",[i,CondExp1]],[*E1,tau*]);
                     tau;
+                end for;
+            end if;
+        end while;
+    end for;
+
+    return AllCurves;
+end function;
+*/
+
+
+function FindSCR(F,SCRc,AllCurves,Twist,FTwist)
+    p, ram_deg, in_deg, pi, N := BaseValues(F);
+
+    for CondExpTau in Keys(SCRc) do
+        ECGenerator := EllipticCurveGenerator(F : InitialBase := 2, method := 2);
+        while &or [#c gt 0 : c in SCRc[CondExpTau]] do
+            E := Next(ECGenerator);
+            
+            CondExp := Valuation(Conductor(E));
+            if CondExp ne CondExpTau then continue; end if;
+
+            L:=mTorsionField(E,3);
+            d := Degree(L,F);
+
+            if not (RamificationDegree(L,F) eq 8) then 
+                continue; 
+            elif (in_deg mod 2 eq 0) and Degree(L,F) ge 24 then 
+                continue; 
+            else
+                for i in Keys(SCRc[CondExp]) do
+                    if IsEmpty(SCRc[CondExp,i]) then continue; end if;
+                    time if not (IsSquare(L!Twist[i])) then continue; end if;
+                    time if not((Valuation(L!Discriminant(QuadraticTwist(E,Twist[i]))) mod 12 eq 0)) then continue;end if;
+                    time if not (Valuation(Conductor(BaseChange(QuadraticTwist(E,Twist[i]),L))) eq 0) then continue; end if;
+
+                    EK := BaseChange(E,SCRc[CondExp,i,1]`Character`Field);
+                    L := mTorsionField(EK,3);
+                    tau := FindInertiaType(L, SCRc[CondExp,i]);
+
+                    if IsNull(tau) then break; end if;
+
+                    Exclude(~SCRc[CondExp,i],tau);
+                    Append(~AllCurves["SCR",[i,CondExp]],[*E,tau*]);
+                    tau;
+
+                    for t in FTwist do
+                        E1 := QuadraticTwist(E,t);
+                        CondExp1 := Valuation(Conductor(E1));
+                        
+                        if IsEmpty(SCRc[CondExp1,i]) then continue; end if;
+
+                        EK1 := BaseChange(E1,SCRc[CondExp1,i,1]`Character`Field);
+                        L := mTorsionField(EK1,3);
+                        tau := FindInertiaType(L, SCRc[CondExp1,i]);
+
+                        if IsNull(tau) then continue; end if;
+
+                        Exclude(~SCRc[CondExp1,i],tau);
+                        Append(~AllCurves["SCR",[i,CondExp1]],[*E1,tau*]);
+                        tau;
+                    end for;
                 end for;
             end if;
         end while;
@@ -405,44 +490,18 @@ function FindEx24(F, Ex24c, AllCurves, Twist, FTwist)
                         #Ex24c[CondExpTau,i];
                         i;
 
-
                         for t in FTwist do
                             Et := QuadraticTwist(E,t);
                             CondExp1 := Valuation(Conductor(Et));
-                            
-                            if not CondExp1 in Keys(Ex24c) then return [*E,t*]; end if;
-                            
-                            j:=i;
-                            NumberOfOrbits:=#(&join [Keys(c) : c in Ex24c]);
-                            for k in [0..NumberOfOrbits-1]  do 
-                                j:=(j-1+k mod NumberOfOrbits)+1; 
-                                if not j in Keys(Ex24c[CondExp1]) then continue; end if;
-
-                                if IsEmpty(Ex24c[CondExp1,j]) then continue; end if;
-                                CubicField:=Ex24c[CondExp1,j][1]`CubicField;
-                                Lt:=mTorsionField(BaseChange(Et,CubicField),3);
-                                if Degree(Lt, F) ne d then continue; end if;
-
-                                K:=Ex24c[CondExp1,j][1]`Character`Field;
-                                Poly:=DefiningPolynomial(K,CubicField);
-                                Lx<x>:=PolynomialRing(Lt);
-                                print("has root time");
-                                time hasRoot := HasRoot(Lx!Poly);
-
-                                if hasRoot then 
-                                    E1 := BaseChange(Et, K);
-                                    time L1 := mTorsionField(E1, 3);
-                                    time tau := FindInertiaType(L1, Ex24c[CondExp1,j]);
-                                    if IsNull(tau) then return[*E,t*]; end if;
-                                    print("------------------------");
-                                    Exclude(~Ex24c[CondExp1,j], tau);
-                                    Append(~AllCurves["Ex24",[j,CondExp1]], [*Et, tau*]);
-                                    tau;
-                                    #Ex24c[CondExp1,j];
-                                    j;
-                                    break;
-                                end if;
-                            end for;
+                            E1 := BaseChange(Et, K);
+                            time L1 := mTorsionField(E1, 3);
+                            time tau := FindInertiaType(L1, Ex24c[CondExp1,i]);
+                            if IsNull(tau) then return[*E,t*]; end if;
+                            print("------------------------");
+                            Exclude(~Ex24c[CondExp1,i], tau);
+                            Append(~AllCurves["Ex24",[i,CondExp1]], [*Et, tau*]);
+                            tau;
+                            #Ex24c[CondExp1,i];
                         end for;
                         // if Type(char) eq RngIntElt then continue; end if;
                         // chi:=char;
@@ -474,7 +533,6 @@ function FindAllCurves(F, Twist, PSc, SCUc, SCRc, Ex8c, Ex24c, AllCurves)
 
     time AllCurves := FindEx24(F,Ex24c,AllCurves,Twist,FTwist);
     assert &+[#d : d in c, c in Ex24c] eq &+[#c : c in AllCurves["Ex24"]];
-
 
     return AllCurves;
 end function;

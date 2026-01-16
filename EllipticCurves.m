@@ -1,33 +1,84 @@
+function MySquarefreePart(f)
+
+  // Easy cases: degree 1, not padics, p-adic of precision 0 (yuck)
+
+  if Degree(f) le 1 then return f; end if;
+  F:=BaseRing(f);
+  if Type(F) eq RngPad then
+    F:=FieldOfFractions(F);
+    f:=PolynomialRing(F)!f;
+  end if;
+  if Type(F) ne FldPad then
+    return SquarefreePart(f);
+  end if;
+
+  prec:=Precision(F);
+  error if prec eq 0, "Cannot do much with p-adic of precision 0";
+
+  R:=PolynomialRing(F);
+  x := R.1;
+  O:=Integers(F);
+  k,m:=ResidueClassField(O);
+  p:=Characteristic(k);
+
+  // Cheap trick to make Derivative monic (for monic f) when p|degree
+
+  fd:=f;
+  if Degree(f) mod p eq 0 then
+    v:=[Valuation(Evaluate(f,n)): n in [1..2*Degree(f)]];
+    m,i:=Min(v);
+    fd:=f*(x-i);
+  end if;
+
+  g:=GCD(f,Derivative(fd));
+
+  plc:=Precision(LeadingCoefficient(g));
+  d:=Degree(g);
+  ok:=(d eq 0) and (plc gt prec/4) or (d gt 0) and (plc gt prec/2);
+  error if not ok,
+    "Not enough precision to determine whether the polynomial is square-free for\n";
+    //"f="*DelSpaces(f)*" d="*DelSpaces(d)*" prec="*DelSpaces(prec)*" plc="*DelSpaces(plc);
+  return (d eq 0) select f else (f div g);
+end function;
+
+function E3TorsField(E1)
+    F:=BaseRing(E1);
+    E := WeierstrassModel(E1);
+    R<x>:=PolynomialRing(F);
+    c4,c6:=Explode(cInvariants(E));
+    L:=SplittingField(x^8-6*c4*x^4-8*c6*x^2-3*c4^2);
+    return L;
+end function;
+
 function mTorsionField(E1, m)
     //We Pick and Elliptic Curve and a WeierstrassModel y^2=f(x)
     F := BaseRing(E1);
-    P<x> := PolynomialRing(F);
     E := WeierstrassModel(E1);
     
     // Then we adjoint the roots of f(x) to Q9 to obtain a field L;
     v2 := aInvariants(E);
-    f := x^3+v2[2]*x^2+v2[4]*x+v2[5]*1;
-
-    g := DivisionPolynomial(E,m);
-    L := SplittingField(g);
+    g := MySquarefreePart(DivisionPolynomial(E,m));
+    L, roots := SplittingField(g);
     R<x> := PolynomialRing(L);
-    g2 := R!g;
-    roots := Roots(g2);
+    // g2 := R!g;
+    // roots := Roots(g2);
 
     if m eq 3 then
-        r:=roots[1]; 
-        z1 := Evaluate(R!f,r[1]);
-        L := SplittingField(R!(x^2-z1));
+        r:=roots[1];
+        z1:=(r^3+L!v2[2]*r^2+L!v2[4]*r+L!v2[5]); 
+        if not z1 in L then print("NO ROOTS USING E3TORS"); Parent(z1); z1; [x in L : x in roots]; R; L; return E3TorsField(E); end if;
+        L := SplittingField(R!(R!x^2-R!z1));
         R<x> := PolynomialRing(L);
     else
         for r in roots do
-            z1 := Evaluate(R!f,r[1]);
+            z1:=L!(r^3+L!v2[2]*r^2+L!v2[4]*r+L!v2[5]);
             L := SplittingField(R!(x^2-z1));
             R<x> := PolynomialRing(L);
         end for;
     end if;
     return L;
 end function;
+
 
 function FindInertiaType(L, CandidateTypes)
     // Warning: this function will only work if all the candidate types
