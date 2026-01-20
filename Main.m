@@ -1,9 +1,61 @@
 load "Exceptionals.m";
 
+function MatchTriplys (F,SCR,Twist)
+    F;
+    Sel,FtoSel := pSelmerGroup(2,F);
+    SeltoF := Inverse(FtoSel);
+    Triples:={};
+    for i,j in [1..#Twist] do
+        if i eq j then continue; end if; 
+        x:=FtoSel(Twist[i]);
+        y:=FtoSel(Twist[j]);
+        z:=x*y;
+        k:=[l : l in [1..#Twist]| FtoSel(Twist[l]) eq z ][1];
+        if IsEmpty({tau`CondExp: tau in SCR[i]} meet {tau`CondExp: tau in SCR[j]} meet {tau`CondExp: tau in SCR[k]}) then continue; end if;
+        trip:={i,j,k};
+        if #trip eq 3 and not trip in Triples then Triples:=Include(Triples,trip); end if;
+    end for;
+
+    // for l in [1..#SCR] do
+    //     for triply in Triples do
+    //         if l in triply then
+    //         i,j,k:=Explode(SetToSequence(triply));
+        
+    //         Ki:=SCR[i,1]`Char`Field;
+    //         Ri<X>:=PolynomialRing(Ki);
+    //         Ei:=SplittingField(X^2-Twist[j]);
+            
+    //         c:=Max([tau`Character`CondExp: tau in SCR[i]]);
+    //         Uf,UpStairsUf:=OptimalNorms(Ei,Ki,c);
+
+
+    //         Kj:=SCR[j,1]`Char`Field;
+    //         Rj<X>:=PolynomialRing(Kj);
+    //         Ej:=SplittingField(X^2-Twist[i]);
+
+            
+    //         Ki:=SCR[i,1]`Char`Field;
+    //         Ri<X>:=PolynomialRing(Ki);
+    //         Ei:=SplittingField(X^2-Twist[j]);
+            
+
+
+    //     end for;
+
+
+
+    // end for; 
+
+
+
+    return Triples;
+end function;
+
 
 function InertialTypes(F : SkipExceptionals := false) 
     c := 0;
     QuadExt,Twist:= AllQuadraticExtensions(F : Selmer:=true);
+    print("Extensions done");
 
     p, ram_deg, in_deg, pi, N := BaseValues(F);
     ff := Floor(N/2);
@@ -37,12 +89,16 @@ function InertialTypes(F : SkipExceptionals := false)
             f := Max(N-Cond, 2*Cond);
             printf "f=%o\n", f;
             printf "c=%o\n", c;
-            G := groups[ff - c + 1];
-            if ff - c + 1 eq 1 then
-                llift := lift;
-            else
-                llift := Inverse(maps[ff - c]) * lift;
-            end if;
+            // G := groups[ff - c + 1];
+            // if ff - c + 1 eq 1 then
+            //     llift := lift;
+            // else
+            //     llift := Inverse(maps[ff - c]) * lift;
+            // end if;
+
+            G := groups[1];
+            llift:=lift;
+
             VarepsGenerators := {K!llift(g) : g in Generators(G)};
             SCR_K := SupercuspidalRamified(F, K, f, c, VarepsGenerators);
             SCR[t] := SCR_K;
@@ -92,10 +148,15 @@ ZZ:=Integers();
 Q2:=pAdicField(2,200);
 R<x>:=PolynomialRing(Q2);
 Q4<phi>:=ext<Q2|x^2-x-1>;
+R<x>:=PolynomialRing(Q4);
 K1:=FieldOfFractions(AllExtensions(Q2,2)[1]);
+K2:=UnramifiedExtension(Q2,3);
+K3:=UnramifiedExtension(K2,2);
+Degree(K3,Q2);
+
 
 // F:=FieldOfFractions(AllExtensions(Q2,2)[6]);
-time Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(Q2);
+time Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(K2: SkipExceptionals:=false);
 // K := FieldOfFractions(AllExtensions(Q4, 2)[1]);
 
 // load "CurvesQ4.m";

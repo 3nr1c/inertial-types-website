@@ -72,7 +72,7 @@ function ExceptionalTypesTriply(F,L)
         else
             llift := Inverse(UMaps[f - c]) * ULift;
         end if;
-        VarepsGenerators := {K1!llift(g) : g in Generators(G)};
+        VarepsGenerators := [K1!llift(g) : g in Generators(G)];
 
         CGroups1, CMaps1, CLift1 := ConComplex(L, K1, f);
         proj := Inverse(CLift1);
@@ -94,13 +94,14 @@ function ExceptionalTypesTriply(F,L)
             if IsZero((GalEtoAut(tau)(y1)-y2)) then mu:=GalEtoAut(tau); break; end if;
         end for;
 
-        E1:=ChangePrecision(E,#CGroups1);
-        OE:=Integers(E1);
-        UE,UEtoOE:=UnitGroup(OE);
-        Gen:=[g : g in Generators(UE)];
+        
+        Uf,UpStairsUf:=OptimalNorms(E,K1,#CGroups1);
+        Uf1:=[Inverse(CLift1)(g): g in Uf];
+        muUf1:=[Inverse(CLift1)(Norm(mu(g),K1)): g in UpStairsUf];
+        
 
-        Uf1:=[Inverse(CLift1)(Norm(ChangePrecision(E!E1!UEtoOE(g),Precision(E)),K1)): g in Gen];
-        muUf1:=[Inverse(CLift1)(Norm(ChangePrecision(mu(E!E1!UEtoOE(g)),Precision(E)),K1)): g in Gen];
+        //Uf1:=[Inverse(CLift1)(Norm(ChangePrecision(E!E1!UEtoOE(g),Precision(E)),K1)): g in Gen];
+        //muUf1:=[Inverse(CLift1)(Norm(ChangePrecision(mu(E!E1!UEtoOE(g)),Precision(E)),K1)): g in Gen];
         //Uf2:=[Inverse(CLift2)(Norm(ChangePrecision(E!E1!UEtoOE(g),Precision(E)),K2)): g in Generators(UE)];
         //SigUf:=[Inverse(CLift2)(ExtendAutomorphism(sigma,K1,K2,y1,y2,CLift1(g))) : g in Uf1];
 
@@ -136,14 +137,25 @@ end function;
 
 
 function ExceptionalTypesSimply(Fi)
-// function ExceptionalTypesSimply(Fi,l)
    
     Fix<x>:=PolynomialRing(Fi);
-    F<zeta3>:=ext<Fi|x^2+x+1>;
-    for l in [1..3] do
+    F:=UnramifiedExtension(Fi,2);
+    for l in [1..3] do 
         L:=FieldOfFractions(AllExtensions(F,3)[l]);
-        if IsNormal(L, Fi) then break; end if;
+        if IsNormal(L,Fi) then break; end if;
     end for;
+
+    //F<zeta3>:=ext<Fi|x^2+x+1>;
+    //R<x>:=PolynomialRing(F);
+    //L:=ext<F|x^3-UniformizingElement(F)>;
+    assert Degree(F,Fi) eq 2; 
+    assert RamificationDegree(F,Fi) eq 1;
+    assert RamificationDegree(L,Fi) eq 3;
+    assert IsNormal(L,Fi);
+    // for l in [1..3] do
+    //     L:=FieldOfFractions(AllExtensions(F,3)[l]);
+    //     if IsNormal(L, Fi) and RamificationDegree(L,Fi) eq 3 then break; end if;
+    // end for;
 
     R<X> := PolynomialRing(L);
     GSel, Sel, SeltoL, Gal, GaltoAut := SelmerGaloisModule(Fi,L);
@@ -162,7 +174,17 @@ function ExceptionalTypesSimply(Fi)
     ExGroups:=[* *];
     ExLifts:=[* *];
     ExExp:=[* *];
-    #SelOrbits;
+
+    // for orbit in SelOrbits do
+    //     for tau in Gal do
+    //     Order(tau);
+    //     orbit!(GSel!(orbit.1)*tau) eq orbit.1;
+    //     orbit!(GSel!(orbit.2)*tau) eq orbit.2;
+    //     orbit!(GSel!(orbit.1+orbit.2)*tau) eq orbit.1+orbit.2;
+    //     end for;
+    //     print("---------------------------------------");
+    // end for;
+
     for orbit in SelOrbits do
         Polynomials := [];
         roots := [];
@@ -171,35 +193,39 @@ function ExceptionalTypesSimply(Fi)
         for i in [1..3] do
             g:=g*rho;
             z := g(ChangePrecision(SeltoL(Sel!ElementToSequence(GSel!orbit.1)), Precision(L)));
-            Append(~Polynomials, X^2 - z);
+            Append(~Polynomials, X^2 - R!z);
         end for;
         K1:=SplittingField(Polynomials[1]);
-        y1:=Roots(PolynomialRing(K1)!Polynomials[1])[1,1];
-        K2:=SplittingField(Polynomials[2]);
-        y2:=Roots(PolynomialRing(K2)!Polynomials[2])[1,1];
-        K3:=SplittingField(Polynomials[3]);
-        y3:=Roots(PolynomialRing(K3)!Polynomials[3])[1,1];
-        assert rho(y1^2) eq y2^2 and rho(y2^2) eq y3^2;
+        //y1:=Roots(PolynomialRing(K1)!Polynomials[1])[1,1];
+        //K2:=SplittingField(Polynomials[2]);
+        //y2:=Roots(PolynomialRing(K2)!Polynomials[2])[1,1];
+        //K3:=SplittingField(Polynomials[3]);
+        //y3:=Roots(PolynomialRing(K3)!Polynomials[3])[1,1];
+        //assert rho(y1^2) eq y2^2 and rho(y2^2) eq y3^2;
 
         K1X<x>:=PolynomialRing(K1);
         E:=SplittingField(K1X!Polynomials[2]);
-        y1:=Roots(PolynomialRing(E)!Polynomials[1])[1,1];
-        y2:=Roots(PolynomialRing(E)!Polynomials[2])[1,1];
+        //y1:=Roots(PolynomialRing(E)!Polynomials[1])[1,1];
+        //y2:=Roots(PolynomialRing(E)!Polynomials[2])[1,1];
+        //y3:=Roots(PolynomialRing(E)!Polynomials[3])[1,1];
+        
 
         // Initialize character conditions
         p, ram_deg, in_deg, pi, N := BaseValues(L);
         Cond, pi, Gal_L_K1, y := ExtValues(L,K1);
-        f := Max(N-Cond, 2*Cond);
+        f := Max(N-Cond, 2*Cond);// CHECK THE VALUE OF f HERE
         c := Cond;
 
         UGroups, UMaps, ULift := UComplex(L, f);
-        G := UGroups[f - c + 1];
-        if f - c + 1 eq 1 then
-            llift := ULift;
-        else
-            llift := Inverse(UMaps[f - c]) * ULift;
-        end if;
-        VarepsGenerators := {K1!llift(g) : g in Generators(G)};
+        // G := UGroups[f - c + 1];
+        // if f - c + 1 eq 1 then
+        //     llift := ULift;
+        // else
+        //     llift := Inverse(UMaps[f - c]) * ULift;
+        // end if;
+        G := UGroups[1];
+        llift:=ULift;
+        VarepsGenerators := [K1!llift(g) : g in Generators(G)];
 
         CGroups1, CMaps1, CLift1 := ConComplex(L, K1, f);
         proj := Inverse(CLift1);
@@ -213,49 +239,73 @@ function ExceptionalTypesSimply(Fi)
         Append(~Values, 0);
 
         ////////////////////////
-        
+        // time IsNormal(E,Fi);
         time GalE,GalEtoAut:=AutomorphismGroup(E,Fi);
-        #GalE;
-        if #GalE eq Degree(E,Fi) then   
-            for tau in GalE do
-                if IsZero((GalEtoAut(tau)(y1)-y2)) and IsZero((GalEtoAut(tau)(zeta3)-zeta3)) then mu:=GalEtoAut(tau); break; end if;
-            end for;
-            for tau in GalE do
-                if IsZero((GalEtoAut(tau)(y1)-y1)) and IsZero((GalEtoAut(tau)(zeta3)-zeta3^2)) then delta:=GalEtoAut(tau); break; end if; 
-            end for;
+        // Degree(E,Fi);
+        // #GalE;
+        // print("------------------------------");
+        time if RamificationDegree(E,F) eq 12 and IsIsomorphic(GalE,Sym(4))  then
+        //if #GalE eq Degree(E,Fi) then   
+            //for tau in GalE do
+                //if IsZero((GalEtoAut(tau)(y1)-y2)) and IsZero((GalEtoAut(tau)(y2)-y3)) and IsZero((GalEtoAut(tau)(zeta3)-zeta3)) then "transitive"; mu:=GalEtoAut(tau); break; end if;
+                // WE DONT KNOW GALOIS THEORY!!!!!!
+                //if Order(tau) eq 3 then mu:=GalEtoAut(tau); break; end if;
+            //end for;
+            // for tau in GalE do
+            //     if IsZero((GalEtoAut(tau)(y1)-y1)) and IsZero((GalEtoAut(tau)(zeta3)-zeta3^2)) then delta:=GalEtoAut(tau); break; end if; 
+            //     // WE DONT KNOW GALOIS THEORY!!!!!!
+            //     //if Order(tau) eq 2 then delta:=GalEtoAut(tau); break; end if;
+            // end for;
 
-            E1:=ChangePrecision(E,#CGroups1);
-            OE:=Integers(E1);
-            UE,UEtoOE:=UnitGroup(OE);
-            Gen:=[g : g in Generators(UE)];
+            // E1:=ChangePrecision(E,#CGroups1);
+            // OE:=Integers(E1);
+            // UE,UEtoOE:=UnitGroup(OE);
+            // Gen:=[g : g in Generators(UE)];
 
-            Uf1:=[Inverse(CLift1)(Norm(ChangePrecision(E!E1!UEtoOE(g),Precision(E)),K1)): g in Gen];
-            muUf1:=[Inverse(CLift1)(Norm(ChangePrecision(mu(E!E1!UEtoOE(g)),Precision(E)),K1)): g in Gen];
-            deltaUf1:=[Inverse(CLift1)(Norm(ChangePrecision(delta(E!E1!UEtoOE(g)),Precision(E)),K1)): g in Gen];
-            
+            // Uf1:=[Inverse(CLift1)(Norm(ChangePrecision(E!E1!UEtoOE(g),Precision(E)),K1)): g in Gen];
+            // muUf1:=[Inverse(CLift1)(Norm(ChangePrecision(mu(E!E1!UEtoOE(g)),Precision(E)),K1)): g in Gen];
+            // deltaUf1:=[Inverse(CLift1)(Norm(ChangePrecision(delta(E!E1!UEtoOE(g)),Precision(E)),K1)): g in Gen];
+
+
+            Uf,UpStairsUf:=OptimalNorms(E,K1,#CGroups1);
+
+            Uf1:=[Inverse(CLift1)(g): g in Uf];
             Elements := Elements cat [2*g : g in Uf1];
             Values := Values cat [0 : i in [1 .. #Uf1]];
 
-            Elements := Elements cat [Uf1[i] - muUf1[i] : i in [1 .. #Uf1]];
-            Values := Values cat [0 : i in [1 .. #Uf1]];
+            for tau in GalE do
+                if IsIdentity(tau) then continue; end if;
+                mu:=GalEtoAut(tau);
+                muUf1:=[Inverse(CLift1)(Norm(mu(g),K1)): g in UpStairsUf];
+                Elements := Elements cat [Uf1[i] - muUf1[i] : i in [1 .. #Uf1]];
+                Values := Values cat [0 : i in [1 .. #Uf1]];
+            end for;    
+            
+            // muUf1:=[Inverse(CLift1)(Norm(mu(g),K1)): g in UpStairsUf];
+            // Elements := Elements cat [Uf1[i] - muUf1[i] : i in [1 .. #Uf1]];
+            // Values := Values cat [0 : i in [1 .. #Uf1]];
+            
+            // deltaUf1:=[Inverse(CLift1)(Norm(delta(g),K1)): g in UpStairsUf];
+            // mudeltaUf1:=[Inverse(CLift1)(Norm(delta(mu(g)),K1)): g in UpStairsUf];
+            // mu2deltaUf1:=[Inverse(CLift1)(Norm(delta(mu(mu(g))),K1)): g in UpStairsUf];
+            // mu2Uf1:=[Inverse(CLift1)(Norm(mu(mu(g)),K1)): g in UpStairsUf];
+            // Elements := Elements cat [Uf1[i] - deltaUf1[i] : i in [1 .. #Uf1]];
+            // Values := Values cat [0 : i in [1 .. #Uf1]];
 
-            Elements2 := Elements cat [Uf1[i] + deltaUf1[i] : i in [1 .. #Uf1]];
+            // Elements := Elements cat [Uf1[i] - mudeltaUf1[i] : i in [1 .. #Uf1]];
+            // Values := Values cat [0 : i in [1 .. #Uf1]];
 
-            Elements := Elements cat [Uf1[i] - deltaUf1[i] : i in [1 .. #Uf1]];
-            Values := Values cat [0 : i in [1 .. #Uf1]];
+            // Elements := Elements cat [Uf1[i] - mu2deltaUf1[i] : i in [1 .. #Uf1]];
+            // Values := Values cat [0 : i in [1 .. #Uf1]];
+
+            // Elements := Elements cat [Uf1[i] - mu2Uf1[i] : i in [1 .. #Uf1]];
+            // Values := Values cat [0 : i in [1 .. #Uf1]];
 
             
 
             
             time Caracteres:=FastCharactersOfPrimePowerOrder(CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements, Values:=Values);
-            time Caracteres2:=FastCharactersOfPrimePowerOrder(CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements2, Values:=Values);
-
-            print("+++++++++++++++++++++++++++++++++++++++++++");
-            #Caracteres;
-            #Caracteres2;
-            print("+++++++++++++++++++++++++++++++++++++++++++");
-
-            Caracteres:=Caracteres cat Caracteres2;
+            
 
             if not IsEmpty(Caracteres) then 
                 Append(~ExceptionalChars,[
@@ -268,6 +318,6 @@ function ExceptionalTypesSimply(Fi)
             end if;
             print("------------------");
         end if;
-    end for;
+         end for;
     return ExceptionalChars;
 end function;

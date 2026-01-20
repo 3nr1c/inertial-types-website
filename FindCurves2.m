@@ -1,6 +1,7 @@
 Attach("ECGenerator.spec");
 load "Main.m";
 load "EllipticCurves.m";
+//load "Exceptionals.m";
 
 function CompareType(E, Twist, PS, SCU, SCR, Ex8, Ex24,AllCurves)
     if Valuation(jInvariant(E)) gt 0 then 
@@ -307,7 +308,7 @@ end function;
 */
 
 
-function FindSCR(F,SCRc,AllCurves,Twist,FTwist)
+procedure FindSCR(F,~SCRc,~AllCurves,Twist,FTwist)
     p, ram_deg, in_deg, pi, N := BaseValues(F);
 
     for CondExpTau in Keys(SCRc) do
@@ -341,6 +342,7 @@ function FindSCR(F,SCRc,AllCurves,Twist,FTwist)
                     Exclude(~SCRc[CondExp,i],tau);
                     Append(~AllCurves["SCR",[i,CondExp]],[*E,tau*]);
                     tau;
+                    &+[#c : c in AllCurves["SCR"]];
 
                     for t in FTwist do
                         E1 := QuadraticTwist(E,t);
@@ -357,14 +359,13 @@ function FindSCR(F,SCRc,AllCurves,Twist,FTwist)
                         Exclude(~SCRc[CondExp1,i],tau);
                         Append(~AllCurves["SCR",[i,CondExp1]],[*E1,tau*]);
                         tau;
+                        &+[#c : c in AllCurves["SCR"]];
                     end for;
                 end for;
             end if;
         end while;
     end for;
-
-    return AllCurves;
-end function;
+end procedure;
 
 // function FindEx24(F, Ex24c, AllCurves, Twist, FTwist)
 //     p, ram_deg, in_deg, pi, N := BaseValues(F);
