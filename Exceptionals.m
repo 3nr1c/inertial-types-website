@@ -89,7 +89,7 @@ function ExceptionalTypesTriply(F,L)
         //FilChars1:=Chars1;
         //FilChars2:=Chars2;
         
-        GalE,GalEtoAut:=AutomorphismGroup(E,F);
+        time GalE,GalEtoAut:=AutomorphismGroup(E,F);
         for tau in GalE do
             if IsZero((GalEtoAut(tau)(y1)-y2)) then mu:=GalEtoAut(tau); break; end if;
         end for;
@@ -112,7 +112,7 @@ function ExceptionalTypesTriply(F,L)
         Elements := Elements cat [Uf1[i] - muUf1[i] : i in [1 .. #Uf1]];
         Values := Values cat [0 : i in [1 .. #Uf1]];
 
-        time Caracteres:=FastCharactersOfPrimePowerOrder(CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements, Values:=Values);
+        Caracteres:=FastCharactersOfPrimePowerOrder(CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements, Values:=Values);
         //time Caracteres2:=FastCharactersOfPrimePowerOrder(CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements2, Values:=Values);
 
         //print("+++++++++++++++++++++++++++++++++++++++++++");
@@ -127,7 +127,7 @@ function ExceptionalTypesTriply(F,L)
             ExGroups:=Append(ExGroups,CGroups1[1]);
             ExLifts:=Append(ExLifts,CLift1);
             ExExp:=Append(ExExp,#CGroups1);
-            Domain(CLift1) eq Domain(Caracteres[1]`Map);
+            // Domain(CLift1) eq Domain(Caracteres[1]`Map);
         end if;
     end for;
 
@@ -162,7 +162,7 @@ function ExceptionalTypesSimply(Fi)
     ExGroups:=[* *];
     ExLifts:=[* *];
     ExExp:=[* *];
-    #SelOrbits;
+    printf "%o Selmer orbits\n", #SelOrbits;
     for orbit in SelOrbits do
         Polynomials := [];
         roots := [];

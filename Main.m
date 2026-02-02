@@ -95,7 +95,7 @@ Q4<phi>:=ext<Q2|x^2-x-1>;
 K1:=FieldOfFractions(AllExtensions(Q2,2)[1]);
 
 // F:=FieldOfFractions(AllExtensions(Q2,2)[6]);
-time Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(Q2);
+time Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(Q4);
 // K := FieldOfFractions(AllExtensions(Q4, 2)[1]);
 
 // load "CurvesQ4.m";

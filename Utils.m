@@ -65,3 +65,20 @@ GenUL:=SetToSequence(Generators(UL));
 return [ChangePrecision(Norm(ChangePrecision(L!LowPrecL!ULtoOL(g),Precision(L)),F),Precision(F)) :g in GenUL],[ChangePrecision(L!LowPrecL!ULtoOL(g),Precision(L)) :g in GenUL];
 
 end function;
+
+function ElementCoordinates(x, B);
+//'''Returns the coordinates of x in the basis B'''
+    L := Parent(B[1]);
+    assert Degree(L) eq #B;//: "Provided vectors are not a basis";
+    basis:=[];
+    for b in B do
+        Append(~basis,ElementToSequence(b));
+    end for;
+    P_1 := Matrix(basis);
+    assert Determinant(P_1) ne 0;//: "Provided vectors are not a basis";
+    P := Matrix(basis)^(-1);
+    K := BaseRing(P);
+
+    xs := Vector(ElementToSequence(L!x));
+    return xs * P;
+end function;

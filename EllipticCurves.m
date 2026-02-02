@@ -9,19 +9,19 @@ function mTorsionField(E1, m)
     f := x^3+v2[2]*x^2+v2[4]*x+v2[5]*1;
 
     g := DivisionPolynomial(E,m);
-    L := SplittingField(g);
+    L, roots := SplittingField(g);
     R<x> := PolynomialRing(L);
-    g2 := R!g;
-    roots := Roots(g2);
+    // g2 := R!g;
+    // roots := Roots(g2);
 
     if m eq 3 then
         r:=roots[1]; 
-        z1 := Evaluate(R!f,r[1]);
+        z1 := Evaluate(R!f,r);
         L := SplittingField(R!(x^2-z1));
         R<x> := PolynomialRing(L);
     else
         for r in roots do
-            z1 := Evaluate(R!f,r[1]);
+            z1 := Evaluate(R!f,r);
             L := SplittingField(R!(x^2-z1));
             R<x> := PolynomialRing(L);
         end for;
