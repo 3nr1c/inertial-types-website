@@ -17,12 +17,15 @@ intrinsic EllipticCurveGenerator(F::FldPad : InitialBase := 4, method := 2) -> C
     ECG`F := F;
     pi := UniformizingElement(F);
     ECG`pi := pi;
-    ECG`u := 1 + ECG`pi;
+    OF:=Integers(F);
+    for x1,x2 in [0..10] do
+        z:=F![x1,x2];
+        if IsUnit(OF!z) and not (z in BaseRing(F)) then z; ECG`u := z; break x1;  end if;
+    end for;
     ECG`Base := InitialBase;
     ECG`InitialBase := ECG`Base;
     ECG`ijk := 1;
     ECG`counter := -1;
-    ECG`curve := EllipticCurveWithjInvariant(1/pi);
     ECG`method := method;
     return ECG;
 end intrinsic;

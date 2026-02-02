@@ -235,13 +235,14 @@ intrinsic NewExceptionalIT(phi::InertiaCharacter, F::FldPad, L::FldPad) -> Excep
 {Create the exceptional inertia type of F given by the character phi}
     assert Degree(L, F) eq 3;
 
-    CondExpFK := Valuation(Discriminant(phi`Field, F));
-    assert CondExpFK gt 0;
+    CondExpKL := Valuation(Discriminant(phi`Field, L));
+    assert CondExpKL gt 0;
 
     exc := New(ExceptionalIT);
     exc`BaseField := F;
 
-    InductionCondExp := phi`CondExp + Valuation(Discriminant(phi`Field, L));
+    InductionCondExp := phi`CondExp + CondExpKL;
+    InductionCondExp;
     RamificationLF := RamificationDegree(L,F);
 
 
