@@ -14,6 +14,8 @@ function MatchTriplys (F,SCR,Twist)
         if #trip eq 3 and not trip in Triples then Triples:=Include(Triples,trip); end if;
     end for;
 
+    TriplyImprimitives := [];
+
     for l in [1..1] do
         counter:=0;
         for triply in Triples do
@@ -56,6 +58,15 @@ function MatchTriplys (F,SCR,Twist)
                 end for;      
             Matchj;
             Matchk;
+            if #Matchj eq 1 and #Matchk eq 1 then
+                Append(~TriplyImprimitives, NewTriplyImprimitiveIT([
+                    chi`Character, Matchj[1]`Character, Matchk[1]`Character
+                ], chi`BaseField));
+            elif not (#Matchj eq 0 and #Matchk eq 0) then
+                print("ERROR");
+                assert false;
+            end if;
+
             print("-------------------------------------------");
             end for;
             
@@ -65,7 +76,7 @@ function MatchTriplys (F,SCR,Twist)
 
 
     end for; 
-    return Triples;
+    return TriplyImprimitives;
 end function;
 
-Triples:=MatchTriplys (Q4,SCR,Twist);
+TriplyImprimitives:=MatchTriplys (Q4,SCR,Twist);

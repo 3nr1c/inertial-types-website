@@ -197,11 +197,6 @@ declare attributes SupercuspidalRamifiedIT:
     InducingField
 ;
 
-// declare type SimplyImprimitiveIT: SupercuspidalRamifiedIT;
-// declare type TriplyImprimitiveIT: SupercuspidalRamifiedIT;
-// declare attributes TriplyImprimitiveIT:
-//     Characters
-// ;
 
 intrinsic NewSupercuspidalRamifiedIT(phi::InertiaCharacter, F::FldPad) -> SupercuspidalRamifiedIT
 {Create the supercuspidal ramified inertia type of F induced by the character phi}
@@ -217,6 +212,46 @@ intrinsic NewSupercuspidalRamifiedIT(phi::InertiaCharacter, F::FldPad) -> Superc
     scr`InducingField := phi`Field;
 
     return scr;
+end intrinsic;
+
+
+declare type SimplyImprimitiveIT: SupercuspidalRamifiedIT;
+declare type TriplyImprimitiveIT: SupercuspidalRamifiedIT;
+declare attributes TriplyImprimitiveIT:
+    Characters
+;
+
+intrinsic NewTriplyImprimitiveIT(phis::SeqEnum[InertiaCharacter], F::FldPad) -> TriplyImprimitiveIT
+{Creates a supercuspidal triply imprimitive inertia type of F induced by the tuple of characters [phi]}
+    assert #phis eq 3;
+    assert Degree(phis[1]`Field, F) eq 2;
+    assert Degree(phis[2]`Field, F) eq 2;
+    assert Degree(phis[3]`Field, F) eq 2;
+
+    CondExpFK := [
+        Valuation(Discriminant(phi`Field, F)) : phi in phis
+    ];
+    assert CondExpFK[1] gt 0;
+    assert CondExpFK[2] gt 0;
+    assert CondExpFK[3] gt 0;
+
+    triply := New(TriplyImprimitiveIT);
+    triply`BaseField := F;
+    CondExps := [CondExpFK[i] + phis[i]`CondExp : i in [1..3]];
+    assert CondExps[1] eq CondExps[2] and CondExps[2] eq CondExps[3];
+    triply`CondExp := CondExps[1];
+    triply`Characters := phis;
+
+    return triply;
+end intrinsic;
+
+intrinsic Print(tau::TriplyImprimitiveIT)
+{Prints a triply imprimitive inertia type}
+    print("Triply Imprimitive Inertia Type of the field");
+    print("\t"),tau`BaseField;
+    printf "of conductor exponent %o\n", tau`CondExp;
+    printf "with 3 underlying characters of order 4 and conductor exponents [%o, %o, %o]",
+        tau`Characters[1]`CondExp, tau`Characters[2]`CondExp, tau`Characters[3]`CondExp;
 end intrinsic;
 
 // intrinsic GetTripleOfCharacters(tau::SupercuspidalRamifiedIT) -> [Character]

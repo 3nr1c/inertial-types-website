@@ -80,5 +80,6 @@ function ElementCoordinates(x, B);
     K := BaseRing(P);
 
     xs := Vector(ElementToSequence(L!x));
-    return xs * P;
+    xsP := xs * P;
+    return [xsP[i] : i in [1..#B]];
 end function;
