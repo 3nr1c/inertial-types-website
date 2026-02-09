@@ -47,15 +47,15 @@ function MatchTriplys (F,SCR,Twist)
             for chi in SCR[i] do
                 Matchj:=SCR[j];
                 Matchk:=SCR[k];
+                isIsoj, isoj := IsIsomorphic(Codomain(chi`Character`Map), Codomain(SCR[j,1]`Character`Map));
+                isIsok, isok := IsIsomorphic(Codomain(chi`Character`Map), Codomain(SCR[k,1]`Character`Map));
+                
                 for t in [1..#ManualUfi] do
-                    Matchj:=[tau: tau in Matchj | ElementToSequence(chi`Character(Inverse(chi`Character`Lift)(ManualUfi[t]))) eq ElementToSequence(tau`Character(Inverse(tau`Character`Lift)(ManualUfj[t])))];
-                    Matchk:=[tau: tau in Matchk | ElementToSequence(chi`Character(Inverse(chi`Character`Lift)(ManualUfi[t]))) eq ElementToSequence(tau`Character(Inverse(tau`Character`Lift)(ManualUfk[t])))];
+                    Matchj:=[tau: tau in Matchj   | isoj(chi`Character(Inverse(chi`Character`Lift)(ManualUfi[t]))) eq tau`Character(Inverse(tau`Character`Lift)(ManualUfj[t]))];
+                    Matchk:=[tau: tau in Matchk   | isok(chi`Character(Inverse(chi`Character`Lift)(ManualUfi[t]))) eq tau`Character(Inverse(tau`Character`Lift)(ManualUfk[t]))];
                 end for;      
             Matchj;
             Matchk;
-            if #Matchj gt 0 then
-            counter:=counter+1;
-            end if;
             print("-------------------------------------------");
             end for;
             
