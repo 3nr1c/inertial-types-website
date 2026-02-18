@@ -89,7 +89,7 @@ function CharInertiaField(tau)
     K:=chi`Field;
     Cond:=chi`CondExp;
     TauLift:=tau`Character`Lift;
-    K2:=ChangePrecision(K,Max(Cond,AbsoluteRamificationDegree(K)+1));
+    K2:=ChangePrecision(K,Max(Cond,2*AbsoluteRamificationDegree(K)+4));
     U,m:=UnitGroup(K2);
     Utors:=sub<U|[g : g in Generators(U)| not IsZero(Order(g))]>;
     f:=Coercion(Utors,U)*m*Coercion(K2,K)*Inverse(TauLift)*chi`Map;
