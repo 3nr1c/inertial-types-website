@@ -53,7 +53,6 @@ function FastMap(m)
 end function;
 
 function OptimalNorms(L,F,f)
-
 r:=RamificationDegree(L,F);
 c:=Max(r*(f-1)+1,AbsoluteRamificationDegree(L)+1);
 assert Ceiling(c/r) ge f;
@@ -61,9 +60,7 @@ LowPrecL:=ChangePrecision(L,c);
 OL:=Integers(LowPrecL);
 UL,ULtoOL:=UnitGroup(OL);
 GenUL:=SetToSequence(Generators(UL));
-
 return [ChangePrecision(Norm(ChangePrecision(L!LowPrecL!ULtoOL(g),Precision(L)),F),Precision(F)) :g in GenUL],[ChangePrecision(L!LowPrecL!ULtoOL(g),Precision(L)) :g in GenUL];
-
 end function;
 
 function ElementCoordinates(x, B);
@@ -84,15 +81,14 @@ function ElementCoordinates(x, B);
     return [xsP[i] : i in [1..#B]];
 end function;
 
-function CharInertiaField(tau)
-    chi:=tau`Character;
+function CharInertiaField(chi)
     K:=chi`Field;
     Cond:=chi`CondExp;
-    TauLift:=tau`Character`Lift;
-    K2:=ChangePrecision(K,Max(Cond,2*AbsoluteRamificationDegree(K)+4));
+    ChiLift:=chi`Lift;
+    K2:=ChangePrecision(K,Max([10,Cond,AbsoluteRamificationDegree(K)+4]));
     U,m:=UnitGroup(K2);
     Utors:=sub<U|[g : g in Generators(U)| not IsZero(Order(g))]>;
-    f:=Coercion(Utors,U)*m*Coercion(K2,K)*Inverse(TauLift)*chi`Map;
+    f:=Coercion(Utors,U)*m*Coercion(K2,K)*Inverse(ChiLift)*chi`Map;
     f:=FastMap(f);
     Norms,mN:=sub<U|Kernel(f),Inverse(m)(UniformizingElement(K2))>;
     L:=ClassField(m,Norms);
