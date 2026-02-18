@@ -83,3 +83,19 @@ function ElementCoordinates(x, B);
     xsP := xs * P;
     return [xsP[i] : i in [1..#B]];
 end function;
+
+function CharInertiaField(tau)
+    chi:=tau`Character;
+    K:=chi`Field;
+    Cond:=chi`CondExp;
+    TauLift:=tau`Character`Lift;
+    K2:=ChangePrecision(K,Max(Cond,AbsoluteRamificationDegree(K)+1));
+    U,m:=UnitGroup(K2);
+    Utors:=sub<U|[g : g in Generators(U)| not IsZero(Order(g))]>;
+    f:=Coercion(Utors,U)*m*Coercion(K2,K)*Inverse(TauLift)*chi`Map;
+    f:=FastMap(f);
+    Norms,mN:=sub<U|Kernel(f),Inverse(m)(UniformizingElement(K2))>;
+    L:=ClassField(m,Norms);
+    return L,U/Norms;
+end function;
+
