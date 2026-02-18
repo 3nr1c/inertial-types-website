@@ -218,10 +218,11 @@ end intrinsic;
 declare type SimplyImprimitiveIT: SupercuspidalRamifiedIT;
 declare type TriplyImprimitiveIT: SupercuspidalRamifiedIT;
 declare attributes TriplyImprimitiveIT:
-    Characters
+    Characters,
+    Indexes
 ;
 
-intrinsic NewTriplyImprimitiveIT(phis::SeqEnum[InertiaCharacter], F::FldPad) -> TriplyImprimitiveIT
+intrinsic NewTriplyImprimitiveIT(phis::SeqEnum[InertiaCharacter], F::FldPad,In::SeqEnum[RngIntElt]) -> TriplyImprimitiveIT
 {Creates a supercuspidal triply imprimitive inertia type of F induced by the tuple of characters [phi]}
     assert #phis eq 3;
     assert Degree(phis[1]`Field, F) eq 2;
@@ -241,6 +242,7 @@ intrinsic NewTriplyImprimitiveIT(phis::SeqEnum[InertiaCharacter], F::FldPad) -> 
     assert CondExps[1] eq CondExps[2] and CondExps[2] eq CondExps[3];
     triply`CondExp := CondExps[1];
     triply`Characters := phis;
+    triply`Indexes:=In;
 
     return triply;
 end intrinsic;
