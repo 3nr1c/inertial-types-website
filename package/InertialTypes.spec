@@ -1,3 +1,5 @@
+import "utils.m" : IsValidExceptionalExtension;
+
 declare type InChtr;
 declare attributes InChtr:
     GrpExp,
@@ -119,6 +121,7 @@ as representations of inertia.}
 
         plus := true;
         minus := true;
+        // TODO: fix domains
         for g in Generators(Domain(tau1`Character`Map)) do 
             plus := plus and i(tau1`Character`Map(g)) eq tau2`Character`Map(g);
             minus := minus and i(tau1`Character`Map(g)) eq -tau2`Character`Map(g);
@@ -234,7 +237,7 @@ declare attributes TriplyImprInType:
     Indexes
 ;
 
-intrinsic TriplyImprimitiveType(phis::SeqEnum[InChtr], F::FldPad,In::SeqEnum[RngIntElt]) -> TriplyImprInType
+intrinsic TriplyImprimitiveType(phis::SeqEnum[InChtr], F::FldPad) -> TriplyImprInType
 {Creates a supercuspidal triply imprimitive inertia type of F induced by the tuple of characters [phi]}
     assert #phis eq 3;
     assert Degree(phis[1]`Field, F) eq 2;
@@ -256,12 +259,18 @@ intrinsic TriplyImprimitiveType(phis::SeqEnum[InChtr], F::FldPad,In::SeqEnum[Rng
 
     triply`Characters := phis;
     triply`CondExp := CondExps[1];
-    triply`Indexes:=In;
-    
     // Assign the first character for uniformity with other InTypes
     triply`Character := phis[1];
 
     return triply;
+end intrinsic;
+
+intrinsic TriplyImprimitiveType(phis::SeqEnum[InChtr], F::FldPad, In::SeqEnum[RngIntElt]) -> TriplyImprInType
+{Creates a supercuspidal triply imprimitive inertia type of F induced by the tuple of characters [phi]}
+    tau := TriplyImprimitiveType(phis, F);
+    tau`Indexes := In;
+
+    return tau;
 end intrinsic;
 
 intrinsic TriplyImprimitiveType(phi::InChtr, F::FldPad) -> TriplyImprInType
@@ -303,13 +312,7 @@ intrinsic ExceptionalType(tau::TriplyImprInType, F::FldPad) -> ExceptionalInType
 {Create the exceptional inertia type of F given by the character phi}
     L := tau`BaseField;
 
-    require Degree(L, F) in [3,6] : "Base field of tau must have degree 3 or 6 over F";
-    assert ((AbsoluteInertiaDegree(F) mod 2 eq 0) and (Degree(L, F) eq 3)) 
-        or (
-            (AbsoluteInertiaDegree(F) mod 2 eq 1) 
-            and (Degree(L, F) eq 6) 
-            and (InertiaDegree(L, F) mod 2 eq 0)
-        );
+    assert IsValidExceptionalExtension(F, L);
 
     exc := New(ExceptionalInType);
     exc`BaseField := F;

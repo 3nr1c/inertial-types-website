@@ -1,39 +1,100 @@
 declare verbose ECITypes, 1;
 
-import "utils.m" : AllQuadraticExtensions, OptimalNorms;
+import "utils.m" : AllQuadraticExtensions, OptimalNorms, IsValidExceptionalExtension, ElementCoordinates;
 import "sequences.m" : UComplex, ConComplex, BaseValues, ExtValues;
 import "characters.m" : FastCharactersOfOrder, FastCharactersOfPrimePowerOrder;
 
-
-function PrincipalSeries(F, f : MyComplex:=[* *])
+///////// PRINCIPAL SERIES //////////
+intrinsic PrincipalSeries(F : Order := 0, TrivialOn := [], QuadraticOn := [], MyComplex:=[* *]) 
+    -> SeqEnum[PSInType]
+{Compute all inertial types from principal series over F}
     if #MyComplex eq 3 then
         groups := MyComplex[1];
         maps := MyComplex[2];
         lift := MyComplex[3];
+        f := #groups;
     else
+        p, ram_deg, in_deg, pi, N := BaseValues(F);
+        f := Floor(N/2);
         groups, maps, lift := UComplex(F, f);
     end if;
+    proj := Inverse(lift);
     
+    Orders := {2, 3, 4, 6};
+    if Order in Orders then
+        Orders := {Order};
+    elif Order ne 0 then
+        Orders := {}; // make sure the output will be empty
+    end if;
+
+    Elements := [];
+    Values := [];
+
+    for e in TrivialOn do
+        Append(~Elements, proj(e));
+        Append(~Values, 0);
+    end for;
+
+    for e in QuadraticOn do
+        Append(~Elements, 2*proj(e));
+        Append(~Values, 0);
+    end for;
+
     PS := [];
-    for n in {2, 3, 4, 6} do
+    for n in Orders do
         PS cat:= [
             PrincipalSeriesType(phi) 
-            : phi in FastCharactersOfOrder(groups[1], n, maps, lift)
+            : phi in FastCharactersOfOrder(groups[1], n, maps, lift : Elements:=Elements, Values:=Values)
         ];
     end for;
 
     return PS;
-end function;
+end intrinsic;
 
 
-function SupercuspidalUnramified(F, K, f)
+// intrinsic ExceptionalTypes(F)
+// end intrinsic;
+
+// intrinsic ExceptionalTypes(F, L)
+//     assert IsValidExceptionalExtension(F, L);
+// end intrinsic;
+
+// intrinsic ExceptionalTypes(F, L, K)
+//     assert IsValidExceptionalExtension(F, L);
+//     // check that K generates a Galois submodule of dim 2
+// end intrinsic;
+
+////// SUPERCUSPIDAL UNRAMIFIED TYPES /////
+function SupercuspidalUnramified(F, K, f : Order := 0, TrivialOn := [], QuadraticOn := [])
     if Valuation(Discriminant(K,F)) gt 0 then
         error Error("The extension K|F is not unramified");
     end if;
 
     groups, maps, lift := ConComplex(F, K, f);
+    proj := Inverse(lift);
+
+    Orders := {3, 4, 6};
+    if Order in Orders then
+        Orders := {Order};
+    elif Order ne 0 then
+        Orders := {}; // make sure the output will be empty
+    end if;
+
+    Elements := [];
+    Values := [];
+
+    for e in TrivialOn do
+        Append(~Elements, proj(e));
+        Append(~Values, 0);
+    end for;
+
+    for e in QuadraticOn do
+        Append(~Elements, 2*proj(e));
+        Append(~Values, 0);
+    end for;
+
     SCU := [];
-    for n in {3, 4, 6} do
+    for n in Orders do
         SCU cat:= [
             SupercuspidalUnramifiedType(phi, F)
             : phi in FastCharactersOfOrder(groups[1], n, maps, lift)
@@ -43,8 +104,18 @@ function SupercuspidalUnramified(F, K, f)
     return SCU;
 end function;
 
+intrinsic SupercuspidalUnramified(F : Order := 0, TrivialOn := [], QuadraticOn := [])
+    -> SeqEnum[SCUInType]
+{TrivialOn and QuadraticOn are elements in UnramifiedExtension(F,2)}
+    K := UnramifiedExtension(F, 2);
 
+    p, ram_deg, in_deg, pi, N := BaseValues(F);
+    f := Floor(N/2);
 
+    return SupercuspidalUnramified(F, K, f : Order := Order, TrivialOn := TrivialOn, QuadraticOn := QuadraticOn);
+end intrinsic;
+
+///// SUPERCUSPIDAL RAMIFIED ////
 function SupercuspidalRamified2(F, K, f, c, VarepsGenerators : KernelElements := [])
     assert Prime(F) eq 2;
 
@@ -97,9 +168,9 @@ function SupercuspidalRamified3(F, K, f, c, VarepsGenerators)
 end function;
 
 
-function SupercuspidalRamified(F, K, f, c, VarepsGenerators)
+function InternalSCR(F, K, f, c, VarepsGenerators)
     p := Prime(F);
-    print("p="),p;
+    // print("p="),p;
     if p eq 2 then
         return SupercuspidalRamified2(F, K, f, c, VarepsGenerators);
     elif p eq 3 then
@@ -108,6 +179,165 @@ function SupercuspidalRamified(F, K, f, c, VarepsGenerators)
         error Error("Prime must be 2 or 3");
     end if;
 end function;
+
+intrinsic SupercuspidalRamified(F::FldPad, K::FldPad) -> SeqEnum[SCRInType]
+{Return SCRs over F induced by a specific quadratic field}
+    assert Degree(K, F) eq 2;
+
+    p, ram_deg, in_deg, pi, N := BaseValues(F);
+    K := K;
+    Cond, pi, Gal, y := ExtValues(F,K);
+    c := Cond;
+    require Cond gt 0 : "Ramification degree must be >1";
+
+    f := Max(N-Cond, 2*Cond);
+    groups, maps, lift := UComplex(F, Floor(N/2));
+    VarepsGenerators := {K!lift(g) : g in Generators(groups[1])};
+    return InternalSCR(F, K, f, c, VarepsGenerators);
+end intrinsic;
+
+function SCRMatched(F, K, SCR)
+// F::FldPad, K::SeqEnum[FldPad], SCR::SeqEnum[SCRInType]
+    assert #K in [2, 3];
+
+    // This list will contain the types
+    TriplyImprimitiveTypes := [];
+
+    // We set up the triple of fields
+    y1 := Discriminant(K[1], F);
+    y2 := Discriminant(K[2], F);
+
+    if #K eq 3 then
+        y3 := Discriminant(K[3], F);
+    else
+        Fx<x> := PolynomialRing(F);
+        y3 := y1*y2;
+        Append(~K, SplittingField(x^2 - y3));
+    end if;
+
+    // we compute the SCR types for each field
+    while #SCR lt 3 do
+        Append(~SCR, SupercuspidalRamified(F, K[#SCR + 1]));
+    end while;
+
+    R1<X> := PolynomialRing(K[1]);
+    E1 := SplittingField(X^2 - y2);
+
+    e2, e3 := Sqrt(E1!y2), Sqrt(E1!y3);
+    s1, s2, s3 := Sqrt(K[1]!y1), Sqrt(K[2]!y2), Sqrt(K[3]!y3);
+
+    // Compute generators of the group of norms from E1
+    c := Max([tau`Character`CondExp: tau in SCR[1]]);
+    Uf, UpStairsUf := OptimalNorms(E1,K[1],c);
+
+    // For the generators of the group in E1, we need their expressions 
+    // in a K[1]- (resp. K[2]-, K[3])-basis of E1, to compute the norm down to each subfield
+    UnitCoordsK2Basis := [ElementCoordinates(g,[1,e2]): g in UpStairsUf];
+    UnitCoordsF12 := [ElementCoordinates(x[1], [1,s1]) cat ElementCoordinates(x[2], [1,s1]) : x in UnitCoordsK2Basis];
+    Norms1 := [ u[1]^2+u[2]^2*y1-u[3]^2*y2-u[4]^2*y1*y2+(2*u[1]*u[2]-2*u[3]*u[4]*y2)*s1 :u in UnitCoordsF12];
+    Norms2 := [ u[1]^2+u[3]^2*y2-u[2]^2*y1-u[4]^2*y1*y2+(2*u[1]*u[3]-2*u[2]*u[4]*y1)*s2 :u in UnitCoordsF12];
+
+    UnitCoordsK3Basis := [ElementCoordinates(g,[1,e3]): g in UpStairsUf];
+    UnitCoordsF13 := [ElementCoordinates(x[1], [1,s1]) cat ElementCoordinates(x[2], [1,s1]) : x in UnitCoordsK3Basis];
+    Norms3 := [ u[1]^2+u[3]^2*y3-u[2]^2*y1-u[4]^2*y1*y3+(2*u[1]*u[3]-2*u[2]*u[4]*y1)*s3 :u in UnitCoordsF13];
+
+
+    for chi in SCR[1] do
+        Match2 := [tau : tau in SCR[2] | chi`CondExp eq tau`CondExp];
+        Match3 := [tau : tau in SCR[3] | chi`CondExp eq tau`CondExp];
+        isIso2, iso2 := IsIsomorphic(Codomain(chi`Character`Map), Codomain(SCR[2,1]`Character`Map));
+        isIso3, iso3 := IsIsomorphic(Codomain(chi`Character`Map), Codomain(SCR[3,1]`Character`Map));
+
+        for t in [1..#Norms1] do
+            Match2 := [tau: tau in Match2 | iso2(chi`Character(Norms1[t])) eq tau`Character(Norms2[t])];
+            Match3 := [tau: tau in Match3 | iso3(chi`Character(Norms1[t])) eq tau`Character(Norms3[t])];
+        end for;      
+        if #Match2 eq 1 and #Match3 eq 1 then
+            Append(~TriplyImprimitiveTypes, TriplyImprimitiveType([
+                chi`Character, Match2[1]`Character, Match3[1]`Character
+            ], chi`BaseField));
+        elif not (#Match2 eq 0 and #Match3 eq 0) then
+            vprint ECITypes : "ERROR in matching triply imprimitive types";
+            assert false;
+        end if;
+    end for;
+
+    return TriplyImprimitiveTypes;
+end function;
+
+
+intrinsic SupercuspidalRamified(F, K::SeqEnum[FldPad]) -> SeqEnum[SCRInType] 
+{Returns some SCR types}
+    p := Prime(F);
+    require p in [2, 3] : "Supercuspidal ramified inertial types only exist for 2-adic and 3-adic fields";
+    if p eq 2 then
+        if AbsoluteInertiaDegree(F) mod 2 eq 0 then
+            require #K in [1, 2, 3] : "SCR must be induced from a tuple of 1 to 3 fields";
+            // check all three fields are a Selmer orbit
+            if #K eq 3 then
+                disc1 := Discriminant(DefiningPolynomial(K[1]));
+                disc2 := Discriminant(DefiningPolynomial(K[2]));
+                require IsSquare(K[3]!(disc1 * disc2)) : "The compositum of the three given fields must form a biquadratic extension";
+            end if;
+
+            // now we match every SCR type from K[1] to the others
+            if #K eq 1 then return SupercuspidalRamified(F, K[1]);
+            else
+                return SCRMatched(F, K, []);
+            end if;
+        else
+            require #K eq 1 : "SCR must be induced from a single field";
+            return SupercuspidalRamified(F, K);
+        end if;
+    else // p eq 3 then 
+        require #K eq 1 : "SCR must be induced from a single field";
+        return SupercuspidalRamified(F, K);
+    end if;
+end intrinsic;
+
+intrinsic SupercuspidalRamified(F::FldPad : QuadExt := [], Twist := []) -> SeqEnum[SCRInType]
+{Returns all SCR types}
+    p := Prime(F);
+    if #QuadExt eq 0 or #Twist eq 0 then
+        QuadExt, Twist := AllQuadraticExtensions(F : Selmer := false);
+    end if;
+    vprintf ECITypes: "Computed all quadratic extensions (%o)\n", #Twist;
+
+    SCR := [(RamificationDegree(K, F) eq 2) select SupercuspidalRamified(F, K) else [] : K in QuadExt];
+
+    if p eq 2 and AbsoluteInertiaDegree(F) mod 2 eq 0 then
+        Sel, FtoSel := pSelmerGroup(2,F);
+        SeltoF := Inverse(FtoSel);
+        Triples := {};
+        for i,j in [1..#Twist] do
+            if i eq j then continue; end if; 
+            x := FtoSel(Twist[i]);
+            y := FtoSel(Twist[j]);
+            z := x*y;
+            k := [l : l in [1..#Twist] | FtoSel(Twist[l]) eq z ][1];
+            if IsEmpty({tau`CondExp: tau in SCR[i]} meet {tau`CondExp: tau in SCR[j]} meet {tau`CondExp: tau in SCR[k]}) then continue; end if;
+            trip := {i,j,k};
+            if #trip eq 3 then 
+                Include(~Triples,trip);
+            end if;
+        end for;
+
+        TriplyImprimitiveTypes := [];
+        for triple in Triples do
+            ThisTriply := SCRMatched(F, [QuadExt[i] : i in triple], [SCR[i] : i in triple]);
+            for i in [1 .. #ThisTriply] do
+                ThisTriply[i]`Indexes := Sort(SetToSequence(triple));
+            end for;
+            TriplyImprimitiveTypes cat:= ThisTriply;
+        end for;
+
+        return TriplyImprimitiveTypes, Twist;
+    else 
+        return &cat SCR, Twist;
+    end if;
+end intrinsic;
+
+//////// EXCEPTIONAL TYPES ////////
 
 //This function produces the 2-Selmer Group of L as a Gal(L/F) module
 function SelmerGaloisModule (F,L)
@@ -208,11 +438,18 @@ function ExceptionalTypes(F, L)
 
             Uf1:=[proj(g): g in Uf];
             Elements := Elements cat [2*g : g in Uf1];
-            Values := Values cat [0 : i in [1 .. #Uf1*(1 + #GalEGens)]];
+            Values := Values cat [0 : i in [1 .. #Uf1]];
+
+            piE := UniformizingElement(E);
 
             time for mu in GalEGens do
                 muUf1:=[proj(Norm(mu(g),K1)): g in UpStairsUf];
                 Elements := Elements cat [Uf1[i] - muUf1[i] : i in [1 .. #Uf1]];
+                Values := Values cat [0 : i in [1 .. #Uf1]];
+
+                x := piE / mu(piE);
+                Elements := Elements cat [proj(Norm(x, K1))];
+                Values := Values cat [0];
             end for;
             
             characters := FastCharactersOfPrimePowerOrder(
@@ -257,7 +494,12 @@ intrinsic InertialTypes(F :: FldPad : SkipExceptionals := false)
     - A list of values in F giving all used quadratic twists
     - A list of Principal Series Types
     - A list of Supercuspidal Unramified Types
-    - A list of lists, each with Supercuspidal Ramified Types of the twist #i
+    - A list of lists, each with Supercuspidal Ramified Types of thTriply Imprimitive Inertia Type of the field
+         Unramified extension defined by the polynomial x^2 + x + 1 + O(2^100) 
+    over 2-adic field mod 2^100
+    of conductor exponent 8
+    with 3 underlying characters of order 4 and conductor exponents [6, 5, 5],
+e twist #i
     - A list of Exceptional Types of size 8
     - A list of Exceptional Types of size 24
 }
@@ -270,7 +512,7 @@ intrinsic InertialTypes(F :: FldPad : SkipExceptionals := false)
     groups, maps, lift := UComplex(F, ff);
     vprintf ECITypes: "N=%o\n", N;
 
-    PS := PrincipalSeries(F, ff : MyComplex := [*groups, maps, lift*]);
+    PS := PrincipalSeries(F : MyComplex := [*groups, maps, lift*]);
     vprintf ECITypes: "Computed %o principal series types\n", #PS;
 
     i := 1;
@@ -292,7 +534,7 @@ intrinsic InertialTypes(F :: FldPad : SkipExceptionals := false)
             llift:=lift;
 
             VarepsGenerators := {K!llift(g) : g in Generators(G)};
-            SCR_K := SupercuspidalRamified(F, K, f, c, VarepsGenerators);
+            SCR_K := InternalSCR(F, K, f, c, VarepsGenerators);
             SCR[t] := SCR_K;
             vprintf ECITypes: "Computed %o supercuspidal ramified types for quadratic extension #%o\n", #SCR_K, i;
         end if;
@@ -307,14 +549,14 @@ intrinsic InertialTypes(F :: FldPad : SkipExceptionals := false)
                 L:=FieldOfFractions(AllExtensions(F,3)[j]);
                 Ex_L:=ExceptionalTypesTriply(F,L);
                 Append(~Ex24, Ex_L);
-                vprintf ECITypes: "Computed %o exceptional types of size 24 for cubic extension #%o\n", &+[#c : c in Ex_L], j;
+                vprintf ECITypes: "Computed %o exceptional types of size 24 for cubic extension #%o\n", &+([#c : c in Ex_L] cat [0]), j;
             end for;
             L := FieldOfFractions(AllExtensions(F,3)[4]);
             Ex8 := ExceptionalTypesTriply(F,L);
-            vprintf ECITypes: "Computed %o exceptional types of size 8\n", &+[#c : c in Ex8];
+            vprintf ECITypes: "Computed %o exceptional types of size 8\n", &+([#c : c in Ex8] cat [0]);
         else 
             Ex24 := ExceptionalTypesSimply(F);
-            vprintf ECITypes: "Computed %o exceptional types of size 24\n", &+[#c : c in Ex24];
+            vprintf ECITypes: "Computed %o exceptional types of size 24\n", &+([#c : c in Ex24] cat [0]);
         end if;
     end if;
 

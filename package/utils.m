@@ -105,3 +105,26 @@ function CharInertiaField(chi)
     return L,U/Norms;
 end function;
 
+
+
+function IsValidExceptionalExtension(F, L)
+    if (AbsoluteInertiaDegree(F) mod 2 eq 0) then
+        valid := (Degree(L, F) eq 3);
+        if not valid then
+            vprintf ECITypes : "L/F must be a cubic extension";
+        end if;
+    else //(AbsoluteInertiaDegree(F) mod 2 eq 1)
+        if Degree(L, F) ne 6 then
+            vprintf ECITypes : "L/F must be an extension of degree 6";
+        end if;
+        if not IsNormal(L, F) then
+            vprintf ECITypes : "L/F must be normal";
+        end if;
+        if InertiaDegree(L, F) ne 2 then
+            vprintf ECITypes : "L/F must have inertia degree 2";
+        end if;
+        valid := (Degree(L, F)) eq 6 and (IsNormal(L, F)) and (InertiaDegree(L, F) eq 2);
+    end if;
+
+    return valid;
+end function;
