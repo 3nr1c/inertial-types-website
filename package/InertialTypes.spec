@@ -1,4 +1,4 @@
-import "utils.m" : IsValidExceptionalExtension;
+import "utils.m" : IsValidExceptionalExtension, FastMap;
 
 declare type InChtr;
 declare attributes InChtr:
@@ -335,17 +335,39 @@ end intrinsic;
 
 intrinsic SemistabilityDefect(tau::InType) -> RngIntElt
 {Returns the semistability defect of tau}
-    if Type(tau) eq PSInType then
-        return tau`Character`order;
-    elif Type(tau) eq SCUInType then
-        return tau`Character`order;
-    elif Type(tau) eq SCRInType then
-        return -1;
-    elif Type(tau) eq ExceptionalInType then
-        if (AbsoluteInertiaDegree(tau`Field) mod 2) eq 0 then
-            return 8;
-        else
-            return 24;
-        end if;
-    end if;
+    return tau`Character`Order * RamificationDegree(tau`Character`Field, tau`BaseField);
+end intrinsic;
+
+function CharInertiaField(chi)
+    K := chi`Field;
+    Cond := chi`CondExp;
+    ChiLift := chi`Lift;
+    // TODO: IMPLEMENT THE CORRECT BOUND
+    // K2 := ChangePrecision(K,Max([10,Cond,AbsoluteRamificationDegree(K)+4]));
+    K2 := K;
+    U, m := UnitGroup(K2);
+    Utors := sub<U|[g : g in Generators(U)| not IsZero(Order(g))]>;
+    A := Domain(Coercion(Utors,U));
+    for g in Generators(A) do
+        // g;
+        // (Coercion(Utors,U) * m * Coercion(K2,K))(g);
+        // (Coercion(Utors,U) * m * Coercion(K2,K))(g) in Domain(Inverse(ChiLift));
+        // h := (Coercion(Utors,U) * m * Coercion(K2,K))(g);
+        Inverse(ChiLift);   
+        // (Inverse(ChiLift))(h);
+        break;
+    end for;
+    f := Coercion(Utors,U) * m * Coercion(K2,K) * Inverse(ChiLift) * chi`Map;
+    f := FastMap(f);
+    Norms := sub<U|Kernel(f), Inverse(m)(UniformizingElement(K2))>;
+    L := ClassField(m, Norms);
+    return L, U/Norms;
+end function;
+
+
+
+intrinsic InertiaField(tau::InType) -> FldPad, GrpAb
+{Returns the inertia field of the type tau}
+    L, G := CharInertiaField(tau`Character);
+    return L;
 end intrinsic;

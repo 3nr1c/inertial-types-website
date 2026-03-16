@@ -45,10 +45,10 @@ function FastMap(m)
 // Given two groups A,B and a map m define as a composite
 // of different maps it returns the map that goes directly from A to B without 
 // passing thorough all the composites.
-    A:=Domain(m);
-    B:=Codomain(m);
+    A := Domain(m);
+    B := Codomain(m);
     Gens := [g : g in Generators(A)];
-    Fmap:= Homomorphism(A, B, Gens, [m(g) : g in Gens]);
+    Fmap := Homomorphism(A, B, Gens, [m(g) : g in Gens]);
     return Fmap;
 end function;
 

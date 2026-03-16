@@ -52,20 +52,9 @@ intrinsic PrincipalSeries(F : Order := 0, TrivialOn := [], QuadraticOn := [], My
 end intrinsic;
 
 
-// intrinsic ExceptionalTypes(F)
-// end intrinsic;
-
-// intrinsic ExceptionalTypes(F, L)
-//     assert IsValidExceptionalExtension(F, L);
-// end intrinsic;
-
-// intrinsic ExceptionalTypes(F, L, K)
-//     assert IsValidExceptionalExtension(F, L);
-//     // check that K generates a Galois submodule of dim 2
-// end intrinsic;
 
 ////// SUPERCUSPIDAL UNRAMIFIED TYPES /////
-function SupercuspidalUnramified(F, K, f : Order := 0, TrivialOn := [], QuadraticOn := [])
+function InternalSCU(F, K, f : Order := 0, TrivialOn := [], QuadraticOn := [])
     if Valuation(Discriminant(K,F)) gt 0 then
         error Error("The extension K|F is not unramified");
     end if;
@@ -112,7 +101,7 @@ intrinsic SupercuspidalUnramified(F : Order := 0, TrivialOn := [], QuadraticOn :
     p, ram_deg, in_deg, pi, N := BaseValues(F);
     f := Floor(N/2);
 
-    return SupercuspidalUnramified(F, K, f : Order := Order, TrivialOn := TrivialOn, QuadraticOn := QuadraticOn);
+    return InternalSCU(F, K, f : Order := Order, TrivialOn := TrivialOn, QuadraticOn := QuadraticOn);
 end intrinsic;
 
 ///// SUPERCUSPIDAL RAMIFIED ////
@@ -363,7 +352,7 @@ function SelmerGaloisModule (F,L)
     return GSel, Sel, Inverse(LtoSel), Gal, GaltoAut;
 end function;
 
-function ExceptionalTypes(F, L)
+function InternalExceptionalTypes(F, L : InducingFields := [])
     // require IsNormal(L,F) : "The extension L/F must be normal";
     // require ((AbsoluteInertiaDegree(F) mod 2 eq 0) and (Degree(L, F) eq 3)) 
     //     or (
@@ -383,7 +372,7 @@ function ExceptionalTypes(F, L)
     SelOrbits := [M: M in MinimalSubmodules(GSel) | Dimension(M) eq 2];
     vprintf ECITypes : "%o Selmer orbits\n", #SelOrbits;
 
-    ExceptionalChars:=[* *];
+    Exceptionals:=[];
     i := 0;
     for orbit in SelOrbits do
         i +:= 1;
@@ -395,6 +384,11 @@ function ExceptionalTypes(F, L)
             z := g(ChangePrecision(SeltoL(Sel!ElementToSequence(GSel!orbit.1)), Precision(L)));
             Append(~Polynomials, X^2 - R!z);
         end for;
+        if #InducingFields gt 0 then
+            if not &or[HasRoot(f, K) : f in Polynomials, K in InducingFields] then
+                continue;
+            end if;
+        end if;
         K1 := SplittingField(Polynomials[1]);
 
         K1X<x> := PolynomialRing(K1);
@@ -457,20 +451,17 @@ function ExceptionalTypes(F, L)
             );
             vprintf ECITypes : "Selmer orbit #%o yields %o exceptional types\n", i, #characters;
 
-            if not IsEmpty(characters) then 
-                typesFromOrbit := [ExceptionalType(phi, F, L) : phi in characters];
-                Append(~ExceptionalChars, typesFromOrbit);
-            end if;
+            Exceptionals cat:= [ExceptionalType(phi, F, L) : phi in characters];
             // print("------------------");
         end if;
          end for;
-    return ExceptionalChars;
+    return Exceptionals;
 end function;
 
 function ExceptionalTypesTriply(F, L)
     assert Degree(L, F) eq 3;
 
-    return ExceptionalTypes(F, L);
+    return InternalExceptionalTypes(F, L);
 end function;
 
 function ExceptionalTypesSimply(F)
@@ -480,26 +471,62 @@ function ExceptionalTypesSimply(F)
         L := FieldOfFractions(AllExtensions(Fprime, 3)[l]);
         if IsNormal(L,F) then break; end if;
     end for;
-    return ExceptionalTypes(F, L);
+    return InternalExceptionalTypes(F, L);
 end function;
+
+
+intrinsic ExceptionalTypes(F::FldPad) -> SeqEnum, SeqEnum
+{Return all exceptional inertia types of F}
+    require Prime(F) eq 2 : "There are no exceptional types for p>2.";
+    Ex24:=[* *];
+    Ex8:=[* *];
+    if (AbsoluteInertiaDegree(F) mod 2 eq 0) then 
+        for j in [1..3] do
+            L:=FieldOfFractions(AllExtensions(F,3)[j]);
+            Ex_L:=ExceptionalTypesTriply(F,L);
+            Ex24 cat:= Ex_L;
+            vprintf ECITypes: "Computed %o exceptional types of size 24 for cubic extension #%o\n", &+([#c : c in Ex_L] cat [0]), j;
+        end for;
+        L := FieldOfFractions(AllExtensions(F,3)[4]);
+        Ex8 := ExceptionalTypesTriply(F,L);
+        vprintf ECITypes: "Computed %o exceptional types of size 8\n", &+([#c : c in Ex8] cat [0]);
+    else 
+        Ex24 := ExceptionalTypesSimply(F);
+        vprintf ECITypes: "Computed %o exceptional types of size 24\n", &+([#c : c in Ex24] cat [0]);
+    end if;
+
+    return Ex8, Ex24;
+end intrinsic;
+
+intrinsic ExceptionalTypes(F::FldPad, L::FldPad) -> SeqEnum[ExceptionalInType]
+{Return all exceptional inertia types of F which first become imprimitive over L}
+    require Prime(F) eq 2 : "There are no exceptional types for p>2.";
+    assert IsValidExceptionalExtension(F, L);
+
+    return InternalExceptionalTypes(F, L);
+end intrinsic;
+
+intrinsic ExceptionalTypes(F::FldPad, L::FldPad, K::FldPad) -> SeqEnum[ExceptionalInType]
+{Return all exceptional inertia types of F which first become imprimitive over L, and are 
+induced from a quartic character of K}
+    require Prime(F) eq 2 : "There are no exceptional types for p>2.";
+    assert IsValidExceptionalExtension(F, L);
+    
+    return InternalExceptionalTypes(F, L : InducingFields := [K]);
+end intrinsic;
 
 intrinsic InertialTypes(F :: FldPad : SkipExceptionals := false) 
     -> SeqEnum[FldPadElt],
        SeqEnum[PrincipalSeriesIT],
        SeqEnum[SCUInType],
-       SeqEnum[SeqEnum[SCRInType]],
+       SeqEnum[SCRInType],
        SeqEnum,
        SeqEnum
 {Compute all inertia types attached to elliptic curves over the field F. Returns:
     - A list of values in F giving all used quadratic twists
     - A list of Principal Series Types
     - A list of Supercuspidal Unramified Types
-    - A list of lists, each with Supercuspidal Ramified Types of thTriply Imprimitive Inertia Type of the field
-         Unramified extension defined by the polynomial x^2 + x + 1 + O(2^100) 
-    over 2-adic field mod 2^100
-    of conductor exponent 8
-    with 3 underlying characters of order 4 and conductor exponents [6, 5, 5],
-e twist #i
+    - A list of Supercuspidal Ramified Types
     - A list of Exceptional Types of size 8
     - A list of Exceptional Types of size 24
 }
@@ -515,48 +542,28 @@ e twist #i
     PS := PrincipalSeries(F : MyComplex := [*groups, maps, lift*]);
     vprintf ECITypes: "Computed %o principal series types\n", #PS;
 
-    i := 1;
-    SCR := [* [] : _ in [1..#Twist] *];
-    for t in [1..#QuadExt] do
-        K:=QuadExt[t];
-        i;
-        Cond, pi, Gal, y := ExtValues(F,K);
-        c := Cond;
-        if Cond eq 0 then
-            SCU := SupercuspidalUnramified(F,K,ff);
-            vprintf ECITypes: "Computed %o supercuspidal unramified types\n", #SCU;
-        else 
-            f := Max(N-Cond, 2*Cond);
-            vprintf ECITypes: "f=%o\n", f;
-            vprintf ECITypes: "c=%o\n", c;
 
-            G := groups[1];
-            llift:=lift;
+    SCU := SupercuspidalUnramified(F);
+    vprintf ECITypes: "Computed %o supercuspidal unramified types\n", #SCU;
+    SCR := SupercuspidalRamified(F : QuadExt:=QuadExt, Twist:=Twist);
+    vprintf ECITypes: "Computed %o supercuspidal ramified types\n", #SCR;
 
-            VarepsGenerators := {K!llift(g) : g in Generators(G)};
-            SCR_K := InternalSCR(F, K, f, c, VarepsGenerators);
-            SCR[t] := SCR_K;
-            vprintf ECITypes: "Computed %o supercuspidal ramified types for quadratic extension #%o\n", #SCR_K, i;
-        end if;
-        i +:= 1;
-    end for;
-
-    Ex24:=[* *];
-    Ex8:=[* *];
+    Ex24:=[];
+    Ex8:=[];
     if p eq 2 and not SkipExceptionals then
         if (in_deg mod 2 eq 0) then 
             for j in [1..3] do
                 L:=FieldOfFractions(AllExtensions(F,3)[j]);
                 Ex_L:=ExceptionalTypesTriply(F,L);
-                Append(~Ex24, Ex_L);
-                vprintf ECITypes: "Computed %o exceptional types of size 24 for cubic extension #%o\n", &+([#c : c in Ex_L] cat [0]), j;
+                Ex24 := Ex24 cat Ex_L;
+                vprintf ECITypes: "Computed %o exceptional types of size 24 for cubic extension #%o\n", #Ex_L, j;
             end for;
             L := FieldOfFractions(AllExtensions(F,3)[4]);
             Ex8 := ExceptionalTypesTriply(F,L);
-            vprintf ECITypes: "Computed %o exceptional types of size 8\n", &+([#c : c in Ex8] cat [0]);
+            vprintf ECITypes: "Computed %o exceptional types of size 8\n", #Ex8;
         else 
             Ex24 := ExceptionalTypesSimply(F);
-            vprintf ECITypes: "Computed %o exceptional types of size 24\n", &+([#c : c in Ex24] cat [0]);
+            vprintf ECITypes: "Computed %o exceptional types of size 24\n", #Ex24;
         end if;
     end if;
 
