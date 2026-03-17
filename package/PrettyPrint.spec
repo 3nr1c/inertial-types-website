@@ -90,7 +90,7 @@ function _AggregateRows(rows)
         Append(~out, [* k[1], k[2], k[3], k[4], counts[k] *]);
     end for;
 
-    return Sort(out, func<x, y | (x[1] - y[1]) + (x[2] - y[2])>);
+    return Sort(out, func<x, y | (x[1] - y[1]) + 0.01*(x[2] - y[2])>);
 end function;
 
 ////////////////////////////////////////////////////////////////////////
@@ -206,7 +206,7 @@ intrinsic PrintInChtrSummary(PS, SCU, SCR, Ex8, Ex24)
     ////////////////////////////////////////////////////////////////
 
     if #Ex8 gt 0 then
-        rows cat:= [ _InTypeRowWithDesc(x, "exceptional") : x in Ex8 ];
+        rows cat:= [ _InTypeRowWithDesc(x, "exceptional, Q8") : x in Ex8 ];
     end if;
 
     ////////////////////////////////////////////////////////////////
@@ -214,7 +214,7 @@ intrinsic PrintInChtrSummary(PS, SCU, SCR, Ex8, Ex24)
     ////////////////////////////////////////////////////////////////
 
     if #Ex24 gt 0 then
-        rows cat:= [ _InTypeRowWithDesc(x, "exceptional") : x in Ex24 ];
+        rows cat:= [ _InTypeRowWithDesc(x, "exceptional, SL(2,3)") : x in Ex24 ];
     end if;
 
     ////////////////////////////////////////////////////////////////
@@ -228,7 +228,7 @@ intrinsic PrintInChtrSummary(PS, SCU, SCR, Ex8, Ex24)
     ////////////////////////////////////////////////////////////////
 
     _PrintTable(
-        ["Semistability defect", "v(E)", "Character order", "Description", "Count"],
+        ["e", "v(N)", "Character order", "Description", "Count"],
         rows
     );
 

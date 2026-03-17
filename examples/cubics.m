@@ -1,0 +1,13 @@
+AttachSpec("../spec");
+
+SetVerbose("ECITypes", true);
+
+Q2 := pAdicField(2, 100);
+CubeExt := AllExtensions(Q2,3);
+for i in [1..#CubeExt] do
+    i;
+    K := FieldOfFractions(CubeExt[i]);
+    K;
+    time Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(K);
+    PrintInChtrSummary(PS,SCU,SCR,Ex8,Ex24);
+end for;

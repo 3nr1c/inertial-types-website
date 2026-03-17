@@ -289,8 +289,8 @@ intrinsic SupercuspidalRamified(F::FldPad : QuadExt := [], Twist := []) -> SeqEn
     p := Prime(F);
     if #QuadExt eq 0 or #Twist eq 0 then
         QuadExt, Twist := AllQuadraticExtensions(F : Selmer := false);
+        vprintf ECITypes: "Computed all quadratic extensions (%o)\n", #Twist;
     end if;
-    vprintf ECITypes: "Computed all quadratic extensions (%o)\n", #Twist;
 
     SCR := [(RamificationDegree(K, F) eq 2) select SupercuspidalRamified(F, K) else [] : K in QuadExt];
 
@@ -393,15 +393,18 @@ function InternalExceptionalTypes(F, L : InducingFields := [])
 
         K1X<x> := PolynomialRing(K1);
         E := SplittingField(K1X!Polynomials[2]);
+        y1 := Sqrt(E!(-Coefficient(Polynomials[1],0)));
+        y2 := Sqrt(E!(-Coefficient(Polynomials[2],0)));
 
         // The orbit will only give exceptional types if either
         // (a) L/F is cubic, or
         // (b) E/F has ramification degree 12 and is Galois with group S4
         viableOrbit := Degree(L,F) eq 3;
-        time GalE, GalEtoAut := AutomorphismGroup(E,F);
+        GalE, GalEtoAut := AutomorphismGroup(E,F);
         GalEGens := [GalEtoAut(tau) : tau in Generators(GalE)];
         if not viableOrbit then
-            viableOrbit := RamificationDegree(E,F) eq 12 and IsIsomorphic(GalE,Sym(4));
+            // viableOrbit := RamificationDegree(E,F) eq 12 and IsIsomorphic(GalE,Sym(4));
+            viableOrbit := RamificationDegree(E,F) eq 12 and #GalE eq 24;
         end if;
 
         // In our experience the orbit is always viable (we need a proof of this)
@@ -428,7 +431,7 @@ function InternalExceptionalTypes(F, L : InducingFields := [])
             Append(~Elements, bar_y2);
             Append(~Values, 0);
 
-            time Uf, UpStairsUf := OptimalNorms(E,K1,#CGroups1);
+            Uf, UpStairsUf := OptimalNorms(E,K1,#CGroups1);
 
             Uf1:=[proj(g): g in Uf];
             Elements := Elements cat [2*g : g in Uf1];
@@ -436,7 +439,7 @@ function InternalExceptionalTypes(F, L : InducingFields := [])
 
             piE := UniformizingElement(E);
 
-            time for mu in GalEGens do
+            for mu in GalEGens do
                 muUf1:=[proj(Norm(mu(g),K1)): g in UpStairsUf];
                 Elements := Elements cat [Uf1[i] - muUf1[i] : i in [1 .. #Uf1]];
                 Values := Values cat [0 : i in [1 .. #Uf1]];
@@ -454,7 +457,7 @@ function InternalExceptionalTypes(F, L : InducingFields := [])
             Exceptionals cat:= [ExceptionalType(phi, F, L) : phi in characters];
             // print("------------------");
         end if;
-         end for;
+    end for;
     return Exceptionals;
 end function;
 

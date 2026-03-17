@@ -89,7 +89,7 @@ function ExceptionalTypesTriply(F,L)
         //FilChars1:=Chars1;
         //FilChars2:=Chars2;
         
-        time GalE,GalEtoAut:=AutomorphismGroup(E,F);
+        GalE,GalEtoAut:=AutomorphismGroup(E,F);
         for tau in GalE do
             if IsZero((GalEtoAut(tau)(y1)-y2)) then mu:=GalEtoAut(tau); break; end if;
         end for;
@@ -202,7 +202,7 @@ function ExceptionalTypesSimply(Fi)
         Append(~Elements, bar_y2);
         Append(~Values, 0);
 
-        time GalE,GalEtoAut:=AutomorphismGroup(E,Fi);
+        GalE,GalEtoAut:=AutomorphismGroup(E,Fi);
         if RamificationDegree(E,F) eq 12 and IsIsomorphic(GalE,Sym(4))  then
 
             Uf,UpStairsUf:=OptimalNorms(E,K1,#CGroups1);
@@ -219,7 +219,7 @@ function ExceptionalTypesSimply(Fi)
                 Values := Values cat [0 : i in [1 .. #Uf1]];
             end for;    
             
-            time Caracteres:=FastCharactersOfPrimePowerOrder(CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements, Values:=Values);
+            Caracteres:=FastCharactersOfPrimePowerOrder(CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements, Values:=Values);
 
             if not IsEmpty(Caracteres) then 
                 Append(~ExceptionalChars,[
@@ -275,7 +275,7 @@ intrinsic ExceptionalTypes(F, L)
         // (b) E/F has ramification degree 12 and is Galois with group S4
         validOrbit := Degree(L,F) eq 3;
         if not validOrbit then
-            time GalE,GalEtoAut:=AutomorphismGroup(E,Fi);
+            GalE,GalEtoAut:=AutomorphismGroup(E,Fi);
             validOrbit := RamificationDegree(E,F) eq 12 and IsIsomorphic(GalE,Sym(4));
         end if;
 
@@ -316,7 +316,7 @@ intrinsic ExceptionalTypes(F, L)
                 Values := Values cat [0 : i in [1 .. #Uf1]];
             end for;    
             
-            time characters := FastCharactersOfPrimePowerOrder(
+            characters := FastCharactersOfPrimePowerOrder(
                 CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements, Values:=Values
             );
 
