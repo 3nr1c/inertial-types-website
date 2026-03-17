@@ -1,0 +1,245 @@
+Magma V2.29-3     Tue Mar 17 2026 11:33:19 on enric-ThinkPad [Seed = 1184236163]
+Type ? for help.  Type <Ctrl>-D to quit.
+
+Loading file "cubics.m"
+1
+Totally ramified extension defined by the polynomial x^3 + 2 + O(2^100) over 
+2-adic field mod 2^100
+Computed all quadratic extensions (31)
+N=20
+Computed 71 principal series types
+Computed 72 supercuspidal unramified types
+Computed all quadratic extensions (31)
+Computed 480 supercuspidal ramified types
+63 Selmer orbits
+Selmer orbit #1 yields 16 exceptional types
+Selmer orbit #2 yields 16 exceptional types
+Selmer orbit #3 yields 16 exceptional types
+Selmer orbit #4 yields 0 exceptional types
+Selmer orbit #5 yields 16 exceptional types
+Selmer orbit #6 yields 0 exceptional types
+Selmer orbit #7 yields 16 exceptional types
+Selmer orbit #8 yields 16 exceptional types
+Selmer orbit #9 yields 0 exceptional types
+Selmer orbit #10 yields 0 exceptional types
+Selmer orbit #11 yields 16 exceptional types
+Selmer orbit #12 yields 0 exceptional types
+Selmer orbit #13 yields 0 exceptional types
+Selmer orbit #14 yields 16 exceptional types
+Selmer orbit #15 yields 16 exceptional types
+Selmer orbit #16 yields 16 exceptional types
+Selmer orbit #17 yields 16 exceptional types
+Selmer orbit #18 yields 16 exceptional types
+Selmer orbit #19 yields 16 exceptional types
+Selmer orbit #20 yields 0 exceptional types
+Selmer orbit #21 yields 16 exceptional types
+Selmer orbit #22 yields 0 exceptional types
+Selmer orbit #23 yields 16 exceptional types
+Selmer orbit #24 yields 16 exceptional types
+Selmer orbit #25 yields 0 exceptional types
+Selmer orbit #26 yields 0 exceptional types
+Selmer orbit #27 yields 16 exceptional types
+Selmer orbit #28 yields 0 exceptional types
+Selmer orbit #29 yields 0 exceptional types
+Selmer orbit #30 yields 16 exceptional types
+Selmer orbit #31 yields 16 exceptional types
+Selmer orbit #32 yields 16 exceptional types
+Selmer orbit #33 yields 16 exceptional types
+Selmer orbit #34 yields 16 exceptional types
+Selmer orbit #35 yields 0 exceptional types
+Selmer orbit #36 yields 16 exceptional types
+Selmer orbit #37 yields 0 exceptional types
+Selmer orbit #38 yields 16 exceptional types
+Selmer orbit #39 yields 0 exceptional types
+Selmer orbit #40 yields 0 exceptional types
+Selmer orbit #41 yields 16 exceptional types
+Selmer orbit #42 yields 16 exceptional types
+Selmer orbit #43 yields 16 exceptional types
+Selmer orbit #44 yields 0 exceptional types
+Selmer orbit #45 yields 0 exceptional types
+Selmer orbit #46 yields 16 exceptional types
+Selmer orbit #47 yields 0 exceptional types
+Selmer orbit #48 yields 0 exceptional types
+Selmer orbit #49 yields 0 exceptional types
+Selmer orbit #50 yields 0 exceptional types
+Selmer orbit #51 yields 16 exceptional types
+Selmer orbit #52 yields 0 exceptional types
+Selmer orbit #53 yields 16 exceptional types
+Selmer orbit #54 yields 0 exceptional types
+Selmer orbit #55 yields 16 exceptional types
+Selmer orbit #56 yields 16 exceptional types
+Selmer orbit #57 yields 0 exceptional types
+Selmer orbit #58 yields 0 exceptional types
+Selmer orbit #59 yields 0 exceptional types
+Selmer orbit #60 yields 16 exceptional types
+Selmer orbit #61 yields 16 exceptional types
+Selmer orbit #62 yields 0 exceptional types
+Selmer orbit #63 yields 16 exceptional types
+Computed 560 exceptional types of size 24
+Time: 926.010
+
+========================================
+    Computed Inertia Types : Summary
+========================================
+
+PrincipalSeries  : 71
+SCU              : 72
+SCR              : 480
+Ex8              : 0
+Ex24             : 560
+----------------------------------------
+Total inertial types : 1183
+
+------------------------------------------------------------
+e   v(N)  Character order  Description               Count  
+------------------------------------------------------------
+2   4     2                principal series          1      
+2   8     2                principal series          2      
+2   12    2                principal series          4      
+2   14    2                principal series          8      
+3   2     3                supercuspidal unramified  1      
+4   6     4                principal series          1      
+4   6     4                supercuspidal unramified  1      
+4   8     4                principal series          1      
+4   8     4                supercuspidal unramified  1      
+4   12    4                supercuspidal unramified  2      
+4   12    4                principal series          2      
+4   14    4                principal series          4      
+4   14    4                supercuspidal unramified  4      
+4   18    4                supercuspidal unramified  16     
+4   18    4                principal series          16     
+4   20    4                principal series          32     
+4   20    4                supercuspidal unramified  32     
+6   4     6                supercuspidal unramified  1      
+6   8     6                supercuspidal unramified  2      
+6   12    6                supercuspidal unramified  4      
+6   14    6                supercuspidal unramified  8      
+8   5     4                supercuspidal ramified    2      
+8   8     4                supercuspidal ramified    2      
+8   11    4                supercuspidal ramified    16     
+8   12    4                supercuspidal ramified    20     
+8   14    4                supercuspidal ramified    40     
+8   17    4                supercuspidal ramified    128    
+8   18    4                supercuspidal ramified    48     
+8   20    4                supercuspidal ramified    224    
+24  3     4                exceptional, SL(2,3)      1      
+24  4     4                exceptional, SL(2,3)      1      
+24  7     4                exceptional, SL(2,3)      4      
+24  8     4                exceptional, SL(2,3)      6      
+24  9     4                exceptional, SL(2,3)      8      
+24  10    4                exceptional, SL(2,3)      8      
+24  12    4                exceptional, SL(2,3)      28     
+24  13    4                exceptional, SL(2,3)      32     
+24  14    4                exceptional, SL(2,3)      88     
+24  15    4                exceptional, SL(2,3)      64     
+24  16    4                exceptional, SL(2,3)      64     
+24  19    4                exceptional, SL(2,3)      256    
+------------------------------------------------------------
+2
+Unramified extension defined by the polynomial x^3 + x + 1 + O(2^100) over 
+2-adic field mod 2^100
+Computed all quadratic extensions (31)
+N=8
+Computed 71 principal series types
+Computed 72 supercuspidal unramified types
+Computed all quadratic extensions (31)
+Computed 480 supercuspidal ramified types
+63 Selmer orbits
+Selmer orbit #1 yields 16 exceptional types
+Selmer orbit #2 yields 0 exceptional types
+Selmer orbit #3 yields 16 exceptional types
+Selmer orbit #4 yields 0 exceptional types
+Selmer orbit #5 yields 0 exceptional types
+Selmer orbit #6 yields 16 exceptional types
+Selmer orbit #7 yields 0 exceptional types
+Selmer orbit #8 yields 0 exceptional types
+Selmer orbit #9 yields 16 exceptional types
+Selmer orbit #10 yields 16 exceptional types
+Selmer orbit #11 yields 16 exceptional types
+Selmer orbit #12 yields 0 exceptional types
+Selmer orbit #13 yields 16 exceptional types
+Selmer orbit #14 yields 16 exceptional types
+Selmer orbit #15 yields 16 exceptional types
+Selmer orbit #16 yields 16 exceptional types
+Selmer orbit #17 yields 16 exceptional types
+Selmer orbit #18 yields 0 exceptional types
+Selmer orbit #19 yields 16 exceptional types
+Selmer orbit #20 yields 16 exceptional types
+Selmer orbit #21 yields 16 exceptional types
+Selmer orbit #22 yields 0 exceptional types
+Selmer orbit #23 yields 0 exceptional types
+Selmer orbit #24 yields 16 exceptional types
+Selmer orbit #25 yields 0 exceptional types
+Selmer orbit #26 yields 0 exceptional types
+Selmer orbit #27 yields 16 exceptional types
+Selmer orbit #28 yields 0 exceptional types
+Selmer orbit #29 yields 16 exceptional types
+Selmer orbit #30 yields 16 exceptional types
+Selmer orbit #31 yields 16 exceptional types
+Selmer orbit #32 yields 0 exceptional types
+Selmer orbit #33 yields 16 exceptional types
+Selmer orbit #34 yields 0 exceptional types
+Selmer orbit #35 yields 0 exceptional types
+Selmer orbit #36 yields 0 exceptional types
+Selmer orbit #37 yields 16 exceptional types
+Selmer orbit #38 yields 0 exceptional types
+Selmer orbit #39 yields 16 exceptional types
+Selmer orbit #40 yields 0 exceptional types
+Selmer orbit #41 yields 0 exceptional types
+Selmer orbit #42 yields 0 exceptional types
+Selmer orbit #43 yields 0 exceptional types
+Selmer orbit #44 yields 16 exceptional types
+Selmer orbit #45 yields 16 exceptional types
+Selmer orbit #46 yields 16 exceptional types
+Selmer orbit #47 yields 0 exceptional types
+Selmer orbit #48 yields 0 exceptional types
+Selmer orbit #49 yields 16 exceptional types
+Selmer orbit #50 yields 0 exceptional types
+Selmer orbit #51 yields 16 exceptional types
+Selmer orbit #52 yields 16 exceptional types
+Selmer orbit #53 yields 0 exceptional types
+Selmer orbit #54 yields 16 exceptional types
+Selmer orbit #55 yields 0 exceptional types
+Selmer orbit #56 yields 16 exceptional types
+Selmer orbit #57 yields 16 exceptional types
+Selmer orbit #58 yields 16 exceptional types
+Selmer orbit #59 yields 0 exceptional types
+Selmer orbit #60 yields 16 exceptional types
+Selmer orbit #61 yields 16 exceptional types
+Selmer orbit #62 yields 16 exceptional types
+Selmer orbit #63 yields 0 exceptional types
+Computed 560 exceptional types of size 24
+Time: 590.070
+
+========================================
+    Computed Inertia Types : Summary
+========================================
+
+PrincipalSeries  : 71
+SCU              : 72
+SCR              : 480
+Ex8              : 0
+Ex24             : 560
+----------------------------------------
+Total inertial types : 1183
+
+------------------------------------------------------------
+e   v(N)  Character order  Description               Count  
+------------------------------------------------------------
+2   4     2                principal series          7      
+2   6     2                principal series          8      
+3   2     3                supercuspidal unramified  1      
+4   6     4                principal series          24     
+4   6     4                supercuspidal unramified  24     
+4   8     4                supercuspidal unramified  32     
+4   8     4                principal series          32     
+6   4     6                supercuspidal unramified  7      
+6   6     6                supercuspidal unramified  8      
+8   5     4                supercuspidal ramified    56     
+8   6     4                supercuspidal ramified    200    
+8   8     4                supercuspidal ramified    224    
+24  3     4                exceptional, SL(2,3)      7      
+24  4     4                exceptional, SL(2,3)      49     
+24  6     4                exceptional, SL(2,3)      56     
+24  7     4                exceptional, SL(2,3)      448    
+------------------------------------------------------------
