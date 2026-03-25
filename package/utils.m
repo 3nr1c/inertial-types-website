@@ -52,9 +52,10 @@ function FastMap(m)
     return Fmap;
 end function;
 
-function OptimalNorms(L,F,f)
+function OptimalNorms(L,F,f : prec:=0)
+// resulting precision is >= prec
     r := RamificationDegree(L,F);
-    c := Max(r*(f-1)+1,AbsoluteRamificationDegree(L)+1);
+    c := Max([r*(f-1)+1,AbsoluteRamificationDegree(L)+1,prec]);
     
     assert Ceiling(c/r) ge f;
 
@@ -62,7 +63,7 @@ function OptimalNorms(L,F,f)
     OL := Integers(LowPrecL);
     // Using UnitGroupGenerators instead of UnitGroup saves _a lot_ of time
     GenUL := UnitGroupGenerators(OL);
-    // UL, ULtoOL := UnitGroup(OL);
+    UL, ULtoOL := UnitGroup(OL);
     // GenUL := SetToSequence(Generators(UL));
 
     upstairs := [ChangePrecision(L!LowPrecL!g,Precision(L)) :g in GenUL];
@@ -70,7 +71,7 @@ function OptimalNorms(L,F,f)
 
     return
         [ChangePrecision(Norm(u, F),Precision(F)) : u in upstairs],
-        upstairs;
+        upstairs, UL, ULtoOL;
 end function;
 
 function ElementCoordinates(x, B);
@@ -127,4 +128,8 @@ function IsValidExceptionalExtension(F, L)
     end if;
 
     return valid;
+end function;
+
+function CmpCondExp(tau1, tau2)
+    return tau1`CondExp - tau2`CondExp;
 end function;

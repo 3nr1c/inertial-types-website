@@ -8,6 +8,6 @@ for i in [1..#QuadExt] do
     i;
     K := FieldOfFractions(QuadExt[i]);
     K;
-    time Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(K);
-    PrintInChtrSummary(PS,SCU,SCR,Ex8,Ex24);
+    time PS, SCU, SCR, Ex8, Ex24, Twist := InertialTypes(K);
+    InTypesSummary(PS,SCU,SCR,Ex8,Ex24);
 end for;

@@ -68,6 +68,20 @@ function _InTypeRowWithDesc(tau, desc)
     *];
 end function;
 
+function _InTypeRowWithDescInertiaField(tau, desc)
+    Qp := pAdicField(Prime(tau`BaseField), 100);
+    poly := DefiningPolynomial(InertiaField(tau), Qp);
+    R := Parent(poly);
+    AssignNames(~R, ["X"]);
+    return [*
+        SemistabilityDefect(tau),
+        tau`CondExp,
+        tau`Character`Order,
+        desc,
+        poly
+    *];
+end function;
+
 
 ////////////////////////////////////////////////////////////////////////
 // Row aggregation
@@ -97,7 +111,7 @@ end function;
 // Main summary procedure
 ////////////////////////////////////////////////////////////////////////
 
-intrinsic PrintData(PS, SCU, SCR, Ex8, Ex24)
+intrinsic PrintInertiaFields(PS, SCU, SCR, Ex8, Ex24)
 {Prints a summary of the data outputed by InertialTypes(F)}
     printf "\n========================================\n";
     printf "    Computed Inertia Types : Summary\n";
@@ -118,7 +132,7 @@ intrinsic PrintData(PS, SCU, SCR, Ex8, Ex24)
     ////////////////////////////////////////////////////////////////
 
     if #PS gt 0 then
-        rows cat:= [ _InTypeRow(x) cat [* "principal series" *]: x in PS ];
+        rows cat:= [ _InTypeRowWithDescInertiaField(x, "principal series") : x in PS ];
     end if;
 
     ////////////////////////////////////////////////////////////////
@@ -126,7 +140,7 @@ intrinsic PrintData(PS, SCU, SCR, Ex8, Ex24)
     ////////////////////////////////////////////////////////////////
 
     if #SCU gt 0 then
-        rows cat:= [ _InTypeRow(x) cat [* "supercuspidal unramified" *] : x in SCU ];
+        rows cat:= [ _InTypeRowWithDescInertiaField(x, "supercuspidal unramified") : x in SCU ];
     end if;
 
     ////////////////////////////////////////////////////////////////
@@ -134,7 +148,7 @@ intrinsic PrintData(PS, SCU, SCR, Ex8, Ex24)
     ////////////////////////////////////////////////////////////////
 
     if #SCR gt 0 then
-        rows cat:= [ _InTypeRow(x) cat [* "supercuspidal ramified" *] : x in SCR ];
+        rows cat:= [ _InTypeRowWithDescInertiaField(x, "supercuspidal ramified") : x in SCR ];
     end if;
 
 
@@ -143,7 +157,7 @@ intrinsic PrintData(PS, SCU, SCR, Ex8, Ex24)
     ////////////////////////////////////////////////////////////////
 
     if #Ex8 gt 0 then
-        rows cat:= [ _InTypeRow(x) cat [* "exceptional" *] : x in Ex8 ];
+        rows cat:= [ _InTypeRowWithDescInertiaField(x, "exceptional, Q8") : x in Ex8 ];
     end if;
 
     ////////////////////////////////////////////////////////////////
@@ -151,16 +165,16 @@ intrinsic PrintData(PS, SCU, SCR, Ex8, Ex24)
     ////////////////////////////////////////////////////////////////
 
     if #Ex24 gt 0 then
-        rows cat:= [ _InTypeRow(x) cat [* "exceptional" *]: x in Ex24 ];
+        rows cat:= [ _InTypeRowWithDescInertiaField(x, "exceptional, SL(2,3)") : x in Ex24 ];
     end if;
 
     _PrintTable(
-        ["Semistability defect", "v(E)", "Character order", "Description"],
+        ["Semistability defect", "v(E)", "Character order", "Description", "Field of inertia"],
         rows
     );
 end intrinsic;
 
-intrinsic PrintInChtrSummary(PS, SCU, SCR, Ex8, Ex24)
+intrinsic InTypesSummary(PS, SCU, SCR, Ex8, Ex24)
 {Prints a summary of the data outputed by InertialTypes(F)}
 
     printf "\n========================================\n";

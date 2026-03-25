@@ -5,6 +5,6 @@ SetVerbose("ECITypes", true);
 Q2 := pAdicField(2, 100);
 Q4 := UnramifiedExtension(Q2, 2);
 
-time Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(Q4);
+time PS, SCU, SCR, Ex8, Ex24, Twist := InertialTypes(Q4 : InertiaFields:=false);
 
-PrintInChtrSummary(PS,SCU,SCR,Ex8,Ex24);
+InTypesSummary(PS,SCU,SCR,Ex8,Ex24);

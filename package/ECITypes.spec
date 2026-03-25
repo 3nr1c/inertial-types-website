@@ -1,6 +1,10 @@
 declare verbose ECITypes, 1;
 
-import "utils.m" : AllQuadraticExtensions, OptimalNorms, IsValidExceptionalExtension, ElementCoordinates;
+import "utils.m" : AllQuadraticExtensions, 
+                   OptimalNorms, 
+                   IsValidExceptionalExtension, 
+                   ElementCoordinates,
+                   CmpCondExp;
 import "sequences.m" : UComplex, ConComplex, BaseValues, ExtValues;
 import "characters.m" : FastCharactersOfOrder, FastCharactersOfPrimePowerOrder;
 
@@ -352,7 +356,7 @@ function SelmerGaloisModule (F,L)
     return GSel, Sel, Inverse(LtoSel), Gal, GaltoAut;
 end function;
 
-function InternalExceptionalTypes(F, L : InducingFields := [])
+function InternalExceptionalTypes(F, L : InducingFields := [], InertiaFields := false)
     // require IsNormal(L,F) : "The extension L/F must be normal";
     // require ((AbsoluteInertiaDegree(F) mod 2 eq 0) and (Degree(L, F) eq 3)) 
     //     or (
@@ -364,13 +368,17 @@ function InternalExceptionalTypes(F, L : InducingFields := [])
     R<X> := PolynomialRing(L);
     GSel, Sel, SeltoL, Gal, GaltoAut := SelmerGaloisModule(F,L);
 
+    // Needed to compute inertia fields
+    FSel, FtoSel := pSelmerGroup(2, F);
+    SeltoF := Inverse(FtoSel);
+
     // Look for an element rho of order 3 in the Galois group
     for tau in Gal do
         if Order(tau) eq 3 then rho := GaltoAut(tau); break; end if;
     end for;
 
     SelOrbits := [M: M in MinimalSubmodules(GSel) | Dimension(M) eq 2];
-    vprintf ECITypes : "%o Selmer orbits\n", #SelOrbits;
+    vprintf ECITypes : "Computing exceptional types from %o Selmer orbits\n", #SelOrbits;
 
     Exceptionals:=[];
     i := 0;
@@ -390,9 +398,12 @@ function InternalExceptionalTypes(F, L : InducingFields := [])
             end if;
         end if;
         K1 := SplittingField(Polynomials[1]);
+        K2 := SplittingField(Polynomials[2]);
+        K3 := SplittingField(Polynomials[3]);
 
         K1X<x> := PolynomialRing(K1);
         E := SplittingField(K1X!Polynomials[2]);
+        ET<T> := PolynomialRing(E);
         y1 := Sqrt(E!(-Coefficient(Polynomials[1],0)));
         y2 := Sqrt(E!(-Coefficient(Polynomials[2],0)));
 
@@ -449,32 +460,90 @@ function InternalExceptionalTypes(F, L : InducingFields := [])
                 Values := Values cat [0];
             end for;
             
-            characters := FastCharactersOfPrimePowerOrder(
-                CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements, Values:=Values
-            );
-            vprintf ECITypes : "Selmer orbit #%o yields %o exceptional types\n", i, #characters;
+            OrbitTypes := [ExceptionalType(chi, F, L, [K1, K2, K3]) :
+                chi in FastCharactersOfPrimePowerOrder(
+                    CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements, Values:=Values
+                )
+            ];
+            vprintf ECITypes : "Selmer orbit #%o yields %o exceptional types\n", i, #OrbitTypes;
 
-            Exceptionals cat:= [ExceptionalType(phi, F, L) : phi in characters];
+            if #OrbitTypes eq 0 then continue; end if;
+            if not InertiaFields then
+                Exceptionals := Exceptionals cat OrbitTypes;
+                continue;
+            end if;
+
+            t := Cputime();
+            E2 := ChangePrecision(E,Max(Precision(F), 60));
+            UE, UEtoE := UnitGroup(E2);
+            EtoUE := Inverse(UEtoE);
+            Utors := sub<UE|[g : g in Generators(UE)| not IsZero(Order(g))]>;
+            Utorsgens := SetToSequence(Generators(Utors));
+            Utorsnorm := [Norm(UEtoE(g), K1) : g in Utorsgens];
+            piE2 := EtoUE(UniformizingElement(E2));
+            vprintf ECITypes: "Computed Nm(E) in %os. Computing inertia fields...\n", Cputime(t);
+
+
+            while #OrbitTypes gt 0 do
+                // order types by conductor exponent to speed up class field computation
+                OrbitTypes := Sort(OrbitTypes, CmpCondExp);
+                
+                tau := OrbitTypes[1];
+                chi := tau`Character;
+                //Exclude(~OrbitTypes, tau);
+
+                ker := Kernel(Homomorphism(Utors, Codomain(chi`Map), Utorsgens, 
+                    [chi(Nmg) : Nmg in Utorsnorm]
+                ));
+                Norms := sub<UE|ker, piE2>;
+                t := Cputime();
+                M := ClassField(UEtoE, Norms);
+                vprintf ECITypes: "Computation of one inertia field took %os (v(N) = %o)\n", Cputime(t), tau`CondExp;
+                //DefiningPolynomial(M,F);
+                
+                tau := ExceptionalType(chi, F, L);
+                tau`InertiaField := M;
+                //Append(~Exceptionals, tau);
+                
+                // If there are still some types, twist field and eliminate some
+                Mdisc := Discriminant(M, E);
+                t := Cputime();
+                for s in FSel do
+                    if #OrbitTypes eq 0 then break; end if;
+                    //if IsIdentity(s) then continue; end if;
+                    Mdisc_s := ChangePrecision(E!(SeltoF(s))*Mdisc, Precision(E));
+                    Ms := SplittingField(T^2 - Mdisc_s);
+                    tau2 := FindInertiaType(Ms, OrbitTypes);
+                    if not IsNull(tau2) then
+                        tau2`InertiaField := Ms;
+                        Exclude(~OrbitTypes, tau2);
+                        Append(~Exceptionals, tau2);
+                    end if;
+                end for;
+                vprintf ECITypes: "Computation of inertia fields of twists took %os\n", Cputime(t);
+            end while;
+
+            //Exceptionals cat:= [ExceptionalType(phi, F, L) : phi in characters];
             // print("------------------");
         end if;
     end for;
     return Exceptionals;
 end function;
 
-function ExceptionalTypesTriply(F, L)
+function ExceptionalTypesTriply(F, L : InertiaFields := false)
     assert Degree(L, F) eq 3;
 
-    return InternalExceptionalTypes(F, L);
+    return InternalExceptionalTypes(F, L : InertiaFields := InertiaFields);
 end function;
 
-function ExceptionalTypesSimply(F)
+function ExceptionalTypesSimply(F : InertiaFields := false)
     Fx<x>:=PolynomialRing(F);
     Fprime := UnramifiedExtension(F,2);
     for l in [1..3] do 
         L := FieldOfFractions(AllExtensions(Fprime, 3)[l]);
         if IsNormal(L,F) then break; end if;
     end for;
-    return InternalExceptionalTypes(F, L);
+    return InternalExceptionalTypes(F, L : InertiaFields := InertiaFields);
 end function;
 
 
@@ -518,23 +587,23 @@ induced from a quartic character of K}
     return InternalExceptionalTypes(F, L : InducingFields := [K]);
 end intrinsic;
 
-intrinsic InertialTypes(F :: FldPad : SkipExceptionals := false) 
-    -> SeqEnum[FldPadElt],
-       SeqEnum[PrincipalSeriesIT],
+intrinsic InertialTypes(F :: FldPad : SkipExceptionals := false, InertiaFields := false) 
+    -> SeqEnum[PrincipalSeriesIT],
        SeqEnum[SCUInType],
        SeqEnum[SCRInType],
-       SeqEnum,
-       SeqEnum
+       SeqEnum[ExceptionalInType],
+       SeqEnum[ExceptionalInType],
+       SeqEnum[FldPadElt]
 {Compute all inertia types attached to elliptic curves over the field F. Returns:
-    - A list of values in F giving all used quadratic twists
     - A list of Principal Series Types
     - A list of Supercuspidal Unramified Types
     - A list of Supercuspidal Ramified Types
     - A list of Exceptional Types of size 8
     - A list of Exceptional Types of size 24
+    - A list of values in F giving all used quadratic twists
 }
     c := 0;
-    QuadExt,Twist := AllQuadraticExtensions(F : Selmer := false);
+    QuadExt,Twist := AllQuadraticExtensions(F : Selmer := true);
     vprintf ECITypes: "Computed all quadratic extensions (%o)\n", #Twist;
     
     p, ram_deg, in_deg, pi, N := BaseValues(F);
@@ -542,33 +611,60 @@ intrinsic InertialTypes(F :: FldPad : SkipExceptionals := false)
     groups, maps, lift := UComplex(F, ff);
     vprintf ECITypes: "N=%o\n", N;
 
-    PS := PrincipalSeries(F : MyComplex := [*groups, maps, lift*]);
+    PS := Sort(PrincipalSeries(F : MyComplex := [*groups, maps, lift*]), CmpCondExp);
     vprintf ECITypes: "Computed %o principal series types\n", #PS;
 
+    if InertiaFields then
+        t := Cputime();
+        for i in [1..#PS] do
+            PS[i]`InertiaField := InertiaField(PS[i]);
+        end for;
+        vprintf ECITypes : "Computation of %o inertia fields took %os\n", #PS, Cputime(t);
+    end if;
 
-    SCU := SupercuspidalUnramified(F);
+
+    SCU := Sort(SupercuspidalUnramified(F), CmpCondExp);
     vprintf ECITypes: "Computed %o supercuspidal unramified types\n", #SCU;
-    SCR := SupercuspidalRamified(F : QuadExt:=QuadExt, Twist:=Twist);
-    vprintf ECITypes: "Computed %o supercuspidal ramified types\n", #SCR;
+    
+    if InertiaFields then
+        t := Cputime();
+        for i in [1..#SCU] do
+            SCU[i]`InertiaField := InertiaField(SCU[i]);
+        end for;
+        vprintf ECITypes : "Computation of %o inertia fields took %os\n", #SCU, Cputime(t);
+    end if;
 
+
+    SCR := Sort(SupercuspidalRamified(F : QuadExt:=QuadExt, Twist:=Twist), CmpCondExp);
+    vprintf ECITypes: "Computed %o supercuspidal ramified types\n", #SCR;    
+        
+    if InertiaFields then
+        t := Cputime();
+        for i in [1..#SCR] do
+            SCR[i]`InertiaField := InertiaField(SCR[i]);
+        end for;
+        vprintf ECITypes : "Computation of %o inertia fields took %os\n", #SCR, Cputime(t);
+    end if;
     Ex24:=[];
     Ex8:=[];
     if p eq 2 and not SkipExceptionals then
         if (in_deg mod 2 eq 0) then 
             for j in [1..3] do
                 L:=FieldOfFractions(AllExtensions(F,3)[j]);
-                Ex_L:=ExceptionalTypesTriply(F,L);
+                Ex_L:=ExceptionalTypesTriply(F,L : InertiaFields := InertiaFields);
                 Ex24 := Ex24 cat Ex_L;
                 vprintf ECITypes: "Computed %o exceptional types of size 24 for cubic extension #%o\n", #Ex_L, j;
             end for;
+
             L := FieldOfFractions(AllExtensions(F,3)[4]);
-            Ex8 := ExceptionalTypesTriply(F,L);
+            Ex8 := Sort(ExceptionalTypesTriply(F,L : InertiaFields := InertiaFields), CmpCondExp);
             vprintf ECITypes: "Computed %o exceptional types of size 8\n", #Ex8;
         else 
-            Ex24 := ExceptionalTypesSimply(F);
+            Ex24 := ExceptionalTypesSimply(F : InertiaFields := InertiaFields);
             vprintf ECITypes: "Computed %o exceptional types of size 24\n", #Ex24;
         end if;
+        Ex24 := Sort(Ex24, CmpCondExp);
     end if;
 
-    return Twist, PS, SCU, SCR, Ex8, Ex24;
+    return PS, SCU, SCR, Ex8, Ex24, Twist;
 end intrinsic;

@@ -2,8 +2,8 @@ AttachSpec("../spec");
 
 SetVerbose("ECITypes", true);
 
-Q2 := pAdicField(3, 100);
+Q3 := pAdicField(3, 100);
 
-time Twist, PS, SCU, SCR, Ex8, Ex24 := InertialTypes(Q2);
+time PS, SCU, SCR, Ex8, Ex24, Twist := InertialTypes(Q3);
 
-PrintInChtrSummary(PS,SCU,SCR,Ex8,Ex24);
+InTypesSummary(PS,SCU,SCR,Ex8,Ex24);
