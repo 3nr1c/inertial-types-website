@@ -46,7 +46,6 @@ O := func<x | O(Q2!x)>;
 //  - Semistability defect
 //  - Conductor exponent
 //  - Character order
-//  - Absolute defining polynomial of the inertia field
 //  - Defining polynomial of the inertia field, relative to F
 data := [
         [* "principal series", 2, 6, 2, T^2 + O(2^40)*T + 2 + O(2^40) *],
