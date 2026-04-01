@@ -1,7 +1,7 @@
 {
    package
    {
-      ECITypes.spec
+      InTypes.spec
       InertialTypes.spec
       PrettyPrint.spec
    }

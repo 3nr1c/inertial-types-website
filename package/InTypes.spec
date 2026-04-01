@@ -1,4 +1,4 @@
-declare verbose ECITypes, 1;
+declare verbose InTypes, 1;
 
 import "utils.m" : AllQuadraticExtensions, 
                    OptimalNorms, 
@@ -109,7 +109,7 @@ intrinsic SupercuspidalUnramified(F : Order := 0, TrivialOn := [], QuadraticOn :
 end intrinsic;
 
 ///// SUPERCUSPIDAL RAMIFIED ////
-function SupercuspidalRamified2(F, K, f, c, VarepsGenerators : KernelElements := [])
+function InternalSCR2(F, K, f, c, VarepsGenerators : KernelElements := [])
     assert Prime(F) eq 2;
 
     p, ram_deg, in_deg, pi, N := BaseValues(F);
@@ -143,7 +143,7 @@ function SupercuspidalRamified2(F, K, f, c, VarepsGenerators : KernelElements :=
     ];
 end function;
 
-function SupercuspidalRamified3(F, K, f, c, VarepsGenerators)
+function InternalSCR3(F, K, f, c, VarepsGenerators)
     assert Prime(F) eq 3;
 
     p, ram_deg, in_deg, pi, N := BaseValues(F);
@@ -165,9 +165,9 @@ function InternalSCR(F, K, f, c, VarepsGenerators)
     p := Prime(F);
     // print("p="),p;
     if p eq 2 then
-        return SupercuspidalRamified2(F, K, f, c, VarepsGenerators);
+        return InternalSCR2(F, K, f, c, VarepsGenerators);
     elif p eq 3 then
-        return SupercuspidalRamified3(F, K, f, c, VarepsGenerators);
+        return InternalSCR3(F, K, f, c, VarepsGenerators);
     else
         error Error("Prime must be 2 or 3");
     end if;
@@ -189,12 +189,15 @@ intrinsic SupercuspidalRamified(F::FldPad, K::FldPad) -> SeqEnum[SCRInType]
     return InternalSCR(F, K, f, c, VarepsGenerators);
 end intrinsic;
 
-function SCRMatched(F, K, SCR)
+function InternalSCRMatched(F, K, SCR)
 // F::FldPad, K::SeqEnum[FldPad], SCR::SeqEnum[SCRInType]
     assert #K in [2, 3];
 
     // This list will contain the types
     TriplyImprimitiveTypes := [];
+    i1s := {};
+    i2s := {};
+    i3s := {};
 
     // We set up the triple of fields
     y1 := Discriminant(K[1], F);
@@ -212,6 +215,9 @@ function SCRMatched(F, K, SCR)
     while #SCR lt 3 do
         Append(~SCR, SupercuspidalRamified(F, K[#SCR + 1]));
     end while;
+    if #SCR[1] eq 0 or #SCR[2] eq 0 or #SCR[3] eq 0 then
+        return TriplyImprimitiveTypes, [], [], [];// = []
+    end if;
 
     R1<X> := PolynomialRing(K[1]);
     E1 := SplittingField(X^2 - y2);
@@ -234,28 +240,91 @@ function SCRMatched(F, K, SCR)
     UnitCoordsF13 := [ElementCoordinates(x[1], [1,s1]) cat ElementCoordinates(x[2], [1,s1]) : x in UnitCoordsK3Basis];
     Norms3 := [ u[1]^2+u[3]^2*y3-u[2]^2*y1-u[4]^2*y1*y3+(2*u[1]*u[3]-2*u[2]*u[4]*y1)*s3 :u in UnitCoordsF13];
 
+    assert #Norms1 eq #Norms2;
+    assert #Norms1 eq #Norms3;
+    
+    isIso3, iso3 := IsIsomorphic(Codomain(SCR[1,1]`Character`Map), Codomain(SCR[3,1]`Character`Map));
+    isIso2, iso2 := IsIsomorphic(Codomain(SCR[1,1]`Character`Map), Codomain(SCR[2,1]`Character`Map));
+    for i1 in [1..#SCR[1]] do
+        chi := SCR[1,i1];
 
-    for chi in SCR[1] do
-        Match2 := [tau : tau in SCR[2] | chi`CondExp eq tau`CondExp];
-        Match3 := [tau : tau in SCR[3] | chi`CondExp eq tau`CondExp];
-        isIso2, iso2 := IsIsomorphic(Codomain(chi`Character`Map), Codomain(SCR[2,1]`Character`Map));
-        isIso3, iso3 := IsIsomorphic(Codomain(chi`Character`Map), Codomain(SCR[3,1]`Character`Map));
-
+        chiNorms1 := [];
+        quadraticOnNorms := true;
         for t in [1..#Norms1] do
-            Match2 := [tau: tau in Match2 | iso2(chi`Character(Norms1[t])) eq tau`Character(Norms2[t])];
-            Match3 := [tau: tau in Match3 | iso3(chi`Character(Norms1[t])) eq tau`Character(Norms3[t])];
-        end for;      
-        if #Match2 eq 1 and #Match3 eq 1 then
-            Append(~TriplyImprimitiveTypes, TriplyImprimitiveType([
-                chi`Character, Match2[1]`Character, Match3[1]`Character
-            ], chi`BaseField));
-        elif not (#Match2 eq 0 and #Match3 eq 0) then
-            vprint ECITypes : "ERROR in matching triply imprimitive types";
-            assert false;
+            chiNm := chi`Character(Norms1[t]);
+            Append(~chiNorms1, chiNm);
+            if not IsIdentity(2*chiNm) then
+                quadraticOnNorms := false;
+                break;
+            end if;
+        end for;
+        if not quadraticOnNorms then 
+            continue;
         end if;
+
+        found2 := false;
+        i2 := 0;
+        while (not found2) and (i2 lt #SCR[2]) do
+            i2 +:= 1;
+            tau := SCR[2,i2];
+            if chi`CondExp eq tau`CondExp then
+                found2 := true;
+                for t in [1..#Norms1] do
+                    chiNm := chiNorms1[t];
+                    tauNm := tau`Character(Norms2[t]);
+                    // found2 := found2 and IsIdentity(2*chiNm);
+                    found2 := found2 and IsIdentity(2*tauNm);
+                    found2 := found2 and iso2(chiNm) eq tauNm;
+                    if not found2 then
+                        break;
+                    end if;
+                end for;
+            else 
+                found2 := false;
+            end if;
+        end while;
+        // Ideally we would check both SCR[2] and SCR[3]. If we want to 
+        // debug, the next line should be disabled:
+        // if not found2 then continue; end if;
+
+        found3 := false;
+        i3 := 0;
+        while (not found3) and (i3 lt #SCR[3]) do
+            i3 +:= 1;
+            tau := SCR[3,i3];
+            if chi`CondExp eq tau`CondExp then
+                found3 := true;
+                for t in [1..#Norms1] do
+                    chiNm := chiNorms1[t];
+                    tauNm := tau`Character(Norms3[t]);
+                    // found3 := found3 and IsIdentity(2*chiNm);
+                    found3 := found3 and IsIdentity(2*tauNm);
+                    found3 := found3 and iso3(chiNm) eq tauNm;
+                    if not found3 then
+                        break;
+                    end if;
+                end for;
+            else 
+                found3 := false;
+            end if;
+        end while;
+        
+        if found2 and found3 then
+            Append(~TriplyImprimitiveTypes, TriplyImprimitiveType([
+                chi`Character, SCR[2,i2]`Character, SCR[3,i3]`Character
+            ], chi`BaseField));
+            Include(~i1s, i1);
+            Include(~i2s, i2);
+            Include(~i3s, i3);
+        end if;
+        // elif found2 xor found3 then
+        //     vprint InTypes : "ERROR in matching triply imprimitive types";
+        //     found2, found3;
+        //     assert found2 and found3;
+        // end if;
     end for;
 
-    return TriplyImprimitiveTypes;
+    return TriplyImprimitiveTypes, SetToSequence(i1s), SetToSequence(i2s), SetToSequence(i3s);
 end function;
 
 
@@ -276,7 +345,7 @@ intrinsic SupercuspidalRamified(F, K::SeqEnum[FldPad]) -> SeqEnum[SCRInType]
             // now we match every SCR type from K[1] to the others
             if #K eq 1 then return SupercuspidalRamified(F, K[1]);
             else
-                return SCRMatched(F, K, []);
+                return InternalSCRMatched(F, K, []);
             end if;
         else
             require #K eq 1 : "SCR must be induced from a single field";
@@ -293,36 +362,61 @@ intrinsic SupercuspidalRamified(F::FldPad : QuadExt := [], Twist := []) -> SeqEn
     p := Prime(F);
     if #QuadExt eq 0 or #Twist eq 0 then
         QuadExt, Twist := AllQuadraticExtensions(F : Selmer := false);
-        vprintf ECITypes: "Computed all quadratic extensions (%o)\n", #Twist;
+        vprintf InTypes: "Computed all quadratic extensions (%o)\n", #Twist;
     end if;
 
-    SCR := [(RamificationDegree(K, F) eq 2) select SupercuspidalRamified(F, K) else [] : K in QuadExt];
+    SCR := [];
+    t := Cputime();
+    for i in [1..#QuadExt] do
+        K := QuadExt[i];
+        Append(~SCR, (RamificationDegree(K, F) eq 2) select SupercuspidalRamified(F, K) else []);
+    end for;
+    vprintf InTypes : "Computed %o SCR types in %os\n", &+[#c : c in SCR], Cputime(t);
 
     if p eq 2 and AbsoluteInertiaDegree(F) mod 2 eq 0 then
+        vprint InTypes : "Grouping triply imprimitive types...";
+        t := Cputime();
         Sel, FtoSel := pSelmerGroup(2,F);
         SeltoF := Inverse(FtoSel);
         Triples := {};
         for i,j in [1..#Twist] do
-            if i eq j then continue; end if; 
+            if i ge j then continue; end if; 
             x := FtoSel(Twist[i]);
             y := FtoSel(Twist[j]);
             z := x*y;
             k := [l : l in [1..#Twist] | FtoSel(Twist[l]) eq z ][1];
-            if IsEmpty({tau`CondExp: tau in SCR[i]} meet {tau`CondExp: tau in SCR[j]} meet {tau`CondExp: tau in SCR[k]}) then continue; end if;
+            if IsEmpty({tau`CondExp: tau in SCR[i]} 
+                    meet {tau`CondExp: tau in SCR[j]} 
+                    meet {tau`CondExp: tau in SCR[k]}) then 
+                continue; 
+            end if;
             trip := {i,j,k};
             if #trip eq 3 then 
                 Include(~Triples,trip);
             end if;
         end for;
 
+        vprintf InTypes : "We have %o field triples (Sel generators = %o)\n", #Triples, #Generators(Sel);
+
         TriplyImprimitiveTypes := [];
         for triple in Triples do
-            ThisTriply := SCRMatched(F, [QuadExt[i] : i in triple], [SCR[i] : i in triple]);
+            tripleseq := Sort(SetToSequence(triple));
+            // vprint InTypes : triple, #SCR[tripleseq[1]], #SCR[tripleseq[2]], #SCR[tripleseq[3]];
+            ThisTriply, i1s, i2s, i3s := InternalSCRMatched(F, [QuadExt[i] : i in tripleseq], [SCR[i] : i in tripleseq]);
             for i in [1 .. #ThisTriply] do
-                ThisTriply[i]`Indexes := Sort(SetToSequence(triple));
+                tau := ThisTriply[i];
+                tau`Indexes := tripleseq;
+                Append(~TriplyImprimitiveTypes, tau);
             end for;
-            TriplyImprimitiveTypes cat:= ThisTriply;
+            // vprint InTypes : i1s,i2s,i3s;
+            for i1 in Reverse(Sort(i1s)) do Remove(~SCR[tripleseq[1]], i1); end for;
+            for i2 in Reverse(Sort(i2s)) do Remove(~SCR[tripleseq[2]], i2); end for;
+            for i3 in Reverse(Sort(i3s)) do Remove(~SCR[tripleseq[3]], i3); end for;
+            // vprint InTypes : #SCR[tripleseq[1]], #SCR[tripleseq[2]], #SCR[tripleseq[3]];
         end for;
+        // [#c : c in SCR];
+
+        vprintf InTypes : "Grouping triply imprimitive types took %os\n", Cputime(t);
 
         return TriplyImprimitiveTypes, Twist;
     else 
@@ -356,7 +450,7 @@ function SelmerGaloisModule (F,L)
     return GSel, Sel, Inverse(LtoSel), Gal, GaltoAut;
 end function;
 
-function InternalExceptionalTypes(F, L : InducingFields := [], InertiaFields := false)
+function InternalExceptionalTypes(F, L : InducingFields := [], InFields := false)
     // require IsNormal(L,F) : "The extension L/F must be normal";
     // require ((AbsoluteInertiaDegree(F) mod 2 eq 0) and (Degree(L, F) eq 3)) 
     //     or (
@@ -378,7 +472,7 @@ function InternalExceptionalTypes(F, L : InducingFields := [], InertiaFields := 
     end for;
 
     SelOrbits := [M: M in MinimalSubmodules(GSel) | Dimension(M) eq 2];
-    vprintf ECITypes : "Computing exceptional types from %o Selmer orbits\n", #SelOrbits;
+    vprintf InTypes : "Computing exceptional types from %o Selmer orbits\n", #SelOrbits;
 
     Exceptionals:=[];
     i := 0;
@@ -387,7 +481,7 @@ function InternalExceptionalTypes(F, L : InducingFields := [], InertiaFields := 
         Polynomials := [];
         roots := [];
         g := GaltoAut(Identity(Gal));
-        for i in [1..3] do
+        for ii in [1..3] do
             g := g*rho;
             z := g(ChangePrecision(SeltoL(Sel!ElementToSequence(GSel!orbit.1)), Precision(L)));
             Append(~Polynomials, X^2 - R!z);
@@ -465,10 +559,10 @@ function InternalExceptionalTypes(F, L : InducingFields := [], InertiaFields := 
                     CGroups1[1], 2, 2, CMaps1, CLift1 : Elements:=Elements, Values:=Values
                 )
             ];
-            vprintf ECITypes : "Selmer orbit #%o yields %o exceptional types\n", i, #OrbitTypes;
+            vprintf InTypes : "Selmer orbit #%o yields %o exceptional types\n", i, #OrbitTypes;
 
             if #OrbitTypes eq 0 then continue; end if;
-            if not InertiaFields then
+            if not InFields then
                 Exceptionals := Exceptionals cat OrbitTypes;
                 continue;
             end if;
@@ -481,7 +575,7 @@ function InternalExceptionalTypes(F, L : InducingFields := [], InertiaFields := 
             Utorsgens := SetToSequence(Generators(Utors));
             Utorsnorm := [Norm(UEtoE(g), K1) : g in Utorsgens];
             piE2 := EtoUE(UniformizingElement(E2));
-            vprintf ECITypes: "Computed Nm(E) in %os. Computing inertia fields...\n", Cputime(t);
+            vprintf InTypes: "Computed Nm(M) in %os. Computing inertia fields...\n", Cputime(t);
 
 
             while #OrbitTypes gt 0 do
@@ -498,11 +592,11 @@ function InternalExceptionalTypes(F, L : InducingFields := [], InertiaFields := 
                 Norms := sub<UE|ker, piE2>;
                 t := Cputime();
                 M := ClassField(UEtoE, Norms);
-                vprintf ECITypes: "Computation of one inertia field took %os (v(N) = %o)\n", Cputime(t), tau`CondExp;
+                vprintf InTypes: "Computation of one inertia field took %os (v(N) = %o)\n", Cputime(t), tau`CondExp;
                 //DefiningPolynomial(M,F);
                 
                 tau := ExceptionalType(chi, F, L);
-                tau`InertiaField := M;
+                tau`InField := M;
                 //Append(~Exceptionals, tau);
                 
                 // If there are still some types, twist field and eliminate some
@@ -513,14 +607,14 @@ function InternalExceptionalTypes(F, L : InducingFields := [], InertiaFields := 
                     //if IsIdentity(s) then continue; end if;
                     Mdisc_s := ChangePrecision(E!(SeltoF(s))*Mdisc, Precision(E));
                     Ms := SplittingField(T^2 - Mdisc_s);
-                    tau2 := FindInertiaType(Ms, OrbitTypes);
+                    tau2, j := FindInType(Ms, OrbitTypes);
                     if not IsNull(tau2) then
-                        tau2`InertiaField := Ms;
-                        Exclude(~OrbitTypes, tau2);
+                        tau2`InField := Ms;
+                        Remove(~OrbitTypes, j);
                         Append(~Exceptionals, tau2);
                     end if;
                 end for;
-                vprintf ECITypes: "Computation of inertia fields of twists took %os\n", Cputime(t);
+                vprintf InTypes: "Computation of inertia fields of twists took %os\n", Cputime(t);
             end while;
 
             //Exceptionals cat:= [ExceptionalType(phi, F, L) : phi in characters];
@@ -530,41 +624,41 @@ function InternalExceptionalTypes(F, L : InducingFields := [], InertiaFields := 
     return Exceptionals;
 end function;
 
-function ExceptionalTypesTriply(F, L : InertiaFields := false)
+function ExceptionalTypesTriply(F, L : InFields := false)
     assert Degree(L, F) eq 3;
 
-    return InternalExceptionalTypes(F, L : InertiaFields := InertiaFields);
+    return InternalExceptionalTypes(F, L : InFields := InFields);
 end function;
 
-function ExceptionalTypesSimply(F : InertiaFields := false)
+function ExceptionalTypesSimply(F : InFields := false)
     Fx<x>:=PolynomialRing(F);
     Fprime := UnramifiedExtension(F,2);
     for l in [1..3] do 
         L := FieldOfFractions(AllExtensions(Fprime, 3)[l]);
         if IsNormal(L,F) then break; end if;
     end for;
-    return InternalExceptionalTypes(F, L : InertiaFields := InertiaFields);
+    return InternalExceptionalTypes(F, L : InFields := InFields);
 end function;
 
 
-intrinsic ExceptionalTypes(F::FldPad) -> SeqEnum, SeqEnum
+intrinsic ExceptionalTypes(F::FldPad : InFields := false) -> SeqEnum, SeqEnum
 {Return all exceptional inertia types of F}
     require Prime(F) eq 2 : "There are no exceptional types for p>2.";
-    Ex24:=[* *];
-    Ex8:=[* *];
+    Ex24:=[];
+    Ex8:=[];
     if (AbsoluteInertiaDegree(F) mod 2 eq 0) then 
         for j in [1..3] do
             L:=FieldOfFractions(AllExtensions(F,3)[j]);
-            Ex_L:=ExceptionalTypesTriply(F,L);
+            Ex_L:=ExceptionalTypesTriply(F,L : InFields := InFields);
             Ex24 cat:= Ex_L;
-            vprintf ECITypes: "Computed %o exceptional types of size 24 for cubic extension #%o\n", &+([#c : c in Ex_L] cat [0]), j;
+            vprintf InTypes: "Computed %o exceptional types of size 24 for cubic extension #%o\n", #Ex_L, j;
         end for;
         L := FieldOfFractions(AllExtensions(F,3)[4]);
-        Ex8 := ExceptionalTypesTriply(F,L);
-        vprintf ECITypes: "Computed %o exceptional types of size 8\n", &+([#c : c in Ex8] cat [0]);
+        Ex8 := ExceptionalTypesTriply(F,L : InFields := InFields);
+        vprintf InTypes: "Computed %o exceptional types of size 8\n", #Ex8;
     else 
-        Ex24 := ExceptionalTypesSimply(F);
-        vprintf ECITypes: "Computed %o exceptional types of size 24\n", &+([#c : c in Ex24] cat [0]);
+        Ex24 := ExceptionalTypesSimply(F : InFields := InFields);
+        vprintf InTypes: "Computed %o exceptional types of size 24\n", #Ex24;
     end if;
 
     return Ex8, Ex24;
@@ -587,7 +681,7 @@ induced from a quartic character of K}
     return InternalExceptionalTypes(F, L : InducingFields := [K]);
 end intrinsic;
 
-intrinsic InertialTypes(F :: FldPad : SkipExceptionals := false, InertiaFields := false) 
+intrinsic InTypes(F :: FldPad : SkipExceptionals := false, InFields := false) 
     -> SeqEnum[PrincipalSeriesIT],
        SeqEnum[SCUInType],
        SeqEnum[SCRInType],
@@ -604,46 +698,46 @@ intrinsic InertialTypes(F :: FldPad : SkipExceptionals := false, InertiaFields :
 }
     c := 0;
     QuadExt,Twist := AllQuadraticExtensions(F : Selmer := true);
-    vprintf ECITypes: "Computed all quadratic extensions (%o)\n", #Twist;
+    vprintf InTypes: "Computed all quadratic extensions (%o)\n", #Twist;
     
     p, ram_deg, in_deg, pi, N := BaseValues(F);
     ff := Floor(N/2);
     groups, maps, lift := UComplex(F, ff);
-    vprintf ECITypes: "N=%o\n", N;
+    vprintf InTypes: "N=%o\n", N;
 
     PS := Sort(PrincipalSeries(F : MyComplex := [*groups, maps, lift*]), CmpCondExp);
-    vprintf ECITypes: "Computed %o principal series types\n", #PS;
+    vprintf InTypes: "Computed %o principal series types\n", #PS;
 
-    if InertiaFields then
+    if InFields then
         t := Cputime();
         for i in [1..#PS] do
-            PS[i]`InertiaField := InertiaField(PS[i]);
+            PS[i]`InField := InField(PS[i]);
         end for;
-        vprintf ECITypes : "Computation of %o inertia fields took %os\n", #PS, Cputime(t);
+        vprintf InTypes : "Computation of %o inertia fields took %os\n", #PS, Cputime(t);
     end if;
 
 
     SCU := Sort(SupercuspidalUnramified(F), CmpCondExp);
-    vprintf ECITypes: "Computed %o supercuspidal unramified types\n", #SCU;
+    vprintf InTypes: "Computed %o supercuspidal unramified types\n", #SCU;
     
-    if InertiaFields then
+    if InFields then
         t := Cputime();
         for i in [1..#SCU] do
-            SCU[i]`InertiaField := InertiaField(SCU[i]);
+            SCU[i]`InField := InField(SCU[i]);
         end for;
-        vprintf ECITypes : "Computation of %o inertia fields took %os\n", #SCU, Cputime(t);
+        vprintf InTypes : "Computation of %o inertia fields took %os\n", #SCU, Cputime(t);
     end if;
 
 
     SCR := Sort(SupercuspidalRamified(F : QuadExt:=QuadExt, Twist:=Twist), CmpCondExp);
-    vprintf ECITypes: "Computed %o supercuspidal ramified types\n", #SCR;    
+    vprintf InTypes: "Computed %o supercuspidal ramified types\n", #SCR;    
         
-    if InertiaFields then
+    if InFields then
         t := Cputime();
         for i in [1..#SCR] do
-            SCR[i]`InertiaField := InertiaField(SCR[i]);
+            SCR[i]`InField := InField(SCR[i]);
         end for;
-        vprintf ECITypes : "Computation of %o inertia fields took %os\n", #SCR, Cputime(t);
+        vprintf InTypes : "Computation of %o inertia fields took %os\n", #SCR, Cputime(t);
     end if;
     Ex24:=[];
     Ex8:=[];
@@ -651,17 +745,17 @@ intrinsic InertialTypes(F :: FldPad : SkipExceptionals := false, InertiaFields :
         if (in_deg mod 2 eq 0) then 
             for j in [1..3] do
                 L:=FieldOfFractions(AllExtensions(F,3)[j]);
-                Ex_L:=ExceptionalTypesTriply(F,L : InertiaFields := InertiaFields);
+                Ex_L:=ExceptionalTypesTriply(F,L : InFields := InFields);
                 Ex24 := Ex24 cat Ex_L;
-                vprintf ECITypes: "Computed %o exceptional types of size 24 for cubic extension #%o\n", #Ex_L, j;
+                vprintf InTypes: "Computed %o exceptional types of size 24 for cubic extension #%o\n", #Ex_L, j;
             end for;
 
             L := FieldOfFractions(AllExtensions(F,3)[4]);
-            Ex8 := Sort(ExceptionalTypesTriply(F,L : InertiaFields := InertiaFields), CmpCondExp);
-            vprintf ECITypes: "Computed %o exceptional types of size 8\n", #Ex8;
+            Ex8 := Sort(ExceptionalTypesTriply(F,L : InFields := InFields), CmpCondExp);
+            vprintf InTypes: "Computed %o exceptional types of size 8\n", #Ex8;
         else 
-            Ex24 := ExceptionalTypesSimply(F : InertiaFields := InertiaFields);
-            vprintf ECITypes: "Computed %o exceptional types of size 24\n", #Ex24;
+            Ex24 := ExceptionalTypesSimply(F : InFields := InFields);
+            vprintf InTypes: "Computed %o exceptional types of size 24\n", #Ex24;
         end if;
         Ex24 := Sort(Ex24, CmpCondExp);
     end if;

@@ -108,7 +108,7 @@ declare attributes InType:
     BaseField,
     CondExp,
     Character,
-    InertiaField
+    InField
 ;
 
 intrinsic 'eq'(tau1::InType, tau2::InType) -> BoolElt
@@ -321,8 +321,13 @@ intrinsic Print(tau::TriplyImprInType)
     print("Triply Imprimitive Inertia Type of the field");
     print("\t"),tau`BaseField;
     printf "of conductor exponent %o\n", tau`CondExp;
-    printf "with 3 underlying characters of order 4 and conductor exponents [%o, %o, %o]",
-        tau`Characters[1]`CondExp, tau`Characters[2]`CondExp, tau`Characters[3]`CondExp;
+    if #tau`Characters eq 3 then
+        printf "with 3 underlying characters of order 4 and conductor exponents [%o, %o, %o]",
+            tau`Characters[1]`CondExp, tau`Characters[2]`CondExp, tau`Characters[3]`CondExp;
+    else 
+        printf "with an underlying character of order 4 and conductor exponent %o", 
+            tau`Characters[1]`CondExp;
+    end if;
 end intrinsic;
 
 
@@ -369,7 +374,7 @@ intrinsic SemistabilityDefect(tau::InType) -> RngIntElt
     return tau`Character`Order * RamificationDegree(tau`Character`Field, tau`BaseField);
 end intrinsic;
 
-function CharInertiaField(chi)
+function CharInField(chi)
     K := chi`Field;
     Cond := chi`CondExp;
     ChiLift := chi`Lift;
@@ -386,28 +391,64 @@ function CharInertiaField(chi)
             f := FastMap(f);
             break;
         catch e
-            vprint ECITypes : e;
+            vprint InTypes : e;
         end try;
     end for;
     Norms := sub<U|Kernel(f), Inverse(m)(UniformizingElement(K2))>;
     L := ClassField(m, Norms);
-    vprintf ECITypes : "Computed one inertia field in %os\n", Cputime(t);
+    vprintf InTypes : "Computed one inertia field in %os\n", Cputime(t);
     return L, U/Norms;
 end function;
 
 
-intrinsic InertiaField(tau::InType) -> FldPad
+intrinsic InField(tau::InType) -> FldPad
 {Returns the inertia field of the type tau}
-    if not assigned tau`InertiaField then
-        L, G := CharInertiaField(tau`Character);
-        tau`InertiaField := L;
+    if not assigned tau`InField then
+        if (Type(tau) eq TriplyImprInType) and (#tau`InducingFields ge 2) then
+            vprint InTypes : "Computing InField of triply imprimitive type";
+
+            F := tau`BaseField;
+            K1 := tau`InducingFields[1];
+            K1x<x> := PolynomialRing(K1);
+            E := SplittingField(x^2 - K1!(Discriminant(tau`InducingFields[2], F)));
+
+            t := Cputime();
+            E2 := ChangePrecision(E,Max(Precision(F), 60));
+            UE, UEtoE := UnitGroup(E2);
+            EtoUE := Inverse(UEtoE);
+            Utors := sub<UE|[g : g in Generators(UE)| not IsZero(Order(g))]>;
+            Utorsgens := SetToSequence(Generators(Utors));
+            Utorsnorm := [Norm(UEtoE(g), K1) : g in Utorsgens];
+            piE2 := EtoUE(UniformizingElement(E2));
+            vprintf InTypes: "Computed Nm(M) in %os. Computing inertia field...\n", Cputime(t);
+
+            chi := tau`Character;
+
+            ker := Kernel(Homomorphism(Utors, Codomain(chi`Map), Utorsgens, 
+                [chi(Nmg) : Nmg in Utorsnorm]
+            ));
+            Norms := sub<UE|ker, piE2>;
+            L1 := ClassField(UEtoE, Norms);
+
+            L1disc := Discriminant(L1, E2);
+            ET<T> := PolynomialRing(E);
+            L := SplittingField(T^2 - ChangePrecision(E!L1disc, Precision(E)));
+
+            vprintf InTypes : "Computation of InField of triply imprimitive took %os\n", Cputime(t);
+        elif (Type(tau) eq ExceptionalInType) then
+            vprint InTypes : "Reducing InField computation to triply imprimitive type";
+            L := InField(tau`Triply);
+        else
+            L, G := CharInField(tau`Character);
+        end if;
+        tau`InField := L;
     end if;
 
-    return tau`InertiaField;
+    return tau`InField;
 end intrinsic;
 
-intrinsic FindInertiaType(L::FldPad, CandidateTypes::SeqEnum[InType]) -> .
-{FindInertiaType}
+intrinsic FindInType(L::FldPad, CandidateTypes::SeqEnum[InType]) -> .
+{FindInType}
     // Warning: this function will only work if all the candidate types
     // have a character with same Field, GrpExp and Lift
     chi := CandidateTypes[1]`Character;
@@ -420,6 +461,7 @@ intrinsic FindInertiaType(L::FldPad, CandidateTypes::SeqEnum[InType]) -> .
     UL, ULtoOL := UnitGroup(OL);
     Gen := [g : g in Generators(UL)];
     Norms:=[Inverse(lift)(Norm(ChangePrecision(L!L1!ULtoOL(g),Precision(L)),K)): g in Gen];
+    i :=1;
     for tau in CandidateTypes do
         found := true;
         for g in Norms do
@@ -428,7 +470,8 @@ intrinsic FindInertiaType(L::FldPad, CandidateTypes::SeqEnum[InType]) -> .
                 break;
             end if;
         end for;
-        if found then return tau; end if;
+        if found then return tau, i; end if;
+        i +:=1;
     end for;
-    return New(NullInType);
+    return New(NullInType), 0;
 end intrinsic;

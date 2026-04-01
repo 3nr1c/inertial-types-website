@@ -255,7 +255,7 @@ intrinsic ExceptionalTypes(F, L)
     end for;
 
     SelOrbits := [M: M in MinimalSubmodules(GSel) | Dimension(M) eq 2];
-    vprintf ECITypes : "%o Selmer orbits\n", #SelOrbits;
+    vprintf InTypes : "%o Selmer orbits\n", #SelOrbits;
     for orbit in SelOrbits do
         Polynomials := [];
         roots := [];

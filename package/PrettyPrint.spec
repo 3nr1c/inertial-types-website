@@ -111,7 +111,7 @@ end function;
 // Main summary procedure
 ////////////////////////////////////////////////////////////////////////
 
-intrinsic PrintInertiaFields(PS, SCU, SCR, Ex8, Ex24)
+intrinsic PrintInFields(PS, SCU, SCR, Ex8, Ex24)
 {Prints a summary of the data outputed by InertialTypes(F)}
     printf "\n========================================\n";
     printf "    Computed Inertia Types : Summary\n";
@@ -246,6 +246,11 @@ intrinsic InTypesSummary(PS, SCU, SCR, Ex8, Ex24)
         rows
     );
 
+end intrinsic;
+
+intrinsic InTypesSummary(PS, SCU, SCR)
+{}
+    InTypesSummary(PS, SCU, SCR, [], []);
 end intrinsic;
 
 ////////////////////////////////////////////////////////////////////////
