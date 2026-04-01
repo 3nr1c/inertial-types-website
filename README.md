@@ -47,40 +47,42 @@ phi(Q4.1); // outputs 2
 
 ## Functions
 
--  ```PrincipalSeries(F : Order := 0, TrivialOn := [], QuadraticOn := [], MyComplex:=[* *]) 
-    -> SeqEnum[PSInType]```
+- ```PrincipalSeries(F : Order := 0, TrivialOn := [], QuadraticOn := []) -> SeqEnum[PSInType]```
+  
     Computes the inertial types of the principal series representations of F.
-- ```SupercuspidalUnramified(F : Order := 0, TrivialOn := [], QuadraticOn := [])
-    -> SeqEnum[SCUInType]```
+- ```SupercuspidalUnramified(F : Order := 0, TrivialOn := [], QuadraticOn := []) -> SeqEnum[SCUInType]```
+  
     Computes the inertial types of the supercuspidal unramified representations of F.
 - ```SupercuspidalRamified(F::FldPad : QuadExt := [], Twist := []) -> SeqEnum[SCRInType]```
+  
     Computes the inertial types of the supercuspidal ramified representations of F that are not exceptional.
 - ```SupercuspidalRamified(F::FldPad, K::FldPad) -> SeqEnum[SCRInType]```
+  
     Computes the inertial types of the supercuspidal ramified representations of F that are induced from characters of the field K. The extension K/F must be ramified.
 - ```SupercuspidalRamified(F, K::SeqEnum[FldPad]) -> SeqEnum[SCRInType]```
+  
     Computes the inertial types of the supercuspidal ramified representations of F that are induced from all fields in the sequence K. This sequence of fields must satisfy:
     - #K <= 3
     - #K may be > 1 only if F contains the cubic roots of unity.
     - If #K == 3, the compositum of two fields in K must contain the third one.
 - ```ExceptionalTypes(F::FldPad : InFields := false) -> SeqEnum[ExceptionalInType], SeqEnum[ExceptionalInType]```
+  
     Computes the inertial types of the supercuspidal ramified representations of F that are exceptional. The output returns two sequences:
     - The first contains representations with image of inertia equal to the quaternion group.
     - The second contains representations with image of inertia equal to SL(2,3).
-    Running with InFields:=true computes the inertia fields of all types, and is the recommended option if many of these fields are needed. This cuts the computation time by a large factor by taking advantage of twists.
+      
+    Running with ```InFields:=true``` computes the inertia fields of all types, and is the recommended option if many of these fields are needed. This cuts the computation time by a large factor by taking advantage of twists.
 - ```ExceptionalTypes(F::FldPad, L::FldPad : InFields := false) -> SeqEnum[ExceptionalInType]```
+  
     Same as above, but returns only representations that become triply imprimitive over the field L.
     The extension L/F is always Galois, and satisfies:
     - If F contains the cubic roots of unity, then L/F is cubic.
     - If F does not contain the cubic roots of unity, then L is a cubic extension of the quadratic extension F(sqrt(-1)).
 - ```ExceptionalTypes(F::FldPad, L::FldPad, K::FldPad : InFields := false) -> SeqEnum[ExceptionalInType]```
+  
     Same as above, but returns only representations that become triply imprimitive over the field L, which in turn are induced from the quadratic extension K of L.
-- ```InTypes(F :: FldPad : SkipExceptionals := false, InFields := false) 
-    -> SeqEnum[PrincipalSeriesIT],
-       SeqEnum[SCUInType],
-       SeqEnum[SCRInType],
-       SeqEnum[ExceptionalInType],
-       SeqEnum[ExceptionalInType],
-       SeqEnum[FldPadElt]```
+- ```InTypes(F :: FldPad : SkipExceptionals := false, InFields := false)```
+  
     Runs all functions in order, returning:
     - A list of Principal Series Types
     - A list of Supercuspidal Unramified Types
@@ -88,7 +90,9 @@ phi(Q4.1); // outputs 2
     - A list of Exceptional Types of size 8
     - A list of Exceptional Types of size 24
     - A list of values in F giving all used quadratic twists
-    Running with SkipExceptionals:=true only computes principal series, supercuspidal unramified and supercuspidal ramified. Running with InFields:=true takes longer, but is the recommended option especially if one needs many inertia fields of exceptional types.
+      
+    Running with ```SkipExceptionals:=true``` only computes principal series, supercuspidal unramified and supercuspidal ramified. Running with ```InFields:=true``` takes longer, but is the recommended option especially if one needs many inertia fields of exceptional types.
+
 
 ## Printing summaries
 
