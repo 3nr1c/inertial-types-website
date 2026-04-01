@@ -44,6 +44,7 @@ phi := tau`Character; // this is the character inducing the type tau
 // we can evaluate the character at units, for instance
 phi(Q4.1); // outputs 2
 ``` 
+To compute an inertia field, run ```InField(tau)```. Running ```InTypes(Q4 : InFields:=true)``` computes all inertia fields, which takes less time on average.
 
 ## Functions
 
