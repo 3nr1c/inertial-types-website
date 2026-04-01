@@ -349,11 +349,11 @@ intrinsic SupercuspidalRamified(F, K::SeqEnum[FldPad]) -> SeqEnum[SCRInType]
             end if;
         else
             require #K eq 1 : "SCR must be induced from a single field";
-            return SupercuspidalRamified(F, K);
+            return SupercuspidalRamified(F, K[1]);
         end if;
     else // p eq 3 then 
         require #K eq 1 : "SCR must be induced from a single field";
-        return SupercuspidalRamified(F, K);
+        return SupercuspidalRamified(F, K[1]);
     end if;
 end intrinsic;
 
@@ -641,7 +641,8 @@ function ExceptionalTypesSimply(F : InFields := false)
 end function;
 
 
-intrinsic ExceptionalTypes(F::FldPad : InFields := false) -> SeqEnum, SeqEnum
+intrinsic ExceptionalTypes(F::FldPad : InFields := false) 
+    -> SeqEnum[ExceptionalInType], SeqEnum[ExceptionalInType]
 {Return all exceptional inertia types of F}
     require Prime(F) eq 2 : "There are no exceptional types for p>2.";
     Ex24:=[];
@@ -664,21 +665,21 @@ intrinsic ExceptionalTypes(F::FldPad : InFields := false) -> SeqEnum, SeqEnum
     return Ex8, Ex24;
 end intrinsic;
 
-intrinsic ExceptionalTypes(F::FldPad, L::FldPad) -> SeqEnum[ExceptionalInType]
+intrinsic ExceptionalTypes(F::FldPad, L::FldPad : InFields := false) -> SeqEnum[ExceptionalInType]
 {Return all exceptional inertia types of F which first become imprimitive over L}
     require Prime(F) eq 2 : "There are no exceptional types for p>2.";
     assert IsValidExceptionalExtension(F, L);
 
-    return InternalExceptionalTypes(F, L);
+    return InternalExceptionalTypes(F, L : InFields := InFields);
 end intrinsic;
 
-intrinsic ExceptionalTypes(F::FldPad, L::FldPad, K::FldPad) -> SeqEnum[ExceptionalInType]
+intrinsic ExceptionalTypes(F::FldPad, L::FldPad, K::FldPad : InFields := InFields) -> SeqEnum[ExceptionalInType]
 {Return all exceptional inertia types of F which first become imprimitive over L, and are 
 induced from a quartic character of K}
     require Prime(F) eq 2 : "There are no exceptional types for p>2.";
     assert IsValidExceptionalExtension(F, L);
     
-    return InternalExceptionalTypes(F, L : InducingFields := [K]);
+    return InternalExceptionalTypes(F, L : InducingFields := [K], InFields := InFields);
 end intrinsic;
 
 intrinsic InTypes(F :: FldPad : SkipExceptionals := false, InFields := false) 
