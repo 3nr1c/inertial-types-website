@@ -1,6 +1,6 @@
 AttachSpec("../spec");
 
-SetVerbose("ECITypes", true);
+SetVerbose("InTypes", true);
 
 Q2 := pAdicField(2, 100);
 CubeExt := AllExtensions(Q2,3);

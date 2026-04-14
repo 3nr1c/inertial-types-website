@@ -1,4 +1,7 @@
 import "utils.m" : IsValidExceptionalExtension, FastMap;
+import "sequences.m" : BaseValues;
+
+declare verbose InFields, 2;
 
 declare type InChtr;
 declare attributes InChtr:
@@ -62,6 +65,16 @@ intrinsic Print(phi::InChtr)
     printf "of order %o and CondExp %o", phi`Order, phi`CondExp;
 end intrinsic;
 
+intrinsic BaseField(phi::InChtr) -> FldPad
+{Returns the base field of phi}
+    return phi`Field;
+end intrinsic;
+
+intrinsic BaseRing(phi::InChtr) -> FldPad
+{Returns the base field of phi}
+    return phi`Field;
+end intrinsic;
+
 function FastMapSum(f, g) 
     A:=Domain(f);
     B:=Codomain(f);
@@ -93,6 +106,23 @@ intrinsic '*'(phi::InChtr, psi::InChtr) -> InChtr
     product`Lift := phi`Lift;
 
     return product;
+end intrinsic;
+
+intrinsic ChSquare(phi::InChtr) -> InChtr
+{Return phi^2}
+    m := phi`Order;
+    Zm := Codomain(phi`Map);
+    squaring := hom<Zm -> Zm | Zm!1 -> Zm!2>;
+
+    square := New(InChtr);
+    square`GrpExp := phi`GrpExp;//Conductor may be smaller!
+    square`Order := m / Gcd(m, 2);
+    //square`CondExp := ???
+    square`Map := phi`Map * squaring;
+    square`Field := phi`Field;
+    square`Lift := phi`Lift;
+
+    return square;
 end intrinsic;
 
 intrinsic '*'(lChars::SeqEnum[InChtr], rChars::SeqEnum[InChtr]) -> SeqEnum[InChtr]
@@ -163,7 +193,17 @@ end intrinsic;
 
 intrinsic Print(tau::NullInType)
 {Print the Null Inertia Type}
-    print("NullInType");
+    printf "NullInType";
+end intrinsic;
+
+intrinsic BaseField(tau::InType) -> FldPad
+{Returns the base field of tau}
+    return tau`BaseField;
+end intrinsic;
+
+intrinsic BaseRing(tau::InType) -> FldPad
+{Returns the base field of tau}
+    return tau`BaseField;
 end intrinsic;
 
 
@@ -239,7 +279,7 @@ declare attributes TriplyImprInType:
     Indexes
 ;
 
-intrinsic TriplyImprimitiveType(phis::SeqEnum[InChtr], F::FldPad) -> TriplyImprInType
+intrinsic TriplyImprimitiveType(phis::SeqEnum[InChtr], F::FldPad : InField := 0) -> TriplyImprInType
 {Creates a supercuspidal triply imprimitive inertia type of F induced by the tuple of characters [phi]}
     assert #phis eq 3;
     assert Degree(phis[1]`Field, F) eq 2;
@@ -265,12 +305,17 @@ intrinsic TriplyImprimitiveType(phis::SeqEnum[InChtr], F::FldPad) -> TriplyImprI
     triply`Character := phis[1];
     triply`InducingFields := [phi`Field : phi in phis];
 
+    if Type(InField) cmpeq FldPad then
+        triply`InField := InField;
+    end if;
+
     return triply;
 end intrinsic;
 
-intrinsic TriplyImprimitiveType(phis::SeqEnum[InChtr], F::FldPad, In::SeqEnum[RngIntElt]) -> TriplyImprInType
+intrinsic TriplyImprimitiveType(phis::SeqEnum[InChtr], F::FldPad, In::SeqEnum[RngIntElt] : InField := 0) 
+    -> TriplyImprInType
 {Creates a supercuspidal triply imprimitive inertia type of F induced by the tuple of characters [phi]}
-    tau := TriplyImprimitiveType(phis, F);
+    tau := TriplyImprimitiveType(phis, F : InField := InField);
     tau`Indexes := In;
 
     return tau;
@@ -376,81 +421,84 @@ end intrinsic;
 
 function CharInField(chi)
     K := chi`Field;
-    Cond := chi`CondExp;
     ChiLift := chi`Lift;
     // TODO: IMPLEMENT THE CORRECT BOUND
     r := chi`Order;
-    prec := [Precision(K)];//[30, 60, Precision(K)];
     t := Cputime();
-    for c in prec do
-        try
-            K2 := ChangePrecision(K,c);
-            U, m := UnitGroup(K2);
-            Utors := sub<U|[g : g in Generators(U)| not IsZero(Order(g))]>;
-            f := Coercion(Utors,U) * m * Coercion(K2,K) * Inverse(ChiLift) * chi`Map;
-            f := FastMap(f);
-            break;
-        catch e
-            vprint InTypes : e;
-        end try;
-    end for;
-    Norms := sub<U|Kernel(f), Inverse(m)(UniformizingElement(K2))>;
+
+    U, m := UnitGroup(K);
+    Utors := sub<U|[g : g in Generators(U)| not IsZero(Order(g))]>;
+    f := Coercion(Utors,U) * m * Inverse(ChiLift) * chi`Map;
+    f := FastMap(f);
+
+    Norms := sub<U|Kernel(f), Inverse(m)(UniformizingElement(K))>;
     L := ClassField(m, Norms);
-    vprintf InTypes : "Computed one inertia field in %os\n", Cputime(t);
+    vprintf InFields, 2 : "InFields: Computed one class field in %os\n", Cputime(t);
     return L, U/Norms;
 end function;
 
 
-intrinsic InField(tau::InType) -> FldPad
+intrinsic InField(tau::InType : Recompute:=false) -> FldPad
 {Returns the inertia field of the type tau}
-    if not assigned tau`InField then
-        if (Type(tau) eq TriplyImprInType) and (#tau`InducingFields ge 2) then
-            vprint InTypes : "Computing InField of triply imprimitive type";
-
+    if Recompute or not assigned tau`InField then
+        t := Cputime();
+        if (Type(tau) eq ExceptionalInType) then
+            vprint InFields, 2 : "InFields: Reducing InField computation to triply imprimitive type";
+            L := InField(tau`Triply);
+        elif tau`Character`Order in [4,6] then
             F := tau`BaseField;
-            K1 := tau`InducingFields[1];
-            K1x<x> := PolynomialRing(K1);
-            E := SplittingField(x^2 - K1!(Discriminant(tau`InducingFields[2], F)));
 
-            t := Cputime();
-            E2 := ChangePrecision(E,Max(Precision(F), 60));
-            UE, UEtoE := UnitGroup(E2);
-            EtoUE := Inverse(UEtoE);
-            Utors := sub<UE|[g : g in Generators(UE)| not IsZero(Order(g))]>;
+            if (Type(tau) eq TriplyImprInType) and (#tau`InducingFields ge 2) then
+                K1 := tau`InducingFields[1];
+                K1x<x> := PolynomialRing(K1);
+                M := SplittingField(x^2 - K1!(Discriminant(tau`InducingFields[2], F)));
+            else
+                // Watch out, might be buggy
+                vprint InFields, 2 : "InFields: Computing intermediate quadratic field...";
+                K1 := tau`Character`Field;
+                M := CharInField(ChSquare(tau`Character));
+            end if;
+
+            M2 := ChangePrecision(M,Max(Precision(F), 200));
+            UM, UMtoM := UnitGroup(M2);
+            MtoUM := Inverse(UMtoM);
+            Utors := sub<UM|[g : g in Generators(UM)| not IsZero(Order(g))]>;
             Utorsgens := SetToSequence(Generators(Utors));
-            Utorsnorm := [Norm(UEtoE(g), K1) : g in Utorsgens];
-            piE2 := EtoUE(UniformizingElement(E2));
-            vprintf InTypes: "Computed Nm(M) in %os. Computing inertia field...\n", Cputime(t);
+            Utorsnorm := [Norm(UMtoM(g), K1) : g in Utorsgens];
+            piM2 := MtoUM(UniformizingElement(M2));
+            vprintf InFields, 2: "InFields: Computed Nm(M) in %os. Computing inertia field...\n", Cputime(t);
 
             chi := tau`Character;
 
             ker := Kernel(Homomorphism(Utors, Codomain(chi`Map), Utorsgens, 
                 [chi(Nmg) : Nmg in Utorsnorm]
             ));
-            Norms := sub<UE|ker, piE2>;
-            L1 := ClassField(UEtoE, Norms);
+            Norms := sub<UM|ker, piM2>;
+            L1 := ClassField(UMtoM, Norms);
 
-            L1disc := Discriminant(L1, E2);
-            ET<T> := PolynomialRing(E);
-            L := SplittingField(T^2 - ChangePrecision(E!L1disc, Precision(E)));
+            L1disc := Discriminant(L1, M2);
+            MT<T> := PolynomialRing(M);
+            L := SplittingField(T^2 - ChangePrecision(M!L1disc, Precision(M)));
 
-            vprintf InTypes : "Computation of InField of triply imprimitive took %os\n", Cputime(t);
-        elif (Type(tau) eq ExceptionalInType) then
-            vprint InTypes : "Reducing InField computation to triply imprimitive type";
-            L := InField(tau`Triply);
+            assert Degree(L, K1) eq tau`Character`Order;
         else
             L, G := CharInField(tau`Character);
         end if;
+        vprintf InFields, 1 : "InFields: Computation of InField took %os\n", Cputime(t);
         tau`InField := L;
     end if;
 
     return tau`InField;
 end intrinsic;
 
-intrinsic FindInType(L::FldPad, CandidateTypes::SeqEnum[InType]) -> .
-{FindInType}
+intrinsic FindInType(L::FldPad, CandidateTypes::SeqEnum[InType]) -> InType, RngIntElt
+{Returns the inertial type cutting the field L. Second output returns position of
+that type in the provided list, or 0 if not found.}
     // Warning: this function will only work if all the candidate types
     // have a character with same Field, GrpExp and Lift
+    if #CandidateTypes eq 0 then
+        return New(NullInType), 0;
+    end if;
     chi := CandidateTypes[1]`Character;
     K := chi`Field;
     exp := Max(chi`GrpExp, AbsoluteRamificationDegree(L) + 1);

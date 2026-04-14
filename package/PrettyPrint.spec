@@ -68,20 +68,14 @@ function _InTypeRowWithDesc(tau, desc)
     *];
 end function;
 
-function _InTypeRowWithDescInertiaField(tau, desc)
-    Qp := pAdicField(Prime(tau`BaseField), 100);
-    poly := DefiningPolynomial(InertiaField(tau), Qp);
-    R := Parent(poly);
-    AssignNames(~R, ["X"]);
+function _InTypeRowWithDesc(tau, desc)
     return [*
         SemistabilityDefect(tau),
         tau`CondExp,
         tau`Character`Order,
-        desc,
-        poly
+        desc
     *];
 end function;
-
 
 ////////////////////////////////////////////////////////////////////////
 // Row aggregation
@@ -91,7 +85,7 @@ function _AggregateRows(rows)
     counts := AssociativeArray();
 
     for r in rows do
-        key := <r[1], r[2], r[3], r[4]>;
+        key := <ri : ri in r>;
         if IsDefined(counts, key) then
             counts[key] +:= 1;
         else
@@ -101,7 +95,7 @@ function _AggregateRows(rows)
 
     out := [];
     for k in Keys(counts) do
-        Append(~out, [* k[1], k[2], k[3], k[4], counts[k] *]);
+        Append(~out, [* ki : ki in k *] cat [* counts[k] *]);
     end for;
 
     return Sort(out, func<x, y | (x[1] - y[1]) + 0.01*(x[2] - y[2])>);
@@ -110,69 +104,6 @@ end function;
 ////////////////////////////////////////////////////////////////////////
 // Main summary procedure
 ////////////////////////////////////////////////////////////////////////
-
-intrinsic PrintInFields(PS, SCU, SCR, Ex8, Ex24)
-{Prints a summary of the data outputed by InertialTypes(F)}
-    printf "\n========================================\n";
-    printf "    Computed Inertia Types : Summary\n";
-    printf "========================================\n\n";
-
-    printf "PrincipalSeries  : %o\n", #PS;
-    printf "SCU              : %o\n", #SCU;
-    printf "SCR              : %o\n", #SCR;
-    printf "Ex8              : %o\n", #Ex8;
-    printf "Ex24             : %o\n", #Ex24;
-    printf "----------------------------------------\n";
-    printf "Total inertial types : %o\n\n", #PS + #SCU + #SCR + #Ex8 + #Ex24;
-
-    rows := [];
-
-    ////////////////////////////////////////////////////////////////
-    // Principal Series
-    ////////////////////////////////////////////////////////////////
-
-    if #PS gt 0 then
-        rows cat:= [ _InTypeRowWithDescInertiaField(x, "principal series") : x in PS ];
-    end if;
-
-    ////////////////////////////////////////////////////////////////
-    // SCU
-    ////////////////////////////////////////////////////////////////
-
-    if #SCU gt 0 then
-        rows cat:= [ _InTypeRowWithDescInertiaField(x, "supercuspidal unramified") : x in SCU ];
-    end if;
-
-    ////////////////////////////////////////////////////////////////
-    // SCR
-    ////////////////////////////////////////////////////////////////
-
-    if #SCR gt 0 then
-        rows cat:= [ _InTypeRowWithDescInertiaField(x, "supercuspidal ramified") : x in SCR ];
-    end if;
-
-
-    ////////////////////////////////////////////////////////////////
-    // Ex8
-    ////////////////////////////////////////////////////////////////
-
-    if #Ex8 gt 0 then
-        rows cat:= [ _InTypeRowWithDescInertiaField(x, "exceptional, Q8") : x in Ex8 ];
-    end if;
-
-    ////////////////////////////////////////////////////////////////
-    // Ex24
-    ////////////////////////////////////////////////////////////////
-
-    if #Ex24 gt 0 then
-        rows cat:= [ _InTypeRowWithDescInertiaField(x, "exceptional, SL(2,3)") : x in Ex24 ];
-    end if;
-
-    _PrintTable(
-        ["Semistability defect", "v(E)", "Character order", "Description", "Field of inertia"],
-        rows
-    );
-end intrinsic;
 
 intrinsic InTypesSummary(PS, SCU, SCR, Ex8, Ex24)
 {Prints a summary of the data outputed by InertialTypes(F)}
@@ -191,55 +122,27 @@ intrinsic InTypesSummary(PS, SCU, SCR, Ex8, Ex24)
 
     rows := [];
 
-    ////////////////////////////////////////////////////////////////
-    // Principal Series
-    ////////////////////////////////////////////////////////////////
-
     if #PS gt 0 then
         rows cat:= [ _InTypeRowWithDesc(x, "principal series") : x in PS ];
     end if;
-
-    ////////////////////////////////////////////////////////////////
-    // SCU
-    ////////////////////////////////////////////////////////////////
 
     if #SCU gt 0 then
         rows cat:= [ _InTypeRowWithDesc(x, "supercuspidal unramified") : x in SCU ];
     end if;
 
-    ////////////////////////////////////////////////////////////////
-    // SCR
-    ////////////////////////////////////////////////////////////////
-
     if #SCR gt 0 then
         rows cat:= [ _InTypeRowWithDesc(x, "supercuspidal ramified") : x in SCR ];
     end if;
-
-    ////////////////////////////////////////////////////////////////
-    // Ex8
-    ////////////////////////////////////////////////////////////////
 
     if #Ex8 gt 0 then
         rows cat:= [ _InTypeRowWithDesc(x, "exceptional, Q8") : x in Ex8 ];
     end if;
 
-    ////////////////////////////////////////////////////////////////
-    // Ex24
-    ////////////////////////////////////////////////////////////////
-
     if #Ex24 gt 0 then
         rows cat:= [ _InTypeRowWithDesc(x, "exceptional, SL(2,3)") : x in Ex24 ];
     end if;
 
-    ////////////////////////////////////////////////////////////////
-    // Aggregate identical rows
-    ////////////////////////////////////////////////////////////////
-
     rows := _AggregateRows(rows);
-
-    ////////////////////////////////////////////////////////////////
-    // Print table
-    ////////////////////////////////////////////////////////////////
 
     _PrintTable(
         ["e", "v(N)", "Character order", "Description", "Count"],
@@ -251,6 +154,45 @@ end intrinsic;
 intrinsic InTypesSummary(PS, SCU, SCR)
 {}
     InTypesSummary(PS, SCU, SCR, [], []);
+end intrinsic;
+
+intrinsic SCRSummary(SCR, Twist)
+{}
+    printf "\n========================================\n";
+    printf "    Supercuspidal Ramified Summary \n";
+    printf "========================================\n\n";
+    rows := [];
+
+    F := SCR[1]`BaseField;
+    triplys := AbsoluteInertiaDegree(F) mod 2 eq 0;
+
+    for tau in SCR do
+        row := _InTypeRow(tau);
+        if triplys then
+            i1 := Index([IsSquare(tau`InducingFields[1]!t) : t in Twist], true);
+            i2 := Index([IsSquare(tau`InducingFields[2]!t) : t in Twist], true);
+            i3 := Index([IsSquare(tau`InducingFields[3]!t) : t in Twist], true);
+            row := [* row[1], row[2] *] cat [* Sprintf("[K%o, K%o, K%o]", i1, i2, i3) *];
+        else 
+            i := Index([IsSquare(tau`InducingField!t) : t in Twist], true);
+            row := [* row[1], row[2] *] cat [* Sprintf("K%o", i) *];
+        end if;
+        Append(~rows, row);
+    end for;
+
+    rows := _AggregateRows(rows);
+
+    if triplys then
+        _PrintTable(
+            ["e", "v(N)", "Inducing fields", "Count" ],
+            rows
+        );
+    else
+        _PrintTable(
+            ["e", "v(N)", "Inducing field", "Count"],
+            rows
+        );
+    end if;
 end intrinsic;
 
 ////////////////////////////////////////////////////////////////////////

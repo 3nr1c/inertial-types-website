@@ -21,7 +21,7 @@ SetVerbose("InTypes", true);
 Q2 := pAdicField(2, 100);
 Q4 := UnramifiedExtension(Q2, 2);
 
-Twist, PS, SCU, SCR, Ex8, Ex24 := InTypes(Q4);
+PS, SCU, SCR, Ex8, Ex24, Twist := InTypes(Q4);
 ``` 
 
 The outputs of ```InTypes``` are documented in the sections below. Inertial types have some attributes that can be accessed:
@@ -72,7 +72,7 @@ To compute an inertia field, run ```InField(tau)```. Running ```InTypes(Q4 : InF
     - The first contains representations with image of inertia equal to the quaternion group.
     - The second contains representations with image of inertia equal to SL(2,3).
       
-    Running with ```InFields:=true``` computes the inertia fields of all types, and is the recommended option if many of these fields are needed. This cuts the computation time by a large factor by taking advantage of twists.
+    Running with ```InFields:=true``` computes the inertia fields of all types, and is the recommended option if many of these fields are needed. This cuts the computation time by a large factor (equal to half the number of quadratic extensions of F) by taking advantage of twists.
 - ```ExceptionalTypes(F::FldPad, L::FldPad : InFields := false) -> SeqEnum[ExceptionalInType]```
   
     Same as above, but returns only representations that become triply imprimitive over the field L.
@@ -134,6 +134,10 @@ e   v(N)  Character order  Description               Count
 ------------------------------------------------------------
 ```
 
+## Implementation details
+
+- The computation of types is based on the computation of the underlying inertia characters, in their avatar as characters of the units of a quotient of a ring of integers. The conditions in [CMFF26] are translated to conditions on the characters to be computed. Hence the computation is reduced to finding q-power-order characters of finite abelian groups (for a prime q) with restrictions, which is essentially a linear algebra problem. The implementation is found in ```package/characters.m```.
+
 ## TODO
 
 - [x] Match triplys
@@ -157,6 +161,7 @@ e   v(N)  Character order  Description               Count
 - [ ] Intrinsics should admit a list of target conductors (and optimize the computation accordingly)
 - [ ] Reconstruction of an inertia type from a given inertia field
 - [ ] Detection of base change types
+- [ ] InFieldsTwist with arbitrary precision & put it in ExceptionalTypes
 
 ## Bugs
 

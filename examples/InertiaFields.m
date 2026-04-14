@@ -1,85 +1,139 @@
 AttachSpec("../spec");
+AttachSpec("../../padic_db/spec");
 
-SetVerbose("ECITypes", true);
+SetVerbose("InTypes", true);
+SetVerbose("InFields", 1);
 
-Q2 := pAdicField(2, 40);
-Q2x<x> := PolynomialRing(Q2);
-// > [DefiningPolynomial(FieldOfFractions(O)) : O in AllExtensions(Q2,2)];
-quadratics := [
-    x^2 + 2*x + 2,
-    x^2 + 2*x + 3*2,
-    x^2 + 2,
-    x^2 + 5*2,
-    x^2 + 3*2,
-    x^2 + 7*2,
-    x^2 + x + 1
-];
-i := 2; i;
-F := UnramifiedExtension(Q2,3);
-//F := ChangePrecision(SplittingField(quadratics[i]),40); 
+Qp := pAdicField(3, 100);
+i := 5; i;
+F := FieldOfFractions(AllExtensions(Qp,3)[i]);
+// F := SplittingField(quadratics[i]); 
+// F := Qp;
 F;
 MinimalPolynomial(F.1);
 
-time PS, SCU, SCR, Ex8, Ex24, Twist := InertialTypes(F : SkipExceptionals:=false, InertiaFields:=true);
+// BE CAREFUL WITH THE FILENAME TO AVOID OVERWRITING PRECOMPUTED DATA
+// FILENAME := Sprintf("../data/out_smallpolys_Q3_L%o.m", i);
+FILENAME := Sprintf("../data/out_smallpolys_Q%o_%o_K%o.m",Prime(F),Degree(F,Qp),i);
+FILENAME;
 
-InTypesSummary(PS,SCU,SCR,Ex8,Ex24);
+time PS, SCU, SCR, _, _, Twist := InTypes(F : SkipExceptionals:=true, InFields:=true);
+InTypesSummary(PS,SCU,SCR);
 
-SetVerbose("ECITypes", false);
-// SetVerbose("ClassField", 5);
+PrintFile(FILENAME, "Twist := ");
+PrintFileMagma(FILENAME, Twist);
+PrintFile(FILENAME, ";");
 
-printf "[\n";
+PrintFile(FILENAME, "data := [*");
 for tau in PS do
-    inertia := InertiaField(tau);
-    poly := DefiningPolynomial(inertia, Q2);
-    relpoly := DefiningPolynomial(inertia, F);
-    R := Parent(poly);
-    S := Parent(relpoly);
-    AssignNames(~R, ["X"]);
-    AssignNames(~S, ["T"]);
-    printf "\t[* \"principal series\", %o, %o, %o, %o *],\n", SemistabilityDefect(tau), tau`CondExp, tau`Character`Order, relpoly;
+    inertia := InField(tau);
+    inertia := SplittingField(BetterPoly(DefiningPolynomial(inertia), inertia, BaseField(inertia)));
+    relpoly := DefiningPolynomial(Integers(inertia), Integers(F));
+    relpoly := BetterPoly(relpoly, inertia, F);
+    try
+        time polyF := PolRedPadic(relpoly, Integers(F));
+        "Used PolRedPadic";
+    catch e
+        polyF := relpoly;
+        "Used BetterPoly";
+    end try;
+    polyF;
+    PrintFileMagma(FILENAME,  [*
+        "principal series", SemistabilityDefect(tau), tau`CondExp, tau`Character`Order, polyF
+    *]);
+    PrintFile(FILENAME, ",");
 end for;
 
 for tau in SCU do
-    inertia := InertiaField(tau);
-    poly := DefiningPolynomial(inertia, Q2);
-    relpoly := DefiningPolynomial(inertia, F);
-    R := Parent(poly);
-    S := Parent(relpoly);
-    AssignNames(~R, ["X"]);
-    AssignNames(~S, ["T"]);
-    printf "\t[* \"supercuspidal unramified\", %o, %o, %o, %o *],\n", SemistabilityDefect(tau), tau`CondExp, tau`Character`Order, relpoly;
+    inertia := InField(tau);
+    inertia := SplittingField(BetterPoly(DefiningPolynomial(inertia), inertia, BaseField(inertia)));
+    relpoly := DefiningPolynomial(Integers(inertia), Integers(F));
+    relpoly := BetterPoly(relpoly, inertia, F);
+    try
+        time polyF := PolRedPadic(relpoly, Integers(F));
+        "Used PolRedPadic";
+    catch e
+        polyF := relpoly;
+        "Used BetterPoly";
+    end try;
+    polyF;
+    PrintFileMagma(FILENAME,  [*
+        "supercuspidal unramified", SemistabilityDefect(tau), tau`CondExp, tau`Character`Order, polyF
+    *]);
+    PrintFile(FILENAME, ",");
 end for;
 
 for tau in SCR do
-    inertia := InertiaField(tau);
-    poly := DefiningPolynomial(inertia, Q2);
-    relpoly := DefiningPolynomial(inertia, F);
-    R := Parent(poly);
-    S := Parent(relpoly);
-    AssignNames(~R, ["X"]);
-    AssignNames(~S, ["T"]);
-    printf "\t[* \"supercuspidal ramified\", %o, %o, %o, %o *],\n", SemistabilityDefect(tau), tau`CondExp, tau`Character`Order, relpoly;
+    inertia := InField(tau);
+    inertia := SplittingField(BetterPoly(DefiningPolynomial(inertia), inertia, BaseField(inertia)));
+    relpoly := DefiningPolynomial(Integers(inertia), Integers(F));relpoly;
+    relpoly := BetterPoly(relpoly, inertia, F);
+    try
+        time polyF := PolRedPadic(relpoly, Integers(F));
+        "Used PolRedPadic";
+    catch e
+        polyF := relpoly;
+        "Used BetterPoly";
+    end try;
+    polyF;
+    PrintFileMagma(FILENAME,  [*
+        "supercuspidal ramified", SemistabilityDefect(tau), tau`CondExp, tau`Character`Order, polyF, 
+        DefiningPolynomial(tau`Character`Field, F)
+    *]);
+    PrintFile(FILENAME, ",");
 end for;
 
-for tau in Ex8 do
-    inertia := InertiaField(tau);
-    poly := DefiningPolynomial(inertia, Q2);
-    relpoly := DefiningPolynomial(inertia, F);
-    R := Parent(poly);
-    S := Parent(relpoly);
-    AssignNames(~R, ["X"]);
-    AssignNames(~S, ["T"]);
-    printf "\t[* \"exceptional Q8\", %o, %o, %o, %o *],\n", SemistabilityDefect(tau), tau`CondExp, tau`Character`Order, relpoly;
-end for;
+if Prime(F) eq 2 then
+    time Ex8, Ex24 := ExceptionalTypes(F : InFields := true);
+    InTypesSummary(PS,SCU,SCR,Ex8,Ex24);
 
-for tau in Ex24 do
-    inertia := InertiaField(tau);
-    poly := DefiningPolynomial(inertia, Q2);
-    relpoly := DefiningPolynomial(inertia, F);
-    R := Parent(poly);
-    S := Parent(relpoly);
-    AssignNames(~R, ["X"]);
-    AssignNames(~S, ["T"]);
-    printf "\t[* \"exceptional SL(2,3)\", %o, %o, %o, %o *],\n", SemistabilityDefect(tau), tau`CondExp, tau`Character`Order, relpoly;
-end for;
-printf "]\n";
+    for tau in Ex8 do
+        inertia := InField(tau);
+        //inertia := SplittingField(BetterPoly(DefiningPolynomial(inertia), inertia, BaseField(inertia)));
+        relpoly := DefiningPolynomial(Integers(inertia), Integers(F));
+        relpoly;
+        relpoly := BetterPoly(relpoly, inertia, F, tau : minprec:=10);
+        try
+            time polyF := PolRedPadic(relpoly, Integers(F));
+            "Used PolRedPadic";
+        catch e
+            polyF := relpoly;
+            "Used BetterPoly";
+        end try;
+        polyF;
+        PrintFileMagma(FILENAME,  [*
+            "exceptional Q8", SemistabilityDefect(tau), tau`CondExp, tau`Character`Order, polyF,
+            DefiningPolynomial(tau`TriplyField, F), DefiningPolynomial(tau`Character`Field, tau`TriplyField)
+        *]);
+        PrintFile(FILENAME, ",");
+    end for;
+
+    queue := [1..#Ex24];
+    while #queue gt 0 do
+        i := queue[1];
+        tau := Ex24[i];
+
+        inertia := InField(tau);
+        //inertia := SplittingField(BetterPoly(DefiningPolynomial(inertia), inertia, BaseField(inertia)));
+        time relpoly := DefiningPolynomial(Integers(inertia), Integers(F));
+        time relpoly := BetterPoly(relpoly, inertia, F, tau: minprec:=10);
+        relpoly;
+        try
+            time polyF := PolRedPadic(relpoly, Integers(F));
+            polyF; 
+            "Used PolRedPadic";
+        catch e
+            polyF := relpoly;
+            "Used BetterPoly";
+        end try;
+        PrintFileMagma(FILENAME,  [*
+            "exceptional SL(2,3)", SemistabilityDefect(tau), tau`CondExp, tau`Character`Order, polyF,
+            DefiningPolynomial(tau`TriplyField, F), DefiningPolynomial(tau`Character`Field, tau`TriplyField)
+        *]);
+        PrintFile(FILENAME, ",");
+        Remove(~queue, 1);
+    end while;
+    PrintFile(FILENAME, "*];");
+else
+    PrintFile(FILENAME, "*];");
+end if;

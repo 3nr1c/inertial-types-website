@@ -4,8 +4,8 @@ SetVerbose("InTypes", true);
 SetVerbose("InFields", 1);
 
 Q2 := pAdicField(2, 100);
-Q8 := UnramifiedExtension(Q2, 3);
+Q16 := UnramifiedExtension(Q2, 4);
 
-time  PS, SCU, SCR, Ex8, Ex24, Twist := InTypes(Q8 : InFields:=true, SkipExceptionals := true);
+time PS, SCU, SCR, Ex8, Ex24, Twist := InTypes(Q16 : SkipExceptionals:=true, InFields:=true);
 
 InTypesSummary(PS,SCU,SCR,Ex8,Ex24);

@@ -133,3 +133,67 @@ end function;
 function CmpCondExp(tau1, tau2)
     return tau1`CondExp - tau2`CondExp;
 end function;
+
+intrinsic BetterPoly(p::., L::FldPad, K::FldPad : minprec := 10, SkipHasRoot:=false) -> .
+{}
+    Kx := Parent(p);
+    pseq := ElementToSequence(p);
+    for prec in [minprec..Precision(K)] do
+        betterp := Kx![ChangePrecision(ChangePrecision(c, prec), Precision(K)) : c in pseq];
+
+        time irred := IsIrreducible(betterp);
+        if irred then
+            if SkipHasRoot then break; end if;
+            time hasroot := HasRoot(betterp, L);
+            if hasroot then 
+                break;
+            end if;
+        end if;
+    end for;
+    return betterp;
+end intrinsic;
+
+intrinsic BetterPoly(p::., N::FldPad, F::FldPad, tau::ExceptionalInType : minprec := 10) -> .
+{}
+    Fx := Parent(p);
+    pseq := ElementToSequence(p);
+    L := tau`TriplyField;
+    M := BaseField(N);
+    pK1 := DefiningPolynomial(tau`Triply`InducingFields[1], L);// basis 1, y1 over L
+    pK2 := DefiningPolynomial(tau`Triply`InducingFields[2], L);// basis 1, y2 over K1
+    discN := ElementToSequence(Discriminant(N, M));
+    _, y2 := HasRoot(pK2, M);
+    discN := ElementCoordinates(discN, [1, y2]);// coordinates in basis 1, y2
+    D := ElementToSequence(discN[1]) cat ElementToSequence(discN[2]);// coordinates in basis 1,y1,y2,y1*y2
+    for prec in [minprec..Precision(F)] do
+        betterp := Fx![ChangePrecision(ChangePrecision(c, prec), Precision(F)) : c in pseq];
+
+        try
+            time irred := IsIrreducible(betterp);
+            if irred then
+                time N2 := FieldOfFractions(SplittingField(ChangeRing(betterp, L) : Std:=false));
+                // Degree(N2,F);
+                // N2;
+                if Degree(N2, F) ne Degree(p) then continue; end if;
+                hasRoot1, r1 := HasRoot(pK1, N2);
+                hasRoot2, r2 := HasRoot(pK2, N2);
+                // hasRoot1, hasRoot2;
+                if not hasRoot1 or not hasRoot2 then continue; end if;
+
+                discN_N2 := D[1] + D[2]*r1 + D[3]*r2 + D[4]*r1*r2;
+                // IsSquare(discN_N2);
+                if IsSquare(discN_N2) then break; end if;
+            end if;
+        catch e
+            print(e);
+            continue;
+        end try;
+    end for;
+    return betterp;
+end intrinsic;
+
+intrinsic BetterPoly(L::FldPad, K::FldPad : minprec := 10) -> .
+{}
+    time p := DefiningPolynomial(L, K);
+    return BetterPoly(p, L, K);
+end intrinsic;

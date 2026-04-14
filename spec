@@ -4,5 +4,7 @@
       InTypes.spec
       InertialTypes.spec
       PrettyPrint.spec
+      EllipticCurves.spec
+      utils.m
    }
 }
