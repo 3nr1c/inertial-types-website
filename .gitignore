@@ -1,1 +1,2 @@
-*.spec.sig
+*.sig
+_site/*
