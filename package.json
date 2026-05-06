@@ -1,0 +1,20 @@
+{
+  "name": "intypes-db",
+  "version": "1.0.0",
+  "description": "",
+  "main": ".eleventy.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-ghpages": "npx @11ty/eleventy --pathprefix=inertial-types.github.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/3nr1c/inertial-types.github.io.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/3nr1c/inertial-types.github.io/issues"
+  },
+  "homepage": "https://github.com/3nr1c/inertial-types.github.io#readme"
+}
