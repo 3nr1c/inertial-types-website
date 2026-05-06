@@ -1,0 +1,248 @@
+---
+layout: layout.njk
+pagination:
+  data: typePages
+  size: 1
+  alias: type
+permalink: "types/{{ type.id | slugify }}/"
+eleventyComputed:
+  title: "Inertial Type | {{ type.Name }}"
+---
+
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <a href="/fields/{{ type['Base Field'] | slugify }}/" class="text-decoration-none">&larr; Back to {{ type['Base Field'] }}</a>
+    
+    {# Lookup the parent field data using the 'Base Field' label #}
+    {% set parentField = fields[type['Base Field']] %}
+</div>
+
+<div class="card shadow-sm mb-4 border-primary">
+    <div class="card-header bg-primary text-white">
+        <h1 class="h4 mb-0">{{ type.Name }}</h1>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-3 text-muted">Base Field</div>
+            <div class="col-md-9 fw-bold">
+                {% if type['Base Field'] == "2.1.1.0a1.1" %}
+                    \(F = \mathbb{Q}_2\)
+                {% elseif type['Base Field'] == "3.1.1.0a1.1" %}
+                    \(F = \mathbb{Q}_3\)
+                {% else %}
+                    \(F = \) {{ type['Base Field'] }} \( = \mathbb{Q}_{ {{parentField.prime}} }(a) = \mathbb{Q}_{ {{parentField.prime}} }[x] / ({{parentField.polynomial | formatMath}})\)
+                {% endif %}
+
+                {% if parentField.lmfdb_url %}
+                   <small class="ms-2"><a href="{{ parentField.lmfdb_url }}" target="_blank" class="text-decoration-none">View on LMFDB &nearr;</a></small>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-3 text-muted">Description</div>
+            <div class="col-md-9"><span class="text-capitalize">{{ type.Description }}</span></div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-3 text-muted">Construction</div>
+            <div class="col-md-9">
+            {% if type.Description == "principal series" %} 
+                \(
+                    \tau = \chi \oplus \chi^{-1}    
+                \), with the character \(\chi\) as below
+            {% elseif type.Description == "supercuspidal unramified" %}
+                \(
+                    \tau = \chi \oplus \chi^{-1}     
+                \), with the character \(\chi\) as below
+            {% elseif type.Description == "supercuspidal ramified" %}
+                \(
+                    \tau = \operatorname{Ind}^{I_K}_{I_F} \chi    
+                \), with \(K\) and \(\chi\) as below
+            {% elseif type.Description == "exceptional, Q8" %}
+                Extension to \(I_F\) of \(
+                    \tau = \operatorname{Ind}^{I_K}_{I_L} \chi
+                \), with \(L, K\) and \(\chi\) as below
+            {% elseif type.Description == "exceptional, SL(2,3)" %}
+                Extension to \(I_F\) of \(
+                    \tau = \operatorname{Ind}^{I_K}_{I_L} \chi
+                \), with \(L, K\) and \(\chi\) as below
+            {% endif %}
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-3 text-muted">Semistability defect</div>
+            <div class="col-md-9">\( e = {{ type.e }}\)</div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-3 text-muted">Conductor exponent</div>
+            <div class="col-md-9">\( v(N) = {{ type['v(N)'] }}\)</div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 text-muted">Character Order</div>
+            <div class="col-md-9">{{ type['Character Order'] }}</div>
+        </div>
+    </div>
+</div>
+
+{% if type.triply_field %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white"><h3 class="h5 mb-0 py-1">Triply Field</h3></div>
+    <div class="card-body">
+        <div class="d-flex align-items-center mb-2">
+            <strong class="me-2">The inertial type \(\tau\) becomes an induction (triply imprimitive) over:</strong>
+            {% if fields[type["Base Field"]].f % 2 == 1 %}
+            <span class="bg-light px-2 py-1 rounded">\( L = F(\mu_3, b) \), with \(\mu_3\) a root of \(x^2+x+1\) and \(b\) a root of \({{ type.triply_field.polynomial | formatMath }}\)</span>
+            {% else %}
+            <span class="bg-light px-2 py-1 rounded">\( L = F(b) \), \(b\) a root of \({{ type.triply_field.polynomial | formatMath }}\)</span>
+            {% endif %}
+            <button class="btn btn-sm btn-outline-secondary ms-2 py-0 copy-poly-btn" style="font-size: 0.8rem;" data-poly="{{ type.triply_field.polynomial }}">Copy polynomial</button>
+        </div>
+        <!--<p class="mb-2"><strong>Label:</strong> {{ type.triply_field.lmfdb_label }}</p>
+        <a href="{{ type.triply_field.lmfdb_url }}" target="_blank" class="link-secondary text-decoration-none border-bottom border-secondary">View on LMFDB &nearr;</a>-->
+    </div>
+</div>
+{% endif %}
+
+{% if type.inducing_field and type["Description"] != "principal series" %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white"><h3 class="h5 mb-0 py-1">Inducing Field</h3></div>
+    <div class="card-body">
+        <div class="d-flex align-items-center mb-2">
+            {% if type.e in [8, 24] %}
+                {% set inducing_base = "L" %}
+            {% else %}
+                {% set inducing_base = "F" %}
+            {% endif %}
+            {% if type["Description"] in ["supercuspidal unramified", "supercuspidal ramified"]%}
+            <strong class="me-2">The inertial type \(\tau\) is reducible, induced from a character of</strong> 
+            <span class="bg-light px-2 py-1 rounded">\(K = {{ inducing_base }}(b)\), with \(b\) a root of \({{ type.inducing_field.polynomial | formatMath }} \)</span>
+            {% else %}
+            <strong class="me-2">The inertial type \(\tau\) becomes reducible over</strong> 
+            <span class="bg-light px-2 py-1 rounded">\(K = {{ inducing_base }}(c)\), \(c\) a root of \({{ type.inducing_field.polynomial | formatMath }} \)</span>
+            {% endif %}
+            <button class="btn btn-sm btn-outline-secondary ms-2 py-0 copy-poly-btn" style="font-size: 0.8rem;" data-poly="{{ type.inducing_field.polynomial }}">Copy polynomial</button>
+        </div>
+        <!--<p class="mb-2"><strong>Label:</strong> {{ type.inducing_field.lmfdb_label }}</p>
+        <a href="{{ type.inducing_field.lmfdb_url }}" target="_blank" class="link-secondary text-decoration-none border-bottom border-secondary">View on LMFDB &nearr;</a>-->
+    </div>
+</div>
+{% endif %}
+
+{% if type.inducing_fields %}
+<div class="mb-4">
+    <h3 class="h5 mb-3">Inducing Fields</h3>
+    <div class="row">
+        {% for ind_field in type.inducing_fields %}
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <strong class="me-2">Polynomial:</strong> 
+                        <span class="bg-light px-2 py-1 rounded">\( {{ ind_field.polynomial | formatMath }} \)</span>
+                        <button class="btn btn-sm btn-outline-secondary ms-2 py-0 copy-poly-btn" style="font-size: 0.8rem;" data-poly="{{ ind_field.polynomial }}">Copy polynomial</button>
+                    </div>
+                    <p class="mb-2"><strong>Label:</strong> {{ ind_field.lmfdb_label }}</p>
+                    <a href="{{ ind_field.lmfdb_url }}" target="_blank" class="link-secondary text-decoration-none border-bottom border-secondary" style="font-size: 0.9rem;">View on LMFDB &nearr;</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white"><h3 class="h5 mb-0 py-1">Underlying Character</h3></div>
+    <div class="card-body">
+        <div class="row mb-12"><p>
+            {% if type.Description == "principal series" %} 
+                Character \(\chi^A:\mathcal O_F^\times \to \mathbb C^\times\) with the following properties:
+            {% else %}
+                Character \(\chi^A:\mathcal O_K^\times \to \mathbb C^\times\) with the following properties:
+            {% endif %}
+        </p></div>
+        <!--{% if type.Description != "principal series" %}
+        <div class="row mb-3">
+            <div class="col-md-3 text-muted">Base field</div>
+            {% if type.Description in ["exceptional, Q8", "exceptional, SL(2,3)"] %} 
+                <div class="col-md-9">\( K = L[x]/({{ type.inducing_field.polynomial | formatMath }})\)</div>
+            {% else %}
+                <div class="col-md-9">\( K = F[x]/({{ type.inducing_field.polynomial | formatMath }})\)</div>
+            {% endif %}
+        </div>
+        {% endif %}-->
+        <div class="row mb-3">
+            <div class="col-md-3 text-muted">Order</div>
+            <div class="col-md-9">{{ type['Character Order'] }}</div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-3 text-muted">Conductor exponent</div>
+            <div class="col-md-9">{{ type['Character CondExp'] }}<!--<br> \(\chi\) factors through \({(\mathcal O_F/\mathfrak{p}^{{type['Character CondExp']}})}^\times\)--></div>
+        </div>
+
+        <div class="row mb-3">
+            {% set zeta = "\\zeta" %}
+            {% if type['Character Order'] == 2 %}
+                {% set zeta = "(-1)" %}
+            {% elif type['Character Order'] == 4 %}
+                {% set zeta = "i" %}
+            {% endif %}
+            <div class="col-md-12 text-muted">
+                <strong>
+                {% if type['Description'] == "principal series" %}
+                    Values on generators of \((\mathcal{O}_F/\mathfrak p^{ {{type['Character CondExp']}} })^\times\)
+                {% else %}
+                    Values on generators of 
+                    \((\mathcal{O}_K/\mathfrak p^{{type['Character CondExp']}})^\times/U_{\mathfrak{p}^{{type['Character CondExp']}} }\)
+                {% endif %}
+                {% if type['Character Order'] == 3 %} 
+                , with \({{ zeta }}=\frac{-1+\sqrt{-3}}{2}\) a 3rd root of unity
+                {% elif type['Character Order'] == 6 %}
+                , with \({{ zeta }}=\frac{1+\sqrt{-3}}{2}\) a 6th root of unity
+                {% endif %}
+                :
+                </strong>
+            </div>
+            
+            <div class="col-md-12">
+                \(\begin{array}{l}
+                {% for tuple in type.char_values %}
+                    {# Use the formatMath filter if the generator or value contains LaTeX #}
+                    \chi^A\left({{ tuple.gen | formatMath }}\right) &= {{ zeta }}^{ {{ tuple.val }} }
+                    {% if not loop.last %}\\ {% endif %}
+                {% endfor %}
+                \end{array}
+                \)
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if type.inertia_field %}
+<div class="card shadow-sm border-info mb-4">
+    <div class="card-header bg-info text-dark"><h3 class="h5 mb-0 py-1">Inertia Field</h3></div>
+    <div class="card-body">
+        {% set hasLabel = type.inertia_field.lmfdb_label and type.inertia_field.lmfdb_label | trim != "" %}
+        {% set hasUrl = type.inertia_field.lmfdb_url and type.inertia_field.lmfdb_url | trim != "" %}
+
+        <div class="d-flex align-items-center {% if hasLabel or hasUrl %}mb-2{% else %}mb-0{% endif %}">
+            <strong class="me-2">Polynomial:</strong> 
+            <span class="bg-light px-2 py-1 rounded">\( {{ type.inertia_field.polynomial | formatMath }} \)</span>
+            <button class="btn btn-sm btn-outline-secondary ms-2 py-0 copy-poly-btn" style="font-size: 0.8rem;" data-poly="{{ type.inertia_field.polynomial }}">Copy polynomial</button>
+        </div>
+        
+        {% if hasLabel %}
+        <p class="{% if not hasUrl %}mb-0{% else %}mb-2{% endif %}">
+            <strong>Label:</strong> {{ type.inertia_field.lmfdb_label }}
+        </p>
+        {% endif %}
+        
+        {% if hasUrl and hasLabel %}
+        <a href="{{ type.inertia_field.lmfdb_url }}" target="_blank" class="link-secondary text-decoration-none border-bottom border-secondary">View on LMFDB &nearr;</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<div class="mt-5 mb-5 border-top pt-3">
+    <a href="/fields/{{ type['Base Field'] | slugify }}/" class="btn btn-outline-secondary">&larr; Back to {{ type['Base Field'] }} Summary</a>
+</div>

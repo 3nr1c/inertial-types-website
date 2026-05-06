@@ -1,0 +1,25 @@
+{
+  "Name": "scu.6.4.1.7.a",
+  "Base Field": "2.1.1.0a1.1",
+  "Description": "supercuspidal unramified",
+  "e": 6,
+  "v(N)": 4,
+  "Character Order": 6,
+  "Character CondExp": 2,
+  "inertia_field": {
+    "polynomial": "x^12 + 6*x^11 + 21*x^10 + 50*x^9 + 90*x^8 + 126*x^7 + 143*x^6 + 132*x^5 + 102*x^4 + 64*x^3 + 33*x^2 + 12*x + 5"
+  },
+  "inducing_field": {
+    "polynomial": "x^2 + x + 1 + O(2^100)"
+  },
+  "char_values": [
+    {
+      "gen": "b - 5 + O(2^4)",
+      "val": "5"
+    },
+    {
+      "gen": "-2*b - 5 + O(2^4)",
+      "val": "3"
+    }
+  ]
+}

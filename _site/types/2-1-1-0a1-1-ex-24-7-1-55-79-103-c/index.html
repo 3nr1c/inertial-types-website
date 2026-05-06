@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inertial Type | ex.24.7.1.55_79_103.c</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <script>
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            // This tells MathJax to allow breaks after binary operators and relations
+            processEscapes: true
+        },
+        chtml: {
+            displayAlign: 'left',
+            linebreaks: { 
+                inline: true, 
+                width: 'container'
+            }
+        },
+        // Adding this ensures that the internal TeX engine allows the break
+        options: {
+            enableMenu: false
+        }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        /* Force the container to respect the parent width */
+        .bg-light.px-2.py-1.rounded {
+            display: inline-block; /* Allows the span to act like a block for wrapping */
+            max-width: 100%;
+            overflow-x: auto;      /* Adds scrollbar if wrapping fails */
+            overflow-y: hidden;
+            vertical-align: middle;
+            white-space: normal;   /* Crucial for allowing text wrap */
+        }
+
+        /* Force MathJax output to wrap */
+        mjx-container[jax="CHTML"][display="true"] {
+            display: block;
+            overflow-x: auto;
+            overflow-y: hidden;
+            max-width: 100%;
+        }
+
+        mjx-c {
+            white-space: normal !important;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-dark mb-4 shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">Inertial Types</a>
+        </div>
+    </nav>
+    
+    <main class="container">
+        
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <a href="/fields/2-1-1-0a1-1/" class="text-decoration-none">&larr; Back to 2.1.1.0a1.1</a>
+    
+    
+    
+</div>
+
+<div class="card shadow-sm mb-4 border-primary">
+    <div class="card-header bg-primary text-white">
+        <h1 class="h4 mb-0">ex.24.7.1.55_79_103.c</h1>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-3 text-muted">Base Field</div>
+            <div class="col-md-9 fw-bold">
+                
+                    \(F = \mathbb{Q}_2\)
+                
+
+                
+                   <small class="ms-2"><a href="https://www.lmfdb.org/padicField/2.1.1.0a1.1" target="_blank" class="text-decoration-none">View on LMFDB &nearr;</a></small>
+                
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-3 text-muted">Description</div>
+            <div class="col-md-9"><span class="text-capitalize">exceptional, SL(2,3)</span></div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-3 text-muted">Construction</div>
+            <div class="col-md-9">
+            
+                Extension to \(I_F\) of \(
+                    \tau = \operatorname{Ind}^{I_K}_{I_L} \chi
+                \), with \(L, K\) and \(\chi\) as below
+            
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-3 text-muted">Semistability defect</div>
+            <div class="col-md-9">\( e = 24\)</div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-3 text-muted">Conductor exponent</div>
+            <div class="col-md-9">\( v(N) = 7\)</div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 text-muted">Character Order</div>
+            <div class="col-md-9">4</div>
+        </div>
+    </div>
+</div>
+
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white"><h3 class="h5 mb-0 py-1">Triply Field</h3></div>
+    <div class="card-body">
+        <div class="d-flex align-items-center mb-2">
+            <strong class="me-2">The inertial type \(\tau\) becomes an induction (triply imprimitive) over:</strong>
+            
+            <span class="bg-light px-2 py-1 rounded">\( L = F(\mu_3, b) \), with \(\mu_3\) a root of \(x^2+x+1\) and \(b\) a root of \(x^{3} + 2 \)</span>
+            
+            <button class="btn btn-sm btn-outline-secondary ms-2 py-0 copy-poly-btn" style="font-size: 0.8rem;" data-poly="x^3 + O(2^100)*x^2 + O(2^100)*x + 2 + O(2^100)">Copy polynomial</button>
+        </div>
+        <!--<p class="mb-2"><strong>Label:</strong> </p>
+        <a href="" target="_blank" class="link-secondary text-decoration-none border-bottom border-secondary">View on LMFDB &nearr;</a>-->
+    </div>
+</div>
+
+
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white"><h3 class="h5 mb-0 py-1">Inducing Field</h3></div>
+    <div class="card-body">
+        <div class="d-flex align-items-center mb-2">
+            
+                
+            
+            
+            <strong class="me-2">The inertial type \(\tau\) becomes reducible over</strong> 
+            <span class="bg-light px-2 py-1 rounded">\(K = L(c)\), \(c\) a root of \(x^{2} - b^{3} x + (3b^{2} + (3&#92;mu_3 + 3))b  \)</span>
+            
+            <button class="btn btn-sm btn-outline-secondary ms-2 py-0 copy-poly-btn" style="font-size: 0.8rem;" data-poly="x^2 - (b^3 + O(b^300))*x + (3*b^2 + (3*&#92;mu_3 + 3))*b + O(b^300)">Copy polynomial</button>
+        </div>
+        <!--<p class="mb-2"><strong>Label:</strong> </p>
+        <a href="" target="_blank" class="link-secondary text-decoration-none border-bottom border-secondary">View on LMFDB &nearr;</a>-->
+    </div>
+</div>
+
+
+
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white"><h3 class="h5 mb-0 py-1">Underlying Character</h3></div>
+    <div class="card-body">
+        <div class="row mb-12"><p>
+            
+                Character \(\chi^A:\mathcal O_K^\times \to \mathbb C^\times\) with the following properties:
+            
+        </p></div>
+        <!--
+        <div class="row mb-3">
+            <div class="col-md-3 text-muted">Base field</div>
+             
+                <div class="col-md-9">\( K = L[x]/(x^{2} - b^{3} x + (3b^{2} + (3&#92;mu_3 + 3))b )\)</div>
+            
+        </div>
+        -->
+        <div class="row mb-3">
+            <div class="col-md-3 text-muted">Order</div>
+            <div class="col-md-9">4</div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-3 text-muted">Conductor exponent</div>
+            <div class="col-md-9">11<!--<br> \(\chi\) factors through \({(\mathcal O_F/\mathfrak{p}^11)}^\times\)--></div>
+        </div>
+
+        <div class="row mb-3">
+            
+            
+                
+            
+            <div class="col-md-12 text-muted">
+                <strong>
+                
+                    Values on generators of 
+                    \((\mathcal{O}_K/\mathfrak p^11)^\times/U_{\mathfrak{p}^11 }\)
+                
+                
+                :
+                </strong>
+            </div>
+            
+            <div class="col-md-12">
+                \(\begin{array}{l}
+                
+                    
+                    \chi^A\left(&#92;mu_3c + 1 \right) &= i^{ 2 }
+                    \\ 
+                
+                    
+                    \chi^A\left((-&#92;mu_3 + 3)c + -&#92;mu_3 + 3 \right) &= i^{ 0 }
+                    \\ 
+                
+                    
+                    \chi^A\left((2&#92;mu_3 + 2)b^{2}c + 1 \right) &= i^{ 0 }
+                    \\ 
+                
+                    
+                    \chi^A\left(((2&#92;mu_3 + 2)b^{2} + 2&#92;mu_3)c + 4&#92;mu_3 + 1 \right) &= i^{ 2 }
+                    \\ 
+                
+                    
+                    \chi^A\left(((3&#92;mu_3 + 3)b^{2} + 4&#92;mu_3)c + 1 \right) &= i^{ 1 }
+                    \\ 
+                
+                    
+                    \chi^A\left(((&#92;mu_3 + 1)b + 2)c + (2&#92;mu_3 + 2)b - 3 \right) &= i^{ 0 }
+                    \\ 
+                
+                    
+                    \chi^A\left((3b + 2&#92;mu_3)c + 2b + 4&#92;mu_3 + 1 \right) &= i^{ 0 }
+                    \\ 
+                
+                    
+                    \chi^A\left((&#92;mu_3b^{2} + 4)c + 1 \right) &= i^{ 0 }
+                    
+                
+                \end{array}
+                \)
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="card shadow-sm border-info mb-4">
+    <div class="card-header bg-info text-dark"><h3 class="h5 mb-0 py-1">Inertia Field</h3></div>
+    <div class="card-body">
+        
+        
+
+        <div class="d-flex align-items-center mb-0">
+            <strong class="me-2">Polynomial:</strong> 
+            <span class="bg-light px-2 py-1 rounded">\( x^{48} + 425541065674964083844296654248x^{47} - 293922586372195556873163317108x^{46} + 208020178044503327051062937672x^{45} - 103162378658804955690726618484x^{44} + 321371221333412531268670694192x^{43} - 313410746724552304098866941832x^{42} - 6813454099040849630771172416x^{41} + 38143533461783126205332474160x^{40} - 358616770170067520439694915808x^{39} - 89314989171033227132064304584x^{38} + 472039964740469660294283936112x^{37} + 121234994773993020306134164776x^{36} + 224985170968364489625522493344x^{35} - 430495259104046564229926536216x^{34} + 316195405143687051241901142128x^{33} - 601929706974295527751471899184x^{32} + 447467695321440952425416681616x^{31} + 4785485670402192179580027584x^{30} + 339163934331649389469468152296x^{29} + 126688375333198426648151458512x^{28} - 394315558889640056282015799104x^{27} + 477285724608447582956688851184x^{26} - 260938690996481043413200623216x^{25} - 78597545576050950588863485668x^{24} - 562730399958303912169176283632x^{23} + 71876843418068660347028253848x^{22} - 158323810551699369113694742544x^{21} + 552579489441453624404136940888x^{20} + 556761085319125807932887601280x^{19} + 297717152188417994013218879408x^{18} + 19147887005665822865933556128x^{17} + 564512767272096080839963226080x^{16} + 531844706457572537127714110976x^{15} - 418978224737480029766146671568x^{14} + 113575000418993817716767420640x^{13} + 378203208077916583374002808448x^{12} - 410025451386070575565501446560x^{11} - 448223779135086529709464392432x^{10} - 163570191739654460000515893024x^{9} - 256485750106060155495179347168x^{8} + 505632308725025628946435826976x^{7} + 481744402246587381388394793696x^{6} - 99618692227750374389356102064x^{5} + 183777504416380365088610775104x^{4} - 338230468708181370908159037632x^{3} + 588460180730807352954360140608x^{2} + 211104833363790696424665377248x - 387978783409005373455035924236 \)</span>
+            <button class="btn btn-sm btn-outline-secondary ms-2 py-0 copy-poly-btn" style="font-size: 0.8rem;" data-poly="x^48 + 425541065674964083844296654248*x^47 - 293922586372195556873163317108*x^46 + 208020178044503327051062937672*x^45 - 103162378658804955690726618484*x^44 + 321371221333412531268670694192*x^43 - 313410746724552304098866941832*x^42 - 6813454099040849630771172416*x^41 + 38143533461783126205332474160*x^40 - 358616770170067520439694915808*x^39 - 89314989171033227132064304584*x^38 + 472039964740469660294283936112*x^37 + 121234994773993020306134164776*x^36 + 224985170968364489625522493344*x^35 - 430495259104046564229926536216*x^34 + 316195405143687051241901142128*x^33 - 601929706974295527751471899184*x^32 + 447467695321440952425416681616*x^31 + 4785485670402192179580027584*x^30 + 339163934331649389469468152296*x^29 + 126688375333198426648151458512*x^28 - 394315558889640056282015799104*x^27 + 477285724608447582956688851184*x^26 - 260938690996481043413200623216*x^25 - 78597545576050950588863485668*x^24 - 562730399958303912169176283632*x^23 + 71876843418068660347028253848*x^22 - 158323810551699369113694742544*x^21 + 552579489441453624404136940888*x^20 + 556761085319125807932887601280*x^19 + 297717152188417994013218879408*x^18 + 19147887005665822865933556128*x^17 + 564512767272096080839963226080*x^16 + 531844706457572537127714110976*x^15 - 418978224737480029766146671568*x^14 + 113575000418993817716767420640*x^13 + 378203208077916583374002808448*x^12 - 410025451386070575565501446560*x^11 - 448223779135086529709464392432*x^10 - 163570191739654460000515893024*x^9 - 256485750106060155495179347168*x^8 + 505632308725025628946435826976*x^7 + 481744402246587381388394793696*x^6 - 99618692227750374389356102064*x^5 + 183777504416380365088610775104*x^4 - 338230468708181370908159037632*x^3 + 588460180730807352954360140608*x^2 + 211104833363790696424665377248*x - 387978783409005373455035924236">Copy polynomial</button>
+        </div>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+<div class="mt-5 mb-5 border-top pt-3">
+    <a href="/fields/2-1-1-0a1-1/" class="btn btn-outline-secondary">&larr; Back to 2.1.1.0a1.1 Summary</a>
+</div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const copyButtons = document.querySelectorAll('.copy-poly-btn');
+        
+        copyButtons.forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                // Prevent link navigation if the button is inside an <a> tag (like on index.njk)
+                e.preventDefault(); 
+                e.stopPropagation(); 
+                
+                const polyText = btn.getAttribute('data-poly');
+                
+                try {
+                    await navigator.clipboard.writeText(polyText);
+                    const originalHTML = btn.innerHTML;
+                    btn.innerHTML = 'Copied!';
+                    btn.classList.add('btn-success', 'text-white');
+                    btn.classList.remove('btn-outline-secondary');
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = originalHTML;
+                        btn.classList.remove('btn-success', 'text-white');
+                        btn.classList.add('btn-outline-secondary');
+                    }, 1500);
+                } catch (err) {
+                    console.error('Failed to copy', err);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+---
+layout: layout.njk
+title: "Inertial Types Directory"
+---
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5">Inertial Types Database</h1>
+        <p class="text-muted">This database contains tables of inertial types of elliptic curves over \(p\)-adic fields having potentially good reduction. We currently have tables over the following fields (according to their LMFDB labels). For further computations, see our <a href="https://github.com/3nr1c/inertial-types" target="_blank">github repo</a>.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="list-group shadow-sm">
+            {% for key, field in fields %}
+            <a href="/fields/{{ field.label | slugify }}/" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center p-3">
+                <div>
+                    <span class="fs-5 fw-bold">{{ field.label }}</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-secondary rounded-pill fs-6 fw-normal me-2">
+                        \( {{ field.polynomial | formatMath }} \)
+                    </span>
+                    <button class="btn btn-sm btn-outline-secondary copy-poly-btn" data-poly="{{ field.polynomial }}" title="Copy raw polynomial">Copy</button>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
