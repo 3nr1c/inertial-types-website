@@ -1,0 +1,29 @@
+{
+  "Name": "ps.2.6.1.1.d",
+  "Base Field": "2.2.1.0a1.1",
+  "Description": "principal series",
+  "e": 2,
+  "v(N)": 6,
+  "Character Order": 2,
+  "Character CondExp": 3,
+  "inertia_field": {
+    "polynomial": "x^2 + (4*a + O(2^100))*x + 2 + O(2^100)"
+  },
+  "inducing_field": {
+    "polynomial": "x^2 + x + 1 + O(2^100)"
+  },
+  "char_values": [
+    {
+      "gen": "-7*a + 7 + O(2^4)",
+      "val": "1"
+    },
+    {
+      "gen": "4*a + 1 + O(2^4)",
+      "val": "1"
+    },
+    {
+      "gen": "-1 + O(2^4)",
+      "val": "1"
+    }
+  ]
+}

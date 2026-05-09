@@ -7,8 +7,8 @@ SetVerbose("InTypes", 1);
 
 p := 2;
 Qp := pAdicField(p,100);
-F := Qp; 
-// F := UnramifiedExtension(Qp, 2);
+// F := Qp; 
+F := UnramifiedExtension(Qp, 2);
 // F := FieldOfFractions(AllExtensions(Qp, 2)[1]);
 
 d := Degree(F, Qp);
@@ -39,12 +39,15 @@ ExportTauListToJSON(PS, label);
 ExportTauListToJSON(SCU, label);
 ExportTauListToJSON(SCR, label);
 
+table := SummaryTable(PS, SCU, SCR, Ex8, Ex24);
+PrintSummaryToFile(table, p, f, label, poly, url, Sprintf("../_data/fields/%o.json", label));
+
 if p eq 2 then
     Ex8, Ex24 := ExceptionalTypes(F : InFields := true);
 
     ExportTauListToJSON(Ex8, label);
     ExportTauListToJSON(Ex24, label);
 
+    table := SummaryTable(PS, SCU, SCR, Ex8, Ex24);
+    PrintSummaryToFile(table, p, f, label, poly, url, Sprintf("../_data/fields/%o.json", label));
 end if;
-table := SummaryTable(PS, SCU, SCR, Ex8, Ex24);
-PrintSummaryToFile(table, p, label, poly, url, Sprintf("../_data/fields/%o.json", label));

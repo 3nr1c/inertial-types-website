@@ -1,0 +1,52 @@
+{
+  "Name": "ex.24.7.2.44_93_114.g",
+  "Base Field": "2.2.1.0a1.1",
+  "Description": "exceptional, SL(2,3)",
+  "e": 24,
+  "v(N)": 7,
+  "Character Order": 4,
+  "Character CondExp": 11,
+  "inertia_field": {
+    "polynomial": "x^24 + (4*a + 4 + O(2^100))*x^21 + (4 + O(2^100))*x^12 + (8 + O(2^100))*x^9 + (4*a + 4 + O(2^100))*x^6 + 2*a + O(2^100)"
+  },
+  "triply_field": {
+    "polynomial": "x^3 + O(2^100)*x^2 + O(2^100)*x + a*2 + O(2^100)"
+  },
+  "inducing_field": {
+    "polynomial": "x^2 + ((a + 1)*b^3 + O(b^300))*x + (b^2 - 2*a + 1)*b + O(b^300)"
+  },
+  "char_values": [
+    {
+      "gen": "(4*a - 3)*c + 3*a - 1 + O(c^14)",
+      "val": "2"
+    },
+    {
+      "gen": "c + 1 + O(c^14)",
+      "val": "2"
+    },
+    {
+      "gen": "2*a*b*c + -2*a - 3 + O(c^14)",
+      "val": "2"
+    },
+    {
+      "gen": "(b^2 + (4*a + 4))*c + 1 + O(c^14)",
+      "val": "1"
+    },
+    {
+      "gen": "(a*b^2 + 4)*c + 1 + O(c^14)",
+      "val": "1"
+    },
+    {
+      "gen": "((2*a + 3)*b + (2*a + 4))*c + 2*b + 4*a + 1 + O(c^14)",
+      "val": "2"
+    },
+    {
+      "gen": "((a + 2)*b + (2*a - 2))*c + 2*a*b + 4*a - 3 + O(c^14)",
+      "val": "2"
+    },
+    {
+      "gen": "((2*a + 2)*b^2 + (2*a + 2)*b + 2)*c + (2*a + 3)*b^2 + a*b + a + 3 + O(c^14)",
+      "val": "0"
+    }
+  ]
+}

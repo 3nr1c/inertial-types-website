@@ -258,7 +258,7 @@ procedure ExportTauListToJSON(TypeList, base_field)
                 inertia_poly := PolRedPadic(inertia_poly, Integers(F));
                 "Used PolRedPadic";
             catch e
-                if type(tau) eq ExceptionalInType then
+                if Type(tau) eq ExceptionalInType then
                     inertia_poly := BetterPoly(inertia_poly, N, F, tau);
                 else 
                     inertia_poly := BetterPoly(inertia_poly, N, F);

@@ -10,7 +10,7 @@ eleventyComputed:
 ---
 
 <div class="mb-4 d-flex justify-content-between align-items-center">
-    <a href="fields/{{ type['Base Field'] | slugify }}/" class="text-decoration-none">&larr; Back to {{ type['Base Field'] }}</a>
+    <a href="{{ project.baseurl }}fields/{{ type['Base Field'] | slugify }}/" class="text-decoration-none">&larr; Back to {{ type['Base Field'] }}</a>
     
     {# Lookup the parent field data using the 'Base Field' label #}
     {% set parentField = fields[type['Base Field']] %}
@@ -244,5 +244,5 @@ eleventyComputed:
 {% endif %}
 
 <div class="mt-5 mb-5 border-top pt-3">
-    <a href="fields/{{ type['Base Field'] | slugify }}/" class="btn btn-outline-secondary">&larr; Back to {{ type['Base Field'] }} Summary</a>
+    <a href="{{ project.baseurl }}fields/{{ type['Base Field'] | slugify }}/" class="btn btn-outline-secondary">&larr; Back to {{ type['Base Field'] }} Summary</a>
 </div>
