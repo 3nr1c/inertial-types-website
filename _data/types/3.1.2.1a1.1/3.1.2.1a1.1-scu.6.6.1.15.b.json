@@ -1,0 +1,25 @@
+{
+  "Name": "scu.6.6.1.15.b",
+  "Base Field": "3.1.2.1a1.1",
+  "Description": "supercuspidal unramified",
+  "e": 6,
+  "v(N)": 6,
+  "Character Order": 6,
+  "Character CondExp": 3,
+  "inertia_field": {
+    "polynomial": "x^12 + (12 + O(a^200))*x^11 + (72 + O(a^200))*x^10 + (37 + O(a^200))*x^9 + (198 + O(a^200))*x^8 + (135 + O(a^200))*x^7 + (115*a + 218 + O(a^200))*x^6 + (204*a + 66 + O(a^200))*x^5 + (78 + O(a^200))*x^4 + (17*a + 53 + O(a^200))*x^3 + (216*a + 207 + O(a^200))*x^2 + (51*a + 21 + O(a^200))*x + 210*a + 157 + O(a^200)"
+  },
+  "inducing_field": {
+    "polynomial": "x^2 + (2 + O(a^200))*x + 2 + O(a^200)"
+  },
+  "char_values": [
+    {
+      "gen": "-2*b + a - 4 + O(a^4)",
+      "val": "3"
+    },
+    {
+      "gen": "-3*b + 1 + O(a^4)",
+      "val": "2"
+    }
+  ]
+}

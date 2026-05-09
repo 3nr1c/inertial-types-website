@@ -5,11 +5,11 @@ load "printing.m";
 
 SetVerbose("InTypes", 1);
 
-p := 2;
+p := 3;
 Qp := pAdicField(p,100);
 // F := Qp; 
-F := UnramifiedExtension(Qp, 2);
-// F := FieldOfFractions(AllExtensions(Qp, 2)[1]);
+// F := UnramifiedExtension(Qp, 2);
+F := FieldOfFractions(AllExtensions(Qp, 2)[3]);
 
 d := Degree(F, Qp);
 e := RamificationDegree(F, Qp);

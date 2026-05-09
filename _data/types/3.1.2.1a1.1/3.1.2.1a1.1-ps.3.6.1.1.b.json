@@ -1,0 +1,29 @@
+{
+  "Name": "ps.3.6.1.1.b",
+  "Base Field": "3.1.2.1a1.1",
+  "Description": "principal series",
+  "e": 3,
+  "v(N)": 6,
+  "Character Order": 3,
+  "Character CondExp": 3,
+  "inertia_field": {
+    "polynomial": "x^3 + (237 + O(a^200))*x + a + O(a^200)"
+  },
+  "inducing_field": {
+    "polynomial": "x^2 + O(3^100)*x + 3 + O(3^100)"
+  },
+  "char_values": [
+    {
+      "gen": "-a - 1 + O(a^4)",
+      "val": "1"
+    },
+    {
+      "gen": "-2 + O(a^4)",
+      "val": "1"
+    },
+    {
+      "gen": "-3*a + 1 + O(a^4)",
+      "val": "0"
+    }
+  ]
+}
