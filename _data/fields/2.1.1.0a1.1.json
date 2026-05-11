@@ -30,14 +30,14 @@
       "e": 4,
       "v(N)": 8,
       "character order": 4,
-      "description": "supercuspidal unramified",
+      "description": "principal series",
       "count": 2
     },
     {
       "e": 4,
       "v(N)": 8,
       "character order": 4,
-      "description": "principal series",
+      "description": "supercuspidal unramified",
       "count": 2
     },
     {
@@ -74,6 +74,34 @@
       "character order": 4,
       "description": "supercuspidal ramified",
       "count": 2
+    },
+    {
+      "e": 24,
+      "v(N)": 3,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 1
+    },
+    {
+      "e": 24,
+      "v(N)": 4,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 1
+    },
+    {
+      "e": 24,
+      "v(N)": 6,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 2
+    },
+    {
+      "e": 24,
+      "v(N)": 7,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 4
     }
   ]
 }

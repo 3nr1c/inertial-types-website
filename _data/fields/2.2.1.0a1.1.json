@@ -77,6 +77,20 @@
     },
     {
       "e": 8,
+      "v(N)": 5,
+      "character order": 4,
+      "description": "exceptional, Q8",
+      "count": 8
+    },
+    {
+      "e": 8,
+      "v(N)": 6,
+      "character order": 4,
+      "description": "exceptional, Q8",
+      "count": 16
+    },
+    {
+      "e": 8,
       "v(N)": 6,
       "character order": 4,
       "description": "supercuspidal ramified",
@@ -88,6 +102,34 @@
       "character order": 4,
       "description": "supercuspidal ramified",
       "count": 24
+    },
+    {
+      "e": 24,
+      "v(N)": 3,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 3
+    },
+    {
+      "e": 24,
+      "v(N)": 4,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 9
+    },
+    {
+      "e": 24,
+      "v(N)": 6,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 12
+    },
+    {
+      "e": 24,
+      "v(N)": 7,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 48
     }
   ]
 }

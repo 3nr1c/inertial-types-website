@@ -43,24 +43,30 @@ procedure PrintSummaryToFile(data, p, f, label, poly, url, filename)
     print "JSON exported to", filename;
 end procedure;
 
-function ExportTauToJSON(tau, name, base_field, inertia_poly)
-    // Convert the p-adic polynomial to a string with integer coefficients
-    name;
-    Fx := Parent(inertia_poly);
-    AssignNames(~Fx, ["x"]);
-    F := BaseRing(tau);
-    AssignNames(~F, ["a"]);
-    if AbsoluteDegree(BaseRing(inertia_poly)) eq 1 then
-        Z := Integers();
-        Zx<x> := PolynomialRing(Z);
-        int_coeffs := [ Z ! c : c in Coefficients(inertia_poly) ];
-        poly_int := Zx ! int_coeffs;
-        poly_string := Sprintf("%o", poly_int);
+function ExportTauToJSON(tau, name, base_field : inertia_poly := "")
+    // Check if inertia_poly was provided and is a polynomial
+    has_poly := Type(inertia_poly) ne MonStgElt;
+
+    if has_poly then
+        Fx := Parent(inertia_poly);
+        AssignNames(~Fx, ["x"]);
+        F := BaseRing(inertia_poly);
+        AssignNames(~F, ["a"]);
+
+        if AbsoluteDegree(F) eq 1 then
+            Z := Integers();
+            Zx<x> := PolynomialRing(Z);
+            int_coeffs := [ Z ! c : c in Coefficients(inertia_poly) ];
+            poly_int := Zx ! int_coeffs;
+            poly_string := Sprintf("%o", poly_int);
+        else
+            poly_string := Sprintf("%o", inertia_poly);
+        end if;
     else
-        poly_string := Sprintf("%o", inertia_poly);
+        poly_string := ""; // Or "" depending on your JSON preference
     end if;
 
-    // Strip out any line breaks and continuation backslashes Magma might have added
+    // Strip out any line breaks and continuation backslashes
     poly_string := SubstituteString(poly_string, "\n", "");
     poly_string := SubstituteString(poly_string, "\\", "");
 
@@ -71,7 +77,7 @@ function ExportTauToJSON(tau, name, base_field, inertia_poly)
     char_condexp := tau`Character`CondExp;
     tau_type := Type(tau);
     
-    // Determine the description based on Type(tau)
+    // Determine the description 
     description := "unknown";
     if tau_type eq PSInType then
         description := "principal series";
@@ -90,7 +96,8 @@ function ExportTauToJSON(tau, name, base_field, inertia_poly)
     end if;
     
     SetColumns(0);
-    // Construct the JSON string
+
+    // Initial JSON format
     json_format := 
         "{\n" cat
         "  \"Name\": \"%o\",\n" cat
@@ -107,7 +114,7 @@ function ExportTauToJSON(tau, name, base_field, inertia_poly)
     if Type(tau) eq ExceptionalInType then
         L := BaseRing(BaseRing(tau`Character));
         Fmu := BaseField(L);
-        if Degree(Fmu, F) eq 2 then
+        if Degree(Fmu, BaseField(tau)) eq 2 then
             AssignNames(~Fmu, ["\\\\mu_3"]);
         end if;
         AssignNames(~L, ["b"]);
@@ -250,25 +257,31 @@ procedure ExportTauListToJSON(TypeList, base_field)
         
         // Generate the inertia polynomial
         inertia_poly := "";
-        N := InField(tau);
-        F := BaseField(tau);
-        inertia_poly := DefiningPolynomial(Integers(N), Integers(F));
-        if true or Degree(inertia_poly) le 12 then
-            try
-                inertia_poly := PolRedPadic(inertia_poly, Integers(F));
-                "Used PolRedPadic";
-            catch e
-                if Type(tau) eq ExceptionalInType then
-                    inertia_poly := BetterPoly(inertia_poly, N, F, tau);
-                else 
-                    inertia_poly := BetterPoly(inertia_poly, N, F);
-                end if;
-                "Used BetterPoly";
-            end try;
+        if Type(tau) ne ExceptionalInType then
+            N := InField(tau);
+            F := BaseField(tau);
+            inertia_poly := DefiningPolynomial(Integers(N), Integers(F));
+            if Degree(inertia_poly) le 12 then
+                try
+                    inertia_poly := PolRedPadic(inertia_poly, Integers(F));
+                    "Used PolRedPadic";
+                catch e
+                    if Type(tau) eq ExceptionalInType then
+                        inertia_poly := BetterPoly(inertia_poly, N, F, tau);
+                    else 
+                        inertia_poly := BetterPoly(inertia_poly, N, F);
+                    end if;
+                    "Used BetterPoly";
+                end try;
+            end if;
+
+            Fx := Parent(inertia_poly);
+            AssignNames(~F, ["a"]);
+            AssignNames(~Fx, ["x"]);
         end if;
         
         // Call the recycled function to generate the JSON string
-        json_string := ExportTauToJSON(tau, name, base_field, inertia_poly);
+        json_string := ExportTauToJSON(tau, name, base_field : inertia_poly:=inertia_poly);
         
         // Construct the filename: base_field.name.json
         filename := Sprintf("../_data/types/%o/%o-%o.json", base_field, base_field, name);

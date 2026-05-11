@@ -1,0 +1,33 @@
+{
+  "Name": "scr.8.14.1.1.b",
+  "Base Field": "2.1.2.3a1.1",
+  "Description": "supercuspidal ramified",
+  "e": 8,
+  "v(N)": 14,
+  "Character Order": 4,
+  "Character CondExp": 12,
+  "inertia_field": {
+    "polynomial": "x^8 + (8 + O(a^200))*x^7 + (28*a + O(a^200))*x^6 + (8*a + 16 + O(a^200))*x^5 + (9*a + 4 + O(a^200))*x^4 + (4*a + 16 + O(a^200))*x^3 + (6*a + O(a^200))*x^2 + (4*a + O(a^200))*x + 5*a + 16 + O(a^200)"
+  },
+  "inducing_field": {
+    "polynomial": "x^2 - (a + O(a^200))*x + a + O(a^200)"
+  },
+  "char_values": [
+    {
+      "gen": "(-a - 2)*b + 3 + O(b^12)",
+      "val": "0"
+    },
+    {
+      "gen": "-a*b - 1 + O(b^12)",
+      "val": "0"
+    },
+    {
+      "gen": "(-2*a + 2)*b + 4*a - 3 + O(b^12)",
+      "val": "3"
+    },
+    {
+      "gen": "b + 1 + O(b^12)",
+      "val": "1"
+    }
+  ]
+}

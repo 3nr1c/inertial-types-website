@@ -3,13 +3,14 @@ AttachSpec("../../padic_db/spec");
 load "summaries.m";
 load "printing.m";
 
-SetVerbose("InTypes", 1);
+SetVerbose("InTypes", 2);
+SetVerbose("InFields", 1);
 
-p := 3;
+p := 2;
 Qp := pAdicField(p,100);
 // F := Qp; 
-// F := UnramifiedExtension(Qp, 2);
-F := FieldOfFractions(AllExtensions(Qp, 2)[3]);
+F := UnramifiedExtension(Qp, 2);
+// F := FieldOfFractions(AllExtensions(Qp, 3)[10]);
 
 d := Degree(F, Qp);
 e := RamificationDegree(F, Qp);
@@ -27,7 +28,7 @@ url := Sprintf("https://www.lmfdb.org/padicField/%o", label);
 System(Sprintf("mkdir -p ../_data/types/%o", label));
 
 F;
-PS, SCU, SCR, Ex8, Ex24, Twist := InTypes(F : SkipExceptionals := true, InFields := true);
+PS, SCU, SCR, Ex8, Ex24, Twist := InTypes(F : SkipExceptionals := false, InFields := false);
 InTypesSummary(PS, SCU, SCR, Ex8, Ex24);
 // table := SummaryTable(PS, SCU, SCR, Ex8, Ex24);
 // PrintSummaryToFile(table, p, f, label, poly, url, Sprintf("../_data/fields/%o.json", label));
@@ -35,14 +36,14 @@ InTypesSummary(PS, SCU, SCR, Ex8, Ex24);
 counts := AssociativeArray();
 alphabet := ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"];
     
-ExportTauListToJSON(PS, label);
-ExportTauListToJSON(SCU, label);
-ExportTauListToJSON(SCR, label);
+// ExportTauListToJSON(PS, label);
+// ExportTauListToJSON(SCU, label);
+// ExportTauListToJSON(SCR, label);
 
 table := SummaryTable(PS, SCU, SCR, Ex8, Ex24);
 PrintSummaryToFile(table, p, f, label, poly, url, Sprintf("../_data/fields/%o.json", label));
 
-if p eq 2 then
+/*if p eq 2 then
     Ex8, Ex24 := ExceptionalTypes(F : InFields := true);
 
     ExportTauListToJSON(Ex8, label);
@@ -50,4 +51,4 @@ if p eq 2 then
 
     table := SummaryTable(PS, SCU, SCR, Ex8, Ex24);
     PrintSummaryToFile(table, p, f, label, poly, url, Sprintf("../_data/fields/%o.json", label));
-end if;
+end if;*/

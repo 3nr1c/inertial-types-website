@@ -1,0 +1,33 @@
+{
+  "Name": "scr.12.11.1.2.j",
+  "Base Field": "3.1.3.4a2.2",
+  "Description": "supercuspidal ramified",
+  "e": 12,
+  "v(N)": 11,
+  "Character Order": 6,
+  "Character CondExp": 10,
+  "inertia_field": {
+    "polynomial": "x^12 + 21*a^2 + 17*a + 54 + O(a^300)"
+  },
+  "inducing_field": {
+    "polynomial": "x^2 + O(a^300)*x - a + O(a^300)"
+  },
+  "char_values": [
+    {
+      "gen": "-b - 1 + O(b^10)",
+      "val": "5"
+    },
+    {
+      "gen": "-3*a*b + 1 + O(b^10)",
+      "val": "2"
+    },
+    {
+      "gen": "a^2*b + 1 + O(b^10)",
+      "val": "0"
+    },
+    {
+      "gen": "-3*b + 1 + O(b^10)",
+      "val": "0"
+    }
+  ]
+}

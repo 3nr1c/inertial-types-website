@@ -1,0 +1,205 @@
+{
+  "prime": "2",
+  "f": "1",
+  "label": "2.1.2.3a1.2",
+  "polynomial": "x^2 + O(2^100)*x + 5*2 + O(2^100)",
+  "lmfdb_url": "https://www.lmfdb.org/padicField/2.1.2.3a1.2",
+  "table": [
+    {
+      "e": 2,
+      "v(N)": 4,
+      "character order": 2,
+      "description": "principal series",
+      "count": 1
+    },
+    {
+      "e": 2,
+      "v(N)": 8,
+      "character order": 2,
+      "description": "principal series",
+      "count": 2
+    },
+    {
+      "e": 2,
+      "v(N)": 10,
+      "character order": 2,
+      "description": "principal series",
+      "count": 4
+    },
+    {
+      "e": 3,
+      "v(N)": 2,
+      "character order": 3,
+      "description": "supercuspidal unramified",
+      "count": 1
+    },
+    {
+      "e": 4,
+      "v(N)": 6,
+      "character order": 4,
+      "description": "principal series",
+      "count": 1
+    },
+    {
+      "e": 4,
+      "v(N)": 6,
+      "character order": 4,
+      "description": "supercuspidal unramified",
+      "count": 1
+    },
+    {
+      "e": 4,
+      "v(N)": 8,
+      "character order": 4,
+      "description": "supercuspidal unramified",
+      "count": 1
+    },
+    {
+      "e": 4,
+      "v(N)": 8,
+      "character order": 4,
+      "description": "principal series",
+      "count": 1
+    },
+    {
+      "e": 4,
+      "v(N)": 10,
+      "character order": 4,
+      "description": "supercuspidal unramified",
+      "count": 2
+    },
+    {
+      "e": 4,
+      "v(N)": 10,
+      "character order": 4,
+      "description": "principal series",
+      "count": 2
+    },
+    {
+      "e": 4,
+      "v(N)": 14,
+      "character order": 4,
+      "description": "principal series",
+      "count": 8
+    },
+    {
+      "e": 4,
+      "v(N)": 14,
+      "character order": 4,
+      "description": "supercuspidal unramified",
+      "count": 8
+    },
+    {
+      "e": 6,
+      "v(N)": 4,
+      "character order": 6,
+      "description": "supercuspidal unramified",
+      "count": 1
+    },
+    {
+      "e": 6,
+      "v(N)": 8,
+      "character order": 6,
+      "description": "supercuspidal unramified",
+      "count": 2
+    },
+    {
+      "e": 6,
+      "v(N)": 10,
+      "character order": 6,
+      "description": "supercuspidal unramified",
+      "count": 4
+    },
+    {
+      "e": 8,
+      "v(N)": 5,
+      "character order": 4,
+      "description": "supercuspidal ramified",
+      "count": 2
+    },
+    {
+      "e": 8,
+      "v(N)": 8,
+      "character order": 4,
+      "description": "supercuspidal ramified",
+      "count": 2
+    },
+    {
+      "e": 8,
+      "v(N)": 10,
+      "character order": 4,
+      "description": "supercuspidal ramified",
+      "count": 4
+    },
+    {
+      "e": 8,
+      "v(N)": 11,
+      "character order": 4,
+      "description": "supercuspidal ramified",
+      "count": 16
+    },
+    {
+      "e": 8,
+      "v(N)": 12,
+      "character order": 4,
+      "description": "supercuspidal ramified",
+      "count": 8
+    },
+    {
+      "e": 8,
+      "v(N)": 14,
+      "character order": 4,
+      "description": "supercuspidal ramified",
+      "count": 24
+    },
+    {
+      "e": 24,
+      "v(N)": 3,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 1
+    },
+    {
+      "e": 24,
+      "v(N)": 4,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 1
+    },
+    {
+      "e": 24,
+      "v(N)": 7,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 4
+    },
+    {
+      "e": 24,
+      "v(N)": 8,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 6
+    },
+    {
+      "e": 24,
+      "v(N)": 9,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 8
+    },
+    {
+      "e": 24,
+      "v(N)": 10,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 20
+    },
+    {
+      "e": 24,
+      "v(N)": 13,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 32
+    }
+  ]
+}

@@ -219,13 +219,11 @@ eleventyComputed:
 
 {% if type.inertia_field %}
 <div class="card shadow-sm border-info mb-4">
-    <div class="card-header bg-info text-dark"><h3 class="h5 mb-0 py-1">Inertia Field</h3></div>
+    <div class="card-header bg-info text-dark"><h3 class="h5 mb-0 py-1">Inertia Polynomial</h3></div>
     <div class="card-body">
-        {% set hasLabel = type.inertia_field.lmfdb_label and type.inertia_field.lmfdb_label | trim != "" %}
-        {% set hasUrl = type.inertia_field.lmfdb_url and type.inertia_field.lmfdb_url | trim != "" %}
+        The following polynomial defines a field \(L\) such that \(L^{un}\) is the fixed field of \(\tau\).
 
         <div class="d-flex align-items-center {% if hasLabel or hasUrl %}mb-2{% else %}mb-0{% endif %}">
-            <strong class="me-2">Polynomial:</strong> 
             <span class="bg-light px-2 py-1 rounded">\( {{ type.inertia_field.polynomial | formatMath }} \)</span>
             <button class="btn btn-sm btn-outline-secondary ms-2 py-0 copy-poly-btn" style="font-size: 0.8rem;" data-poly="{{ type.inertia_field.polynomial }}">Copy polynomial</button>
         </div>

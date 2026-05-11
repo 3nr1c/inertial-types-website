@@ -1,0 +1,29 @@
+{
+  "Name": "ps.2.8.1.1.a",
+  "Base Field": "2.1.2.3a1.3",
+  "Description": "principal series",
+  "e": 2,
+  "v(N)": 8,
+  "Character Order": 2,
+  "Character CondExp": 4,
+  "inertia_field": {
+    "polynomial": "x^2 + (18 + O(a^200))*x + a + O(a^200)"
+  },
+  "inducing_field": {
+    "polynomial": "x^2 + O(2^100)*x + 7*2 + O(2^100)"
+  },
+  "char_values": [
+    {
+      "gen": "a + 1 + O(a^7)",
+      "val": "0"
+    },
+    {
+      "gen": "2*a + 1 + O(a^7)",
+      "val": "1"
+    },
+    {
+      "gen": "7 + O(a^7)",
+      "val": "1"
+    }
+  ]
+}
