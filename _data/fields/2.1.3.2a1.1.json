@@ -44,20 +44,13 @@
       "e": 4,
       "v(N)": 6,
       "character order": 4,
-      "description": "supercuspidal unramified",
+      "description": "principal series",
       "count": 1
     },
     {
       "e": 4,
       "v(N)": 6,
       "character order": 4,
-      "description": "principal series",
-      "count": 1
-    },
-    {
-      "e": 4,
-      "v(N)": 8,
-      "character order": 4,
       "description": "supercuspidal unramified",
       "count": 1
     },
@@ -70,30 +63,37 @@
     },
     {
       "e": 4,
+      "v(N)": 8,
+      "character order": 4,
+      "description": "supercuspidal unramified",
+      "count": 1
+    },
+    {
+      "e": 4,
       "v(N)": 12,
       "character order": 4,
-      "description": "principal series",
+      "description": "supercuspidal unramified",
       "count": 2
     },
     {
       "e": 4,
       "v(N)": 12,
       "character order": 4,
-      "description": "supercuspidal unramified",
+      "description": "principal series",
       "count": 2
     },
     {
       "e": 4,
       "v(N)": 14,
       "character order": 4,
-      "description": "supercuspidal unramified",
+      "description": "principal series",
       "count": 4
     },
     {
       "e": 4,
       "v(N)": 14,
       "character order": 4,
-      "description": "principal series",
+      "description": "supercuspidal unramified",
       "count": 4
     },
     {
@@ -207,6 +207,90 @@
       "character order": 4,
       "description": "supercuspidal ramified",
       "count": 224
+    },
+    {
+      "e": 24,
+      "v(N)": 3,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 1
+    },
+    {
+      "e": 24,
+      "v(N)": 4,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 1
+    },
+    {
+      "e": 24,
+      "v(N)": 7,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 4
+    },
+    {
+      "e": 24,
+      "v(N)": 8,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 6
+    },
+    {
+      "e": 24,
+      "v(N)": 9,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 8
+    },
+    {
+      "e": 24,
+      "v(N)": 10,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 8
+    },
+    {
+      "e": 24,
+      "v(N)": 12,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 28
+    },
+    {
+      "e": 24,
+      "v(N)": 13,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 32
+    },
+    {
+      "e": 24,
+      "v(N)": 14,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 88
+    },
+    {
+      "e": 24,
+      "v(N)": 15,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 64
+    },
+    {
+      "e": 24,
+      "v(N)": 16,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 64
+    },
+    {
+      "e": 24,
+      "v(N)": 19,
+      "character order": 4,
+      "description": "exceptional, SL(2,3)",
+      "count": 256
     }
   ]
 }

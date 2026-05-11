@@ -1,0 +1,29 @@
+{
+  "Name": "scu.3.4.1.31.c",
+  "Base Field": "3.3.1.0a1.1",
+  "Description": "supercuspidal unramified",
+  "e": 3,
+  "v(N)": 4,
+  "Character Order": 3,
+  "Character CondExp": 2,
+  "inertia_field": {
+    "polynomial": "x^6 + (12*a^2 + 6*a + 15 + O(3^100))*x^5 + (42*a^2 + 58968*a + 9 + O(3^100))*x^4 + (58857*a^2 + 58901*a + 59024 + O(3^100))*x^3 + (58842*a^2 + 345*a + 195 + O(3^100))*x^2 + (39*a^2 + 318*a + 147 + O(3^100))*x + 59031*a^2 + 58990*a + 17 + O(3^100)"
+  },
+  "inducing_field": {
+    "polynomial": "x^2 + (2*a + 1 + O(3^100))*x + a + O(3^100)"
+  },
+  "char_values": [
+    {
+      "gen": "(-3*a^2 + 3*a + 4)*b + 3*a^2 + O(3^2)",
+      "val": "0"
+    },
+    {
+      "gen": "3*b + 1 + O(3^2)",
+      "val": "1"
+    },
+    {
+      "gen": "(3*a - 3)*b - 3*a + 1 + O(3^2)",
+      "val": "1"
+    }
+  ]
+}
