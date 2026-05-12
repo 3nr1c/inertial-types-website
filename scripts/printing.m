@@ -177,12 +177,25 @@ procedure ExportTauListToJSON(TypeList, base_field)
         Gens := [tau`Character`Lift(g) : g in Generators(Domain(tau`Character`Map))];
 
         Zm := Codomain(tau`Character`Map);
-        Append(~Values, [[i : i in [0..tau`Character`Order-1] | tau`Character(g) eq Zm!i][1] : g in Gens]);
+        vals := [];
+        for g in Gens do
+            chig := tau`Character(g);
+            for i in [0..tau`Character`Order - 1] do    
+                if chig eq Zm!i then
+                    Append(~vals, i);
+                    break;
+                end if;
+            end for;
+        end for;
+        Append(~Values, vals);
+        printf "%o...", #Values;
     end for;
     Sort(~Values, ~permut);
     TypeList := [TypeList[i^permut] : i in [1..#TypeList]];
 
     QuadDisc := [];
+    Sel := AssociativeArray();
+    LtoSel := AssociativeArray();
 
     for tau in TypeList do
         F := BaseField(tau);
@@ -220,11 +233,17 @@ procedure ExportTauListToJSON(TypeList, base_field)
             if AbsoluteInertiaDegree(F) mod 2 eq 0 then
                 l := Index([IsIsomorphic(FieldOfFractions(L), tau`TriplyField) : L in AllExtensions(F, 3)], true);
             end if;
-            QuadOfL := [Discriminant(FieldOfFractions(K), tau`TriplyField) : K in AllExtensions(tau`TriplyField, 2)];
+
+            if not IsInKeys(Sel, l) then
+                Sel_l, LtoSel_l := pSelmerGroup(2, tau`TriplyField);
+                Sel[l] := Sel_l;
+                LtoSel[l] := LtoSel_l;
+            end if;
+
             ks := Sort([
-                Index([IsSquare(tau`Triply`InducingFields[1]!d) : d in QuadOfL], true),
-                Index([IsSquare(tau`Triply`InducingFields[2]!d) : d in QuadOfL], true),
-                Index([IsSquare(tau`Triply`InducingFields[3]!d) : d in QuadOfL], true)
+                SequenceToInteger(ElementToSequence(LtoSel[l](Discriminant(tau`Triply`InducingFields[1], tau`TriplyField))),2),
+                SequenceToInteger(ElementToSequence(LtoSel[l](Discriminant(tau`Triply`InducingFields[2], tau`TriplyField))),2),
+                SequenceToInteger(ElementToSequence(LtoSel[l](Discriminant(tau`Triply`InducingFields[3], tau`TriplyField))),2)
             ]);
             k := Sprintf("%o_%o_%o", ks[1], ks[2], ks[3]);
         end if;
@@ -257,29 +276,27 @@ procedure ExportTauListToJSON(TypeList, base_field)
         
         // Generate the inertia polynomial
         inertia_poly := "";
-        if Type(tau) ne ExceptionalInType then
-            N := InField(tau);
-            F := BaseField(tau);
-            inertia_poly := DefiningPolynomial(Integers(N), Integers(F));
-            if Degree(inertia_poly) le 12 then
-                try
-                    inertia_poly := PolRedPadic(inertia_poly, Integers(F));
-                    "Used PolRedPadic";
-                catch e
-                    if Type(tau) eq ExceptionalInType then
-                        inertia_poly := BetterPoly(inertia_poly, N, F, tau);
-                    else 
-                        inertia_poly := BetterPoly(inertia_poly, N, F);
-                    end if;
-                    "Used BetterPoly";
-                end try;
-            end if;
-
-            Fx := Parent(inertia_poly);
-            AssignNames(~F, ["a"]);
-            AssignNames(~Fx, ["x"]);
+        N := InField(tau);
+        F := BaseField(tau);
+        inertia_poly := DefiningPolynomial(Integers(N), Integers(F));
+        if Degree(inertia_poly) le 12 then
+            try
+                inertia_poly := PolRedPadic(inertia_poly, Integers(F));
+                "Used PolRedPadic";
+            catch e
+                if Type(tau) eq ExceptionalInType then
+                    inertia_poly := BetterPoly(inertia_poly, N, F, tau);
+                else 
+                    inertia_poly := BetterPoly(inertia_poly, N, F);
+                end if;
+                "Used BetterPoly";
+            end try;
         end if;
-        
+
+        Fx := Parent(inertia_poly);
+        AssignNames(~F, ["a"]);
+        AssignNames(~Fx, ["x"]);
+
         // Call the recycled function to generate the JSON string
         json_string := ExportTauToJSON(tau, name, base_field : inertia_poly:=inertia_poly);
         
@@ -291,5 +308,6 @@ procedure ExportTauListToJSON(TypeList, base_field)
 
         // Write out the JSON string, overwriting the file if it already exists
         PrintFile(filename, json_string : Overwrite := true);
+        name;
     end for;
 end procedure;
